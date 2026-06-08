@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Sandeep Office Manager Pro</title>
+  <!-- PWA manifest link -->
+  <link rel="manifest" href="manifest.json">
+  <!-- External Libs -->
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- Font Awesome & Google Fonts -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+      transition: background 0.2s ease, color 0.2s;
+    }
+    body {
+      background: #f0f2f8;
+    }
+    body.dark {
+      background: #121212;
+      color: #e0e0e0;
+    }
+    /* Sidebar */
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 260px;
+      height: 100%;
+      background: linear-gradient(135deg, #0b5ed7, #0a58ca);
+      box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+      z-index: 1000;
+      overflow-y: auto;
+      transition: all 0.3s;
+    }
+    body.dark .sidebar {
+      background: linear-gradient(135deg, #0a3a6e, #062c54);
+    }
+    .sidebar-header {
+      padding: 24px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+      color: white;
+      font-weight: 700;
+      font-size: 1.4rem;
+    }
+    .sidebar-header i {
+      margin-right: 10px;
+    }
+    .sidebar-nav {
+      padding: 20px 0;
+    }
+    .nav-item {
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      color: rgba(255,255,255,0.85);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 500;
+    }
+    .nav-item i {
+      width: 24px;
+      font-size: 1.2rem;
+    }
+    .nav-item:hover, .nav-item.active {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border-left: 4px solid white;
+    }
+    /* Main content */
+    .main-content {
+      margin-left: 260px;
+      padding: 24px 30px;
+      min-height: 100vh;
+    }
+    /* Top bar */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+    .page-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    body.dark .page-title {
+      background: linear-gradient(135deg, #60a5fa, #3b82f6);
+      -webkit-background-clip: text;
+    }
+    .dark-toggle {
+      background: #fff;
+      border-radius: 40px;
+      padding: 8px 18px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    body.dark .dark-toggle {
+      background: #2d2d2d;
+      color: white;
+    }
+    /* Card */
+    .card {
+      background: white;
+      border-radius: 24px;
+      padding: 20px 24px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.03);
+      margin-bottom: 24px;
+      border: 1px solid #eef2f6;
+    }
+    body.dark .card {
+      background: #1e1e2f;
+      border-color: #2c2c3a;
+      color: #e0e0e0;
+    }
+    .grid-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    .stat-card {
+      background: white;
+      border-radius: 28px;
+      padding: 18px;
+      border-left: 6px solid #0d6efd;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    body.dark .stat-card {
+      background: #262637;
+    }
+    button, .btn-blue {
+      background: #0d6efd;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 40px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    button:hover {
+      background: #0b5ed7;
+      transform: scale(0.97);
+    }
+    input, select, textarea {
+      padding: 10px 12px;
+      border-radius: 16px;
+      border: 1px solid #ccc;
+      background: white;
+    }
+    body.dark input, body.dark select, body.dark textarea {
+      background: #2c2c3a;
+      border-color: #444;
+      color: white;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 12px 8px;
+      border-bottom: 1px solid #e2e8f0;
+      text-align: left;
+    }
+    body.dark th, body.dark td {
+      border-color: #2c3a4a;
+    }
+    .status-badge {
+      padding: 4px 12px;
+      border-radius: 30px;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+    .task-done {
+      background: #28a745;
+      color: white;
+    }
+    .task-pending {
+      background: #ffc107;
+      color: black;
+    }
+    @media (max-width: 768px) {
+      .sidebar { width: 70px; }
+      .sidebar-header span, .sidebar-nav .nav-item span { display: none; }
+      .sidebar-header i { font-size: 1.6rem; margin: 0; }
+      .nav-item { justify-content: center; padding: 14px 0; }
+      .main-content { margin-left: 70px; padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+  // ---------- STORAGE MANAGER (IndexedDB + LocalStorage) ----------
+  const DB_NAME = 'SandeepOfficeDB';
+  const DB_VERSION = 3;
+  let db = null;
+
+  function openDB() {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(DB_NAME, DB_VERSION);
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => { db = request.result; resolve(db); };
+      request.onupgradeneeded = (e) => {
+        const dbRef = e.target.result;
+        const stores = ['tasks', 'attendance', 'leaves', 'bgList', 'payments', 'expenses', 'calendarEvents'];
+        stores.forEach(store => { if (!dbRef.objectStoreNames.contains(store)) dbRef.createObjectStore(store, { keyPath: 'id', autoIncrement: true }); });
+      };
+    });
+  }
+
+  async function getStoreData(storeName) {
+    if (!db) await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(storeName, 'readonly');
+      const store = tx.objectStore(storeName);
+      const req = store.getAll();
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  async function saveItem(storeName, item) {
+    if (!db) await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(storeName, 'readwrite');
+      const store = tx.objectStore(storeName);
+      const req = item.id ? store.put(item) : store.add(item);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  async function deleteItem(storeName, id) {
+    if (!db) await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(storeName, 'readwrite');
+      const store = tx.objectStore(storeName);
+      const req = store.delete(id);
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  // ---------- APP STATE ----------
+  let currentUser = null;
+  let currentPage = 'dashboard';
+  let theme = localStorage.getItem('theme') || 'light';
+
+  // ---------- Helper functions ----------
+  function formatDate(date) { return date ? new Date(date).toISOString().split('T')[0] : ''; }
+  function todayStr() { return new Date().toISOString().split('T')[0]; }
+
+  // Render Router
+  async function renderApp() {
+    if (!currentUser) {
+      renderLogin();
+      return;
+    }
+    const mainHtml = `
+      <div class="sidebar">
+        <div class="sidebar-header"><i class="fas fa-tasks"></i> <span>Sandeep Pro</span></div>
+        <div class="sidebar-nav">
+          ${navItem('dashboard', 'tachometer-alt', 'Dashboard')}
+          ${navItem('worktracker', 'clipboard-list', 'Work Tracker')}
+          ${navItem('attendance', 'clock', 'Attendance')}
+          ${navItem('leave', 'umbrella-beach', 'Leave')}
+          ${navItem('calendar', 'calendar-alt', 'Calendar')}
+          ${navItem('bg', 'file-invoice-dollar', 'BG Mgmt')}
+          ${navItem('payment', 'money-bill-wave', 'Payments')}
+          ${navItem('expense', 'wallet', 'Expenses')}
+          ${navItem('documents', 'folder-open', 'Documents')}
+          ${navItem('reports', 'chart-line', 'Reports')}
+        </div>
+        <div style="padding:20px"><button id="logoutBtn" class="btn-blue"><i class="fas fa-sign-out-alt"></i> Logout</button></div>
+      </div>
+      <div class="main-content">
+        <div class="top-bar"><div class="page-title" id="pageTitle"></div><div class="dark-toggle" id="darkModeToggle"><i class="fas fa-moon"></i> Dark/Light</div></div>
+        <div id="pageContent">Loading...</div>
+      </div>
+    `;
+    document.getElementById('app').innerHTML = mainHtml;
+    document.getElementById('darkModeToggle').onclick = toggleDarkMode;
+    document.getElementById('logoutBtn').onclick = () => { currentUser = null; localStorage.removeItem('sandeep_session'); renderApp(); };
+    attachNavEvents();
+    await loadPageContent(currentPage);
+    if (theme === 'dark') document.body.classList.add('dark');
+  }
+
+  function navItem(id, icon, label) { return `<div class="nav-item ${currentPage===id?'active':''}" data-page="${id}"><i class="fas fa-${icon}"></i><span>${label}</span></div>`; }
+  function attachNavEvents() { document.querySelectorAll('.nav-item').forEach(el => { el.onclick = () => { currentPage = el.dataset.page; renderApp(); }; }); }
+
+  async function loadPageContent(page) {
+    const container = document.getElementById('pageContent');
+    document.getElementById('pageTitle').innerText = page.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+    if (page === 'dashboard') await renderDashboard(container);
+    else if (page === 'worktracker') await renderWorkTracker(container);
+    else if (page === 'attendance') await renderAttendance(container);
+    else if (page === 'leave') await renderLeave(container);
+    else if (page === 'calendar') await renderCalendar(container);
+    else if (page === 'bg') await renderBG(container);
+    else if (page === 'payment') await renderPayment(container);
+    else if (page === 'expense') await renderExpense(container);
+    else if (page === 'documents') await renderDocuments(container);
+    else if (page === 'reports') await renderReports(container);
+  }
+
+  // DASHBOARD
+  async function renderDashboard(container) {
+    const tasks = await getStoreData('tasks');
+    const expenses = await getStoreData('expenses');
+    const payments = await getStoreData('payments');
+    const bg = await getStoreData('bgList');
+    const pendingTasks = tasks.filter(t => t.status !== 'Completed');
+    const completedTasks = tasks.filter(t => t.status === 'Completed');
+    const totalExpenseMonth = expenses.filter(e => e.date && e.date.startsWith(todayStr().slice(0,7))).reduce((a,b)=>a+(Number(b.amount)||0),0);
+    const pendingPayments = payments.filter(p=>p.status !== 'Paid').reduce((a,b)=>a+(Number(b.amount)||0),0);
+    container.innerHTML = `
+      <div class="grid-cards">
+        <div class="stat-card"><i class="fas fa-tasks"></i><h3>Today's Tasks</h3><p>${tasks.filter(t=>t.date===todayStr()).length}</p></div>
+        <div class="stat-card"><i class="fas fa-spinner"></i><h3>Pending Tasks</h3><p>${pendingTasks.length}</p></div>
+        <div class="stat-card"><i class="fas fa-check-circle"></i><h3>Completed</h3><p>${completedTasks.length}</p></div>
+        <div class="stat-card"><i class="fas fa-hand-holding-usd"></i><h3>Active BGs</h3><p>${bg.filter(b=>b.status==='Active').length}</p></div>
+        <div class="stat-card"><i class="fas fa-hourglass-half"></i><h3>Pending Payments</h3><p>₹${pendingPayments}</p></div>
+        <div class="stat-card"><i class="fas fa-chart-line"></i><h3>Monthly Expenses</h3><p>₹${totalExpenseMonth}</p></div>
+      </div>
+      <div class="card"><canvas id="taskChart" width="400" height="200"></canvas></div>
+    `;
+    new Chart(document.getElementById('taskChart'), { type: 'bar', data: { labels: ['Pending','Completed'], datasets: [{ label: 'Tasks', data: [pendingTasks.length, completedTasks.length], backgroundColor: '#0d6efd' }] } });
+  }
+
+  // WORK TRACKER (with toggle complete)
+  async function renderWorkTracker(container) {
+    let tasks = await getStoreData('tasks');
+    const renderTable = () => {
+      container.innerHTML = `<div class="card"><h3><i class="fas fa-plus-circle"></i> Add Task</h3><div id="taskForm"></div><h3>Tasks List <input type="text" id="searchTask" placeholder="Search..."></h3><table id="taskTable"></table></div>`;
+      document.getElementById('taskForm').innerHTML = `<input id="taskDate" type="date" value="${todayStr()}"><input id="taskName" placeholder="Task Name"><input id="projectName" placeholder="Project"><select id="taskPriority"><option>High</option><option>Medium</option><option>Low</option></select><select id="taskStatus"><option>Pending</option><option>In Progress</option><option>Completed</option></select><input id="taskRemarks" placeholder="Remarks"><button id="addTaskBtn">Add Task</button>`;
+      const search = document.getElementById('searchTask');
+      const filterTasks = () => {
+        const keyword = search.value.toLowerCase();
+        const filtered = tasks.filter(t => t.taskName?.toLowerCase().includes(keyword) || t.projectName?.toLowerCase().includes(keyword));
+        const tbody = filtered.map(t => `<tr><td>${t.date}</td><td>${t.taskName}</td><td>${t.projectName}</td><td>${t.priority}</td><td><button class="toggleComplete" data-id="${t.id}" data-status="${t.status}">${t.status==='Completed'? '✔ Done' : 'Mark Done'}</button> <span>${t.status}</span></td><td><button class="editTask" data-id='${t.id}'>Edit</button> <button class="delTask" data-id='${t.id}'>Del</button></td></tr>`).join('');
+        document.getElementById('taskTable').innerHTML = `<tr><th>Date</th><th>Task</th><th>Project</th><th>Priority</th><th>Status</th><th>Actions</th></tr>${tbody}`;
+        document.querySelectorAll('.toggleComplete').forEach(btn => btn.onclick = async (e) => { const id = parseInt(btn.dataset.id); const task = tasks.find(t=>t.id===id); if(task) { task.status = task.status==='Completed' ? 'Pending' : 'Completed'; await saveItem('tasks', task); tasks = await getStoreData('tasks'); renderTable(); } });
+        document.querySelectorAll('.editTask').forEach(btn => btn.onclick = async (e) => { const id = parseInt(btn.dataset.id); const task = tasks.find(t=>t.id===id); const newName = prompt('Edit task name', task.taskName); if(newName) { task.taskName = newName; await saveItem('tasks',task); tasks = await getStoreData('tasks'); renderTable(); } });
+        document.querySelectorAll('.delTask').forEach(btn => btn.onclick = async (e) => { if(confirm('Delete?')) { await deleteItem('tasks', parseInt(btn.dataset.id)); tasks = await getStoreData('tasks'); renderTable(); } });
+      };
+      search.oninput = filterTasks;
+      document.getElementById('addTaskBtn').onclick = async () => { const newTask = { date: document.getElementById('taskDate').value, taskName: document.getElementById('taskName').value, projectName: document.getElementById('projectName').value, priority: document.getElementById('taskPriority').value, status: document.getElementById('taskStatus').value, remarks: document.getElementById('taskRemarks').value || '' }; await saveItem('tasks', newTask); tasks = await getStoreData('tasks'); renderTable(); };
+      filterTasks();
+    };
+    renderTable();
+  }
+
+  async function renderAttendance(container) { let attend = await getStoreData('attendance'); const checkInOut = () => { const todayRec = attend.find(a=>a.date===todayStr()); if(!todayRec) { saveItem('attendance',{date:todayStr(), checkIn:new Date().toLocaleTimeString(), checkOut:'', breakTime:0, workingHours:0}); } else if(todayRec.checkOut==='') { todayRec.checkOut=new Date().toLocaleTimeString(); const hours = 8; todayRec.workingHours = hours; saveItem('attendance',todayRec); } renderAttendance(container); }; container.innerHTML = `<div class="card"><button id="checkBtn">${attend.find(a=>a.date===todayStr() && !a.checkOut) ? 'Check Out' : 'Check In'}</button><table><tr><th>Date</th><th>IN</th><th>OUT</th><th>Hours</th></tr>${attend.map(a=>`<tr><td>${a.date}</td><td>${a.checkIn}</td><td>${a.checkOut}</td><td>${a.workingHours}</td></tr>`).join('')}</table></div>`; document.getElementById('checkBtn')?.addEventListener('click',checkInOut); }
+
+  async function renderLeave(container) { let leaves = await getStoreData('leaves'); container.innerHTML = `<div class="card"><h3>Add Leave</h3><input id="leaveType" placeholder="Type"><input id="startDate" type="date"><input id="endDate" type="date"><input id="reason" placeholder="Reason"><button id="addLeave">Add</button><table>${leaves.map(l=>`<tr><td>${l.type}</td><td>${l.start}</td><td>${l.end}</td><td><button class="delLeave" data-id="${l.id}">Del</button></td></tr>`).join('')}</table></div>`; document.getElementById('addLeave').onclick = async()=>{ await saveItem('leaves',{type:document.getElementById('leaveType').value, start:document.getElementById('startDate').value, end:document.getElementById('endDate').value, reason:document.getElementById('reason').value}); renderLeave(container); }; document.querySelectorAll('.delLeave').forEach(btn=>btn.onclick=async()=>{ await deleteItem('leaves',parseInt(btn.dataset.id)); renderLeave(container); }); }
+
+  async function renderCalendar(container) { container.innerHTML = `<div class="card"><div id="fullCal"></div></div>`; let calendarEl = document.getElementById('fullCal'); let calendar = new FullCalendar.Calendar(calendarEl, { initialView: 'dayGridMonth', editable:true, events: (await getStoreData('calendarEvents')).map(ev=>({ title:ev.title, start:ev.start, id:ev.id })) }); calendar.render(); }
+
+  async function renderBG(container) {
+    let bgList = await getStoreData('bgList');
+    const refresh = () => renderBG(container);
+    container.innerHTML = `<div class="card"><h3>Add BG</h3><input placeholder="Package Name" id="pkgName"><input placeholder="BG Number" id="bgNo"><input placeholder="Claim Date" type="date" id="claimDate"><input placeholder="Expiry Date" type="date" id="expiryDate"><input placeholder="Submitted Date" type="date" id="submittedDate"><input placeholder="PO Details" id="poDetails"><input placeholder="Amount" id="bgAmount"><select id="bgStatus"><option>Active</option><option>Expired</option></select><button id="addBg">Add</button><table><tr><th>BG No</th><th>Package</th><th>Expiry</th><th>Claim Date</th><th>PO Details</th><th>Status</th><th>Action</th></tr>${bgList.map(b=>`<tr><td>${b.bgNo}</td><td>${b.pkgName}</td><td>${b.expiryDate}</td><td>${b.claimDate}</td><td>${b.poDetails}</td><td>${b.status}</td><td><button class="delBg" data-id="${b.id}">Del</button></td></tr>`).join('')}</table></div>`;
+    document.getElementById('addBg').onclick = async () => { await saveItem('bgList',{ pkgName:document.getElementById('pkgName').value, bgNo:document.getElementById('bgNo').value, claimDate:document.getElementById('claimDate').value, expiryDate:document.getElementById('expiryDate').value, submittedDate:document.getElementById('submittedDate').value, poDetails:document.getElementById('poDetails').value, bgAmount:document.getElementById('bgAmount').value, status:document.getElementById('bgStatus').value }); refresh(); };
+    document.querySelectorAll('.delBg').forEach(btn=>btn.onclick=async()=>{ await deleteItem('bgList',parseInt(btn.dataset.id)); refresh(); });
+  }
+
+  async function renderPayment(container) { let pays = await getStoreData('payments'); const refresh=()=>renderPayment(container); container.innerHTML = `<div class="card"><input id="vendor" placeholder="Vendor"><input id="invNo" placeholder="Invoice"><input id="amountPay" placeholder="Amount"><input id="dueDate" type="date"><select id="payStatus"><option>Pending</option><option>Paid</option></select><button id="addPay">Add</button><table>${pays.map(p=>`<tr><td>${p.vendor}</td><td>${p.invoice}</td><td>₹${p.amount}</td><td>${p.dueDate}</td><td><button class="delPay" data-id="${p.id}">Del</button></td></tr>`).join('')}</table></div>`; document.getElementById('addPay').onclick = async()=>{ await saveItem('payments',{vendor:document.getElementById('vendor').value, invoice:document.getElementById('invNo').value, amount:document.getElementById('amountPay').value, dueDate:document.getElementById('dueDate').value, status:document.getElementById('payStatus').value}); refresh(); }; document.querySelectorAll('.delPay').forEach(btn=>btn.onclick=async()=>{ await deleteItem('payments',parseInt(btn.dataset.id)); refresh(); }); }
+
+  async function renderExpense(container) { let exps = await getStoreData('expenses'); const refresh=()=>renderExpense(container); container.innerHTML = `<div class="card"><input id="expDate" type="date" value="${todayStr()}"><select id="expCat"><option>Travel</option><option>Taxi</option><option>Food</option><option>Hotel</option><option>Misc</option></select><input id="expAmount" placeholder="Amount"><button id="addExp">Add</button><table>${exps.map(e=>`<tr><td>${e.date}</td><td>${e.category}</td><td>₹${e.amount}</td><td><button class="delExp" data-id="${e.id}">Del</button></td></tr>`).join('')}</table><h4>Total: ₹${exps.reduce((a,b)=>a+(Number(b.amount)||0),0)}</h4></div>`; document.getElementById('addExp').onclick = async()=>{ await saveItem('expenses',{date:document.getElementById('expDate').value, category:document.getElementById('expCat').value, amount:document.getElementById('expAmount').value}); refresh(); }; document.querySelectorAll('.delExp').forEach(btn=>btn.onclick=async()=>{ await deleteItem('expenses',parseInt(btn.dataset.id)); refresh(); }); }
+
+  async function renderDocuments(container) { container.innerHTML = `<div class="card"><input type="file" id="fileUpload" multiple><button id="saveDoc">Store Locally (IndexedDB)</button><div id="docsList"></div></div>`; let docs = JSON.parse(localStorage.getItem('sandeep_docs')||'[]'); const updateList = () => { document.getElementById('docsList').innerHTML = docs.map((d,i)=>`<div>${d.name} <button class="delDoc" data-i="${i}">Delete</button> <button class="downloadDoc" data-i="${i}">Download</button></div>`).join(''); }; document.getElementById('saveDoc').onclick = () => { const files = document.getElementById('fileUpload').files; Array.from(files).forEach(f=>{ const reader = new FileReader(); reader.onload = e=>{ docs.push({name:f.name, type:f.type, data:e.target.result}); localStorage.setItem('sandeep_docs',JSON.stringify(docs)); updateList(); }; reader.readAsDataURL(f); }); }; updateList(); window.delDocListener = ()=>{ document.querySelectorAll('.delDoc').forEach(btn=>btn.onclick=()=>{ docs.splice(parseInt(btn.dataset.i),1); localStorage.setItem('sandeep_docs',JSON.stringify(docs)); updateList(); }); }; setTimeout(()=>delDocListener(),100); }
+
+  async function renderReports(container) { const tasks = await getStoreData('tasks'); const expenses = await getStoreData('expenses'); container.innerHTML = `<div class="card"><button id="exportExcel">Export Tasks to Excel</button><button id="exportPDF">Export Report PDF</button></div>`; document.getElementById('exportExcel').onclick = () => { const ws = XLSX.utils.json_to_sheet(tasks); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Tasks'); XLSX.writeFile(wb, 'tasks_report.xlsx'); }; document.getElementById('exportPDF').onclick = () => { const {jsPDF} = window.jspdf; const doc = new jsPDF(); doc.text("Sandeep Report", 20, 20); doc.text(`Tasks total: ${tasks.length}`,20,40); doc.text(`Expenses total: ₹${expenses.reduce((a,b)=>a+Number(b.amount),0)}`,20,50); doc.save('report.pdf'); }; }
+
+  // LOGIN
+  function renderLogin() {
+    document.getElementById('app').innerHTML = `<div style="max-width:400px;margin:100px auto;background:white;border-radius:32px;padding:32px;text-align:center"><i class="fas fa-user-shield" style="font-size:3rem;color:#0d6efd"></i><h2>Sandeep Office Manager Pro</h2><input id="loginUser" placeholder="Username" value="sandeep"><input id="loginPass" type="password" placeholder="Password" value="sandeep"><br><button id="loginBtn">Login</button><div><label><input type="checkbox" id="rememberLogin"> Remember me</label></div></div>`;
+    document.getElementById('loginBtn').onclick = () => { const u = document.getElementById('loginUser').value; const p = document.getElementById('loginPass').value; if(u==='sandeep' && p==='sandeep') { currentUser = u; if(document.getElementById('rememberLogin').checked) localStorage.setItem('sandeep_session','true'); renderApp(); } else alert('Invalid'); };
+    if(localStorage.getItem('sandeep_session')==='true') { currentUser = 'sandeep'; renderApp(); }
+  }
+  function toggleDarkMode() { theme = theme === 'light' ? 'dark' : 'light'; document.body.classList.toggle('dark', theme === 'dark'); localStorage.setItem('theme', theme); }
+
+  openDB().then(() => { if(localStorage.getItem('sandeep_session')==='true') currentUser='sandeep'; renderApp(); });
+</script>
+</body>
+</html>
