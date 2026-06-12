@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>💼 Corporate Operations Hub</title>
+    <title>💼 Corporate Hub</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Chart.js & Firebase SDKs -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
@@ -29,7 +28,7 @@
         body { background-color: var(--bg-main); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; transition: background-color 0.5s; }
         h1, h2, h3, h4 { color: var(--accent-primary); letter-spacing: 0.5px; }
 
-        /* AUTH & MODAL OVERLAYS */
+        /* AUTH OVERLAYS */
         .overlay-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #101f3c 0%, #02050a 100%); display: flex; justify-content: center; align-items: center; z-index: 10000; transition: opacity 0.5s ease; }
         .box-container { background: rgba(18, 24, 43, 0.8); backdrop-filter: blur(20px); border: 1px solid var(--card-border); padding: 40px; border-radius: 20px; text-align: center; width: 90%; max-width: 400px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
         .input-field { width: 100%; padding: 14px; margin-bottom: 15px; background: rgba(0,0,0,0.4); border: 1px solid var(--card-border); border-radius: 8px; color: var(--text-main); transition: var(--transition); }
@@ -60,18 +59,19 @@
         .menu-toggle { display: none; font-size: 1.5rem; color: var(--accent-primary); cursor: pointer; }
         .live-timer { background: rgba(0,0,0,0.5); border: 1px solid var(--accent-primary); color: var(--accent-primary); padding: 8px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 8px; box-shadow: var(--glow); }
 
-        /* GRIDS, CARDS & TABLES */
+        /* GRIDS & CARDS */
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
         .card { background: var(--card-bg); backdrop-filter: blur(10px); border: 1px solid var(--card-border); border-radius: 12px; padding: 20px; margin-bottom: 20px; width: 100%; transition: var(--transition); }
         .stat-header { display: flex; justify-content: space-between; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 10px; font-weight: 600; }
         .stat-value { font-size: 2rem; font-weight: 800; color: var(--text-main); }
 
+        /* TABLES, LISTS & BADGES */
         .table-container { overflow-x: auto; margin-top: 15px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid var(--card-border); }
         table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem; }
         th { padding: 12px; background: rgba(255,255,255,0.05); color: var(--accent-primary); border-bottom: 1px solid var(--card-border); }
         td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        
+        tr:hover { background: rgba(255,255,255,0.03); }
         .list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(0,0,0,0.3); border-radius: 8px; margin-bottom: 8px; border-left: 4px solid var(--accent-primary); }
         .delete-btn { background: transparent; border: none; color: var(--danger); cursor: pointer; font-size: 1rem; margin-left: 10px; }
         .task-date-badge { font-size: 0.65rem; background: rgba(255,255,255,0.1); padding: 3px 8px; border-radius: 4px; margin-top: 6px; display: inline-block; color: var(--text-muted); letter-spacing: 0.5px; }
@@ -334,12 +334,12 @@
             </div>
         </section>
 
-        <!-- MODULE 6: GPS ATTENDANCE -->
+        <!-- MODULE 6: GPS ATTENDANCE WITH ACTUAL AREA NAMES -->
         <section id="attendance" class="module-section">
             <div class="grid-2">
                 <div class="card" style="text-align: center; padding: 40px 20px;">
                     <h2 style="margin-bottom: 10px;"><i class="fas fa-map-marker-alt"></i> GPS Attendance</h2>
-                    <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:25px;">Click to instantly mark your attendance with Live Location & Time.</p>
+                    <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:25px;">Click to instantly mark your attendance with Live Address & Time.</p>
                     
                     <label style="text-align:left; max-width:300px; margin: 0 auto 10px;">Select Location / Duty Type</label>
                     <select id="attType" style="max-width:300px; margin:0 auto 20px;">
@@ -425,7 +425,6 @@
         const getLocalDateStr = () => { let d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); };
         const todayStr = getLocalDateStr();
 
-        // Added 'appPin' for security
         let appData = { plans: [], travels: [], reports: [], staff: [], attendance: [], userName: '', theme: 'gold', totalAppTime: 0, timerDate: todayStr, appPin: '' };
         let enteredPin = "";
 
@@ -610,11 +609,33 @@
         document.getElementById('staffForm').addEventListener('submit', function(e) { e.preventDefault(); appData.staff.push({ id: Date.now(), name: document.getElementById('stfName').value, role: document.getElementById('stfRole').value, status: document.getElementById('stfStatus').value, wage: document.getElementById('stfWage').value }); this.reset(); autoSave(); });
         function renderStaff() { const tbl = document.getElementById('staffTable'); tbl.innerHTML = '<tr><th>Name</th><th>Role/ID</th><th>Status</th><th>Wage(₹)</th><th>Action</th></tr>'; appData.staff.forEach(n => { let sCol = n.status === 'Present' ? 'var(--success)' : (n.status === 'Completed' ? 'var(--accent-primary)' : 'var(--danger)'); tbl.innerHTML += `<tr><td>${n.name}</td><td>${n.role}</td><td style="color:${sCol}; font-weight:bold;">${n.status}</td><td>₹${n.wage}</td><td><button class="delete-btn" onclick="delData('staff', ${n.id})"><i class="fas fa-trash"></i></button></td></tr>`; }); }
 
-        // ✨ 1-CLICK GPS ATTENDANCE ✨
+        // ✨ 1-CLICK REVERSE GEOCODING GPS ATTENDANCE ✨
         function getGPSLocation(callback) {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
-                    (position) => { callback(`${position.coords.latitude.toFixed(4)}, ${position.coords.longitude.toFixed(4)}`); },
+                    async (position) => { 
+                        let lat = position.coords.latitude;
+                        let lng = position.coords.longitude;
+                        try {
+                            // Free OpenStreetMap API to get Location Name
+                            let res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
+                            let data = await res.json();
+                            
+                            let address = "";
+                            if(data && data.address) {
+                                let a = data.address;
+                                address = (a.neighbourhood || a.suburb || a.city_district || a.road || "") + ", " + (a.city || a.town || a.village || a.county || "");
+                                if(address === ", ") address = data.display_name.split(",").slice(0,2).join(",");
+                            } else {
+                                address = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+                            }
+                            if(address.startsWith(", ")) address = address.substring(2);
+                            callback(address);
+                        } catch(e) {
+                            // Fallback to coordinates
+                            callback(`${lat.toFixed(4)}, ${lng.toFixed(4)}`);
+                        }
+                    },
                     (error) => { console.warn("GPS Error", error); callback("GPS Denied/Unavailable"); },
                     { enableHighAccuracy: true, timeout: 10000 }
                 );
@@ -627,7 +648,7 @@
             let existing = appData.attendance.find(a => a.date === todayStr && a.outTime === '-');
             if(existing) return alert("You are already Punched IN for today!");
             
-            showToast("Fetching GPS Location... 📍");
+            showToast("Fetching Location Name... 📍");
             getGPSLocation((locStr) => {
                 appData.attendance.push({ id: Date.now(), date: todayStr, type: type, inTime: time12, outTime: '-', locationIn: locStr, locationOut: '' });
                 autoSave(); showToast("Punched IN: " + time12);
@@ -638,7 +659,7 @@
             let time12 = format12Hour(new Date().toTimeString().slice(0,5));
             let existing = [...appData.attendance].reverse().find(a => a.outTime === '-'); 
             if(existing) { 
-                showToast("Fetching GPS Location... 📍");
+                showToast("Fetching Location Name... 📍");
                 getGPSLocation((locStr) => {
                     existing.outTime = time12; existing.locationOut = locStr;
                     autoSave(); showToast("Punched OUT: " + time12); 
@@ -647,7 +668,7 @@
         }
 
         function renderAttendance() { 
-            const tbl = document.getElementById('attTable'); tbl.innerHTML = '<tr><th>Date</th><th>Type & GPS</th><th>In/Out</th><th>Action</th></tr>'; 
+            const tbl = document.getElementById('attTable'); tbl.innerHTML = '<tr><th>Date</th><th>Type & GPS Location</th><th>In/Out</th><th>Action</th></tr>'; 
             [...appData.attendance].sort((a,b)=> new Date(b.date) - new Date(a.date)).forEach(a => { 
                 let tCol = a.type === 'Leave / Holiday' ? 'var(--warning)' : 'var(--text-main)'; 
                 let locInHtml = a.locationIn ? `<br><span style="font-size:0.65rem; color:var(--text-muted);"><i class="fas fa-map-marker-alt" style="color:#00E5FF;"></i> IN: ${a.locationIn}</span>` : '';
@@ -657,7 +678,7 @@
         }
 
         function delData(arrayName, id) { if(confirm("Delete this record?")) { appData[arrayName] = appData[arrayName].filter(item => item.id !== id); autoSave(); } }
-        function exportData(type) { let dataArr = appData[type]; if(!dataArr || dataArr.length === 0) return alert("No data to export."); let csv = ""; if (type === 'attendance') { csv = "Date,Duty Type,In Time,Out Time,GPS IN,GPS OUT\n"; dataArr.forEach(a => csv += `${a.date},${a.type},${a.inTime},${a.outTime},${a.locationIn||'N/A'},${a.locationOut||'N/A'}\n`); } const a = document.createElement("a"); a.href = encodeURI("data:text/csv;charset=utf-8," + csv); a.download = `Corporate_${type}_Report.csv`; a.click(); }
+        function exportData(type) { let dataArr = appData[type]; if(!dataArr || dataArr.length === 0) return alert("No data to export."); let csv = ""; if (type === 'attendance') { csv = "Date,Duty Type,In Time,Out Time,GPS IN,GPS OUT\n"; dataArr.forEach(a => csv += `${a.date},${a.type},${a.inTime},${a.outTime},"${a.locationIn||'N/A'}","${a.locationOut||'N/A'}"\n`); } const a = document.createElement("a"); a.href = encodeURI("data:text/csv;charset=utf-8," + csv); a.download = `Corporate_${type}_Report.csv`; a.click(); }
     </script>
 </body>
 </html>
