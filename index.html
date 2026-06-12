@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Firebase SDKs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
@@ -60,7 +60,7 @@
         .stat-header { display: flex; justify-content: space-between; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 10px; font-weight: 600; }
         .stat-value { font-size: 2rem; font-weight: 800; color: var(--text-main); }
 
-        /* TABLES & LISTS */
+        /* TABLES, LISTS & BADGES */
         .table-container { overflow-x: auto; margin-top: 15px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid var(--card-border); }
         table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem; }
         th { padding: 12px; background: rgba(255,255,255,0.05); color: var(--accent-primary); border-bottom: 1px solid var(--card-border); }
@@ -68,6 +68,12 @@
         tr:hover { background: rgba(255,255,255,0.03); }
         .list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(0,0,0,0.3); border-radius: 8px; margin-bottom: 8px; border-left: 4px solid var(--accent-primary); }
         .delete-btn { background: transparent; border: none; color: var(--danger); cursor: pointer; font-size: 1rem; margin-left: 10px; }
+        .task-date-badge { font-size: 0.65rem; background: rgba(255,255,255,0.1); padding: 3px 8px; border-radius: 4px; margin-top: 6px; display: inline-block; color: var(--text-muted); letter-spacing: 0.5px; }
+
+        /* CALENDAR */
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 15px; }
+        .cal-head { font-weight: bold; text-align: center; color: var(--text-muted); font-size: 0.8rem; padding-bottom: 5px; }
+        .cal-day { background: rgba(255,255,255,0.05); color: var(--text-main); padding: 10px 0; text-align: center; border-radius: 5px; font-size: 0.85rem; font-weight: 600; }
         
         /* FORMS & AI BOX */
         label { display: block; margin-bottom: 6px; color: var(--text-muted); font-size: 0.85rem; }
@@ -101,7 +107,6 @@
 </head>
 <body>
 
-    <!-- SECURE LOGIN GATEWAY -->
     <div id="loginOverlay" class="overlay-screen">
         <div class="box-container">
             <i class="fas fa-fingerprint" style="font-size: 3rem; color: var(--accent-primary); margin-bottom: 15px; text-shadow: var(--glow);"></i>
@@ -131,7 +136,6 @@
     <div id="toast"><i class="fas fa-check-circle"></i> <span id="toastMsg">Synced successfully!</span></div>
     <div class="overlay-bg" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
-    <!-- SIDEBAR NAVIGATION -->
     <aside class="sidebar" id="sidebar">
         <div class="brand">
             <i class="fas fa-network-wired"></i><h2>CORP HUB</h2>
@@ -160,15 +164,13 @@
             </div>
             
             <div style="display:flex; align-items:center; gap:15px;">
-                <!-- LIVE USAGE TIMER (Smart Active Tracker) -->
-                <div class="live-timer" title="Active Screen Time">
+                <div class="live-timer" title="Active Screen Time Today">
                     <i class="fas fa-stopwatch"></i> <span id="appTimerDisplay">00:00:00</span>
                 </div>
                 <button class="btn" style="width:auto; padding:8px 15px; font-size:0.8rem; background: transparent; border: 1px solid var(--danger); color: var(--danger);" onclick="logout()"><i class="fas fa-power-off"></i></button>
             </div>
         </header>
 
-        <!-- MODULE 1: DASHBOARD -->
         <section id="dashboard" class="module-section active">
             <div class="grid-3">
                 <div class="card"><div class="stat-header"><span>Travel Claims (MTD)</span><i class="fas fa-rupee-sign"></i></div><div class="stat-value" id="dashTravel">₹0</div></div>
@@ -185,15 +187,16 @@
                     <div class="list-item"><span>Daily Report Logged?</span><strong id="chkReport" style="color:var(--danger)">NO</strong></div>
                     <div class="list-item"><span>Attendance Punched?</span><strong id="chkAttend" style="color:var(--danger)">NO</strong></div>
                 </div>
+                
                 <div class="card">
-                    <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
-                    <button class="btn" style="margin-top:15px;" onclick="switchTab('planner')">Set Today's Plan</button>
-                    <button class="btn" style="margin-top:10px; background: transparent; border: 1px solid var(--accent-primary); color: var(--accent-primary);" onclick="switchTab('attendance')">Open Punch Panel</button>
+                    <h3>📊 Expense Analytics (This Month)</h3>
+                    <div style="position: relative; height: 200px; width: 100%; margin-top: 20px;">
+                        <canvas id="expenseChart"></canvas>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- NEW MODULE: DAILY PLAN (TASK MANAGEMENT) -->
         <section id="planner" class="module-section">
             <div class="card">
                 <h2 style="margin-bottom: 5px;"><i class="fas fa-tasks"></i> Today's Action Plan</h2>
@@ -205,12 +208,10 @@
                 </form>
                 
                 <div id="planListDiv" style="display:flex; flex-direction:column; gap:10px; max-height: 400px; overflow-y: auto;">
-                    <!-- Tasks injected here -->
-                </div>
+                    </div>
             </div>
         </section>
 
-        <!-- MODULE 2: DAILY REPORTS ENGINE -->
         <section id="reports" class="module-section">
             <div class="grid-2">
                 <div class="card">
@@ -264,7 +265,6 @@
             </div>
         </section>
 
-        <!-- MODULE 3: ADVANCED TRAVEL LOGS -->
         <section id="rapido" class="module-section">
             <div class="grid-2">
                 <div class="card">
@@ -303,7 +303,6 @@
             </div>
         </section>
 
-        <!-- MODULE 4: STAFF / VENDOR DESK -->
         <section id="staff" class="module-section">
             <div class="card">
                 <h2 style="margin-bottom: 15px;"><i class="fas fa-users-cog"></i> Staff & Vendor Log</h2>
@@ -320,7 +319,6 @@
             </div>
         </section>
 
-        <!-- MODULE 5: ATTENDANCE -->
         <section id="attendance" class="module-section">
             <div class="grid-2">
                 <div class="card" style="text-align: center; padding: 40px 20px;">
@@ -332,6 +330,7 @@
                         <option value="Site Duty">Site Duty</option>
                         <option value="Office">Office</option>
                         <option value="Client Meeting">Client Meeting</option>
+                        <option value="Leave / Holiday">Leave / Holiday</option>
                     </select>
 
                     <div style="display:flex; gap:15px; justify-content:center; max-width:400px; margin:0 auto;">
@@ -343,17 +342,24 @@
                         </button>
                     </div>
                 </div>
+                
                 <div class="card">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
-                        <h2><i class="fas fa-list"></i> Duty Register</h2>
-                        <button class="btn" style="width:auto; padding:5px 10px; font-size:0.8rem; background:#4caf50;" onclick="exportData('attendance')"><i class="fas fa-file-excel"></i> Export Excel</button>
-                    </div>
-                    <div class="table-container" style="max-height: 300px;"><table id="attTable"></table></div>
+                    <h2>📅 Monthly Duty Calendar</h2>
+                    <p style="color:var(--text-muted); font-size:0.8rem;">Green = Present, Red = Leave</p>
+                    <div class="cal-grid" id="dutyCalendar">
+                        </div>
                 </div>
+            </div>
+
+            <div class="card" style="margin-top:20px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+                    <h2><i class="fas fa-list"></i> Duty Register List</h2>
+                    <button class="btn" style="width:auto; padding:5px 10px; font-size:0.8rem; background:#4caf50;" onclick="exportData('attendance')"><i class="fas fa-file-excel"></i> Export Excel</button>
+                </div>
+                <div class="table-container" style="max-height: 300px;"><table id="attTable"></table></div>
             </div>
         </section>
 
-        <!-- SETTINGS -->
         <section id="settings" class="module-section">
             <div class="grid-2">
                 <div class="card">
@@ -369,11 +375,16 @@
                     </select>
                     <button class="btn" onclick="saveSettings()">Save Configuration</button>
                 </div>
+
+                <div class="card">
+                    <h2 style="margin-bottom: 20px;"><i class="fas fa-database"></i> Data Management</h2>
+                    <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:15px;">Securely download your entire app database locally to your device.</p>
+                    <button class="btn" style="background:transparent; border:1px solid var(--accent-primary); color:var(--accent-primary); margin-bottom: 15px;" onclick="exportBackup()"><i class="fas fa-download"></i> Download Local Backup (JSON)</button>
+                </div>
             </div>
         </section>
     </main>
 
-    <!-- FIREBASE & JAVASCRIPT ENGINE -->
     <script>
         // FIREBASE SETUP
         const firebaseConfig = {
@@ -389,8 +400,15 @@
         const auth = firebase.auth(); const db = firebase.firestore();
 
         let currentUser = null, isLoginMode = true;
-        // Data Structure Update: Added 'plans' array
-        let appData = { plans: [], travels: [], reports: [], staff: [], attendance: [], userName: '', theme: 'gold', totalAppTime: 0 };
+        
+        // Ensure proper date calculation for Indian Time Zone (IST matching)
+        const getLocalDateStr = () => {
+            let d = new Date();
+            return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+        };
+        const todayStr = getLocalDateStr();
+
+        let appData = { plans: [], travels: [], reports: [], staff: [], attendance: [], userName: '', theme: 'gold', totalAppTime: 0, timerDate: todayStr };
 
         // 10 THEMES
         const themes = {
@@ -407,7 +425,6 @@
         function switchTab(id) { document.querySelectorAll('.module-section, .nav-item').forEach(e => e.classList.remove('active')); document.getElementById(id).classList.add('active'); event.currentTarget.classList.add('active'); if(window.innerWidth <= 768) toggleSidebar(); }
         
         // DATE & TIME
-        const todayStr = new Date().toISOString().split('T')[0];
         document.getElementById('trvDate').value = todayStr; 
         document.getElementById('repDate').value = todayStr; 
         document.getElementById('repTime').value = new Date().toTimeString().slice(0,5);
@@ -423,12 +440,20 @@
             return `${h < 10 ? '0'+h : h}:${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
         }
 
-        // SMART ACTIVE TIMER (Pauses when app is minimized)
+        // SMART ACTIVE TIMER (Daily Reset & Pauses when app is minimized)
         let isAppActive = true;
         document.addEventListener('visibilitychange', () => { isAppActive = !document.hidden; });
         
         setInterval(() => {
             if(currentUser && isAppActive) { 
+                let currentStr = getLocalDateStr();
+                // Reset if date changes
+                if(appData.timerDate !== currentStr) {
+                    appData.totalAppTime = 0;
+                    appData.timerDate = currentStr;
+                    autoSave();
+                }
+
                 appData.totalAppTime = (appData.totalAppTime || 0) + 1; 
                 document.getElementById('appTimerDisplay').innerText = formatSecondsToTime(appData.totalAppTime); 
                 if(appData.totalAppTime % 60 === 0) silentSave(); 
@@ -446,7 +471,6 @@
             document.getElementById('loginModeFields').style.display = isLoginMode ? "block" : "none"; document.getElementById('registerModeFields').style.display = isLoginMode ? "none" : "block";
         }
         
-        // FORGOT PASSWORD
         function forgotPassword() {
             const email = document.getElementById('loginId').value.trim();
             if(!email || !email.includes('@')) return alert("Please enter your registered Email ID in the box above to reset your password.");
@@ -476,7 +500,13 @@
         auth.onAuthStateChanged((user) => { if (user) setupUserEnv(user); });
 
         // FIRESTORE
-        function cleanData(data) { return { userName: data.userName || currentUser.displayName || "", theme: data.theme || "gold", totalAppTime: data.totalAppTime || 0, plans: Array.isArray(data.plans) ? data.plans : [], travels: Array.isArray(data.travels) ? data.travels : [], reports: Array.isArray(data.reports) ? data.reports : [], staff: Array.isArray(data.staff) ? data.staff : [], attendance: Array.isArray(data.attendance) ? data.attendance : [] }; }
+        function cleanData(data) { 
+            let tDate = data.timerDate || getLocalDateStr();
+            let tTime = data.totalAppTime || 0;
+            if(tDate !== getLocalDateStr()) { tTime = 0; tDate = getLocalDateStr(); }
+            
+            return { userName: data.userName || currentUser.displayName || "", theme: data.theme || "gold", totalAppTime: tTime, timerDate: tDate, plans: Array.isArray(data.plans) ? data.plans : [], travels: Array.isArray(data.travels) ? data.travels : [], reports: Array.isArray(data.reports) ? data.reports : [], staff: Array.isArray(data.staff) ? data.staff : [], attendance: Array.isArray(data.attendance) ? data.attendance : [] }; 
+        }
         function loadDataForUser() {
             if (!currentUser) return;
             db.collection('corporateOperationsData').doc(currentUser.uid).get().then((doc) => {
@@ -488,7 +518,66 @@
         function silentSave() { if(currentUser) db.collection('corporateOperationsData').doc(currentUser.uid).set(cleanData(appData), {merge:true}); }
         function saveSettings() { appData.userName = document.getElementById('profileName').value; autoSave(); }
 
-        // UI UPDATE
+        // LOCAL BACKUP EXPORT (Feature 6b)
+        function exportBackup() {
+            let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
+            let dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", `CorporateHub_Backup_${todayStr}.json`);
+            dlAnchorElem.click();
+            showToast("Backup Downloaded Securely!");
+        }
+
+        // CHART.JS ANALYTICS (Feature 4)
+        let expenseChart = null;
+        function updateCharts() {
+            let taxi = 0, food = 0, other = 0, fare = 0;
+            const currentMonth = new Date().getMonth();
+            appData.travels.forEach(t => { 
+                if(new Date(t.date).getMonth() === currentMonth) {
+                    taxi += parseFloat(t.taxi || 0); food += parseFloat(t.food || 0); other += parseFloat(t.other || 0); fare += parseFloat(t.fare || t.amount || 0);
+                }
+            });
+
+            const ctx = document.getElementById('expenseChart');
+            if(!ctx) return;
+            if(expenseChart) expenseChart.destroy();
+            expenseChart = new Chart(ctx.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Main Fare', 'Local Taxi', 'Food', 'Other'],
+                    datasets: [{ data: [fare, taxi, food, other], backgroundColor: ['#00E5FF', '#FFD700', '#00e676', '#ff4d4d'], borderWidth: 0 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#A0A0A0', font: {family: 'Inter'} } } }, cutout: '70%' }
+            });
+        }
+
+        // MONTHLY ATTENDANCE CALENDAR (Feature 2)
+        function renderCalendar() {
+            const cal = document.getElementById('dutyCalendar');
+            cal.innerHTML = '<div class="cal-head">S</div><div class="cal-head">M</div><div class="cal-head">T</div><div class="cal-head">W</div><div class="cal-head">T</div><div class="cal-head">F</div><div class="cal-head">S</div>';
+            
+            let date = new Date();
+            let year = date.getFullYear(), month = date.getMonth();
+            let firstDay = new Date(year, month, 1).getDay();
+            let daysInMonth = new Date(year, month + 1, 0).getDate();
+            
+            for(let i=0; i<firstDay; i++) cal.innerHTML += `<div></div>`;
+            for(let i=1; i<=daysInMonth; i++) {
+                let dStr = `${year}-${String(month+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+                let entry = appData.attendance.find(a => a.date === dStr);
+                let bg = 'rgba(255,255,255,0.05)', color = 'var(--text-main)';
+                if(entry) {
+                    if(entry.type.includes('Leave')) { bg = 'var(--danger)'; color='#fff';}
+                    else { bg = 'var(--success)'; color='#000'; }
+                } else if(dStr === todayStr) {
+                    bg = 'rgba(255,255,255,0.2)'; // Highlight today if no punch
+                }
+                cal.innerHTML += `<div class="cal-day" style="background:${bg}; color:${color};">${i}</div>`;
+            }
+        }
+
+        // UI UPDATE MASTER
         function updateUI() {
             let mtdTravel = 0; const currentMonth = new Date().getMonth();
             appData.travels.forEach(t => { if(new Date(t.date).getMonth() === currentMonth) mtdTravel += parseFloat(t.total || 0); });
@@ -500,10 +589,11 @@
             document.getElementById('chkAttend').innerHTML = appData.attendance.some(a => a.date === todayStr) ? '<span style="color:var(--success)">YES</span>' : '<span style="color:var(--danger)">NO</span>';
             document.getElementById('welcomeText').innerHTML = `Corporate Hub: ${appData.userName || 'Agent'}`;
             
-            renderPlans(); renderTravels(); renderReportsList(); renderStaff(); renderAttendance();
+            renderPlans(); renderTravels(); renderReportsList(); renderStaff(); renderAttendance(); 
+            updateCharts(); renderCalendar();
         }
 
-        // 📋 NEW: DAILY PLAN LOGIC
+        // 📋 DAILY PLAN LOGIC
         document.getElementById('planForm').addEventListener('submit', function(e) {
             e.preventDefault();
             appData.plans.push({ id: Date.now(), task: document.getElementById('planTask').value, status: 'Pending', date: todayStr });
@@ -523,8 +613,9 @@
                 div.innerHTML += `
                 <div class="list-item" style="border-left-color:${badgeCol}; flex-wrap:wrap; gap:10px;">
                     <div style="flex:1; min-width:200px;">
-                        <span style="font-size:0.7rem; padding:2px 8px; border-radius:10px; border:1px solid ${badgeCol}; color:${badgeCol};">${p.status.toUpperCase()}</span>
+                        <span style="font-size:0.65rem; font-weight:bold; padding:2px 8px; border-radius:10px; border:1px solid ${badgeCol}; color:${badgeCol};">${p.status.toUpperCase()}</span>
                         <p style="font-size:0.95rem; margin-top:5px; text-decoration:${strike}; color:${txtCol}">${p.task}</p>
+                        <span class="task-date-badge"><i class="fas fa-calendar-alt"></i> ${p.date}</span>
                     </div>
                     <div style="display:flex; gap:5px; align-items:center;">
                         <button class="btn" style="padding:5px 10px; width:auto; font-size:0.75rem; background:transparent; border:1px solid var(--warning); color:var(--warning);" onclick="updatePlanStatus(${p.id}, 'Progress')">Progress</button>
@@ -536,7 +627,7 @@
         }
         function updatePlanStatus(id, newStatus) { let plan = appData.plans.find(p => p.id === id); if(plan) { plan.status = newStatus; autoSave(); } }
 
-        // ✨ AI ENGINE: TWO-WAY TRANSLATOR ✨
+        // ✨ AI ENGINE
         function startReportVoice() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if(!SpeechRecognition) return alert("Voice unsupported on this browser.");
@@ -628,7 +719,7 @@
             const tbl = document.getElementById('travelTable'); tbl.innerHTML = '<tr><th>Date</th><th>From-To</th><th>Purpose</th><th>Total (₹)</th><th>Action</th></tr>'; 
             [...appData.travels].sort((a,b)=> new Date(b.date) - new Date(a.date)).forEach(t => { 
                 let fT = (t.from || 'N/A') + ' -> ' + (t.to || 'N/A');
-                let tAmt = t.total !== undefined ? t.total : (t.amount || 0); // fallback for old data
+                let tAmt = t.total !== undefined ? t.total : (t.amount || 0); 
                 tbl.innerHTML += `<tr><td>${t.date}</td><td>${fT}</td><td>${t.purpose || '-'}</td><td style="color:var(--accent-primary)">₹${tAmt}</td><td><button class="delete-btn" onclick="delData('travels', ${t.id})"><i class="fas fa-trash"></i></button></td></tr>`; 
             }); 
         }
@@ -672,7 +763,7 @@
 
         function punchOut() {
             let time12 = format12Hour(new Date().toTimeString().slice(0,5));
-            let existing = [...appData.attendance].reverse().find(a => a.outTime === '-'); // Find last open punch
+            let existing = [...appData.attendance].reverse().find(a => a.outTime === '-'); 
             if(existing) { existing.outTime = time12; autoSave(); showToast("Punched OUT: " + time12); } 
             else { alert("No open Punch IN found!"); }
         }
