@@ -735,23 +735,65 @@
             }
         }
         let isRecording = false;
+        let recognition = null;
         function startReportVoice() {
             const btn = document.getElementById('micReportBtn');
-            if(isRecording) {
-                btn.classList.remove('listening');
-                isRecording = false;
-                showToast("Dictation ended.");
-            } else {
-                btn.classList.add('listening');
-                isRecording = true;
-                showToast("Listening... (Speak now)");
-                setTimeout(() => {
-                    if(isRecording) {
-                        document.getElementById('repText').value += " [Voice dictation inserted here]";
-                        btn.classList.remove('listening');
-                        isRecording = false;
+            const el = document.getElementById('repText');
+            
+            if (isRecording) {
+                if (recognition) recognition.stop();
+                return;
+            }
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                return alert("Speech Recognition is not supported in this browser. Please use Chrome or Edge.");
+            }
+
+            if (!recognition) {
+                recognition = new SpeechRecognition();
+                recognition.continuous = true;
+                recognition.interimResults = false;
+                recognition.lang = 'en-IN';
+                
+                recognition.onstart = function() {
+                    isRecording = true;
+                    btn.classList.add('listening');
+                    showToast("Listening... (Speak now)");
+                };
+                
+                recognition.onresult = function(event) {
+                    let finalTranscript = '';
+                    for (let i = event.resultIndex; i < event.results.length; ++i) {
+                        if (event.results[i].isFinal) {
+                            finalTranscript += event.results[i][0].transcript;
+                        }
                     }
-                }, 3000);
+                    if (finalTranscript) {
+                        el.value += (el.value ? ' ' : '') + finalTranscript.trim();
+                    }
+                };
+                
+                recognition.onerror = function(event) {
+                    console.error("Speech Recognition Error: ", event.error);
+                    showToast("Microphone error. Check permissions.");
+                    isRecording = false;
+                    btn.classList.remove('listening');
+                };
+                
+                recognition.onend = function() {
+                    isRecording = false;
+                    btn.classList.remove('listening');
+                    showToast("Dictation ended.");
+                };
+            }
+            
+            try {
+                recognition.start();
+            } catch(e) {
+                console.error("Start error:", e);
+                isRecording = false;
+                btn.classList.remove('listening');
             }
         }
 
