@@ -230,6 +230,7 @@
                 <form id="planForm" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 20px;">
                     <input type="text" id="planTask" class="input-field" placeholder="What needs to be done today?" style="flex:1; margin-bottom:0;" required>
                     <button type="submit" class="btn" style="width:auto; margin-top:0;">Add Task</button>
+                    <button type="button" class="btn" style="width:auto; margin-top:0; background: linear-gradient(45deg, #00E5FF, #00BFFF); color: black;" onclick="aiSuggestTask()"><i class="fas fa-magic"></i> AI</button>
                 </form>
                 <div id="planListDiv" style="display:flex; flex-direction:column; gap:10px; max-height: 400px; overflow-y: auto;"></div>
             </div>
@@ -267,6 +268,7 @@
                     <p style="color:var(--text-muted); font-size:0.85rem; margin:15px 0;">Combine all updates and meetings into a single professional format.</p>
                     <button class="btn" onclick="generateReport(7)"><i class="fas fa-file-alt"></i> Build Weekly Report</button>
                     <button class="btn" style="margin-top:10px; background: transparent; border: 1px solid var(--accent-primary); color: var(--accent-primary);" onclick="generateReport(30)"><i class="fas fa-calendar-alt"></i> Build Monthly Report</button>
+                    <button class="btn" style="margin-top:10px; background: linear-gradient(45deg, #b026ff, #8a2be2); color: white; border: none;" onclick="aiSummarizeReports()"><i class="fas fa-magic"></i> AI Summarize</button>
                     
                     <div id="compiledReportBox" style="display:none; margin-top:15px;">
                         <textarea id="compiledOutput" style="height: 150px; font-size:0.8rem; background:rgba(0,0,0,0.5);" readonly></textarea>
@@ -574,6 +576,13 @@
         }
 
         // DAILY PLAN
+        async function aiSuggestTask() {
+            const el = document.getElementById('planTask');
+            el.value = "AI thinking... ⏳";
+            let suggested = await callSandeepAI("You are a corporate assistant. Suggest ONE short daily operational task for a field manager. Just the task.", "Suggest a task.");
+            if(suggested) { el.value = suggested.trim(); showToast("AI Task Suggested."); }
+            else { el.value = ""; }
+        }
         document.getElementById('planForm').addEventListener('submit', function(e) { e.preventDefault(); appData.plans.push({ id: Date.now(), task: document.getElementById('planTask').value, status: 'Pending', date: todayStr }); this.reset(); autoSave(); });
         function renderPlans() {
             const div = document.getElementById('planListDiv'); div.innerHTML = ''; let todaysPlans = appData.plans.filter(p => p.date === todayStr);
@@ -661,12 +670,69 @@
         function exportReportExcel() { alert("Report Excel Export Feature Coming Soon"); }
         function exportReportPDF() { alert("Report PDF Export Feature Coming Soon"); }
 
-        // AI & VOICE (Mock)
-        function magicRewrite(lang) {
+        // MOCK AI CALL UTILITY (Adapting for Vercel AI endpoint)
+        async function callSandeepAI(systemPrompt, userPrompt) {
+            try {
+                const response = await fetch("https://sandeepai.vercel.app/api/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        messages: [
+                            { role: "system", content: systemPrompt },
+                            { role: "user", content: userPrompt }
+                        ]
+                    })
+                });
+                if (!response.ok) throw new Error("API failed");
+                const text = await response.text();
+                try {
+                    const data = JSON.parse(text);
+                    if (data.choices && data.choices[0] && data.choices[0].message) return data.choices[0].message.content;
+                    if (data.response) return data.response;
+                    if (data.message) return data.message; 
+                    if (typeof data === 'string') return data;
+                } catch(e) {}
+                return text;
+            } catch(e) {
+                console.error("AI Error:", e);
+                return null;
+            }
+        }
+
+        async function aiSummarizeReports() {
+            const filtered = appData.reports;
+            if(filtered.length === 0) return alert("No reports to summarize.");
+            document.getElementById('compiledReportBox').style.display = 'block';
+            const outputEl = document.getElementById('compiledOutput');
+            outputEl.value = "AI is analyzing your reports... Please wait.";
+            let allText = filtered.map(r => `[${r.date}] Met: ${r.metName || 'N/A'} - ${r.text}`).join("\n");
+            
+            let summary = await callSandeepAI("You are a corporate executive assistant. Summarize these daily reports into a concise, professional executive summary with bullet points.", allText);
+            if(summary) {
+                outputEl.value = summary;
+                showToast("AI Summary generated successfully.");
+            } else {
+                outputEl.value = "Failed to generate AI summary.";
+            }
+        }
+
+        // AI TRANSLATE
+        async function magicRewrite(lang) {
             const el = document.getElementById('repText');
             if(!el.value) return alert("Please write something to translate.");
-            el.value = `[Translated to ${lang.toUpperCase()}] ` + el.value;
-            showToast("Text translated successfully.");
+            const originalText = el.value;
+            el.value = "Translating... ⏳";
+            
+            let systemPrompt = `You are a professional assistant. Translate the following text to ${lang === 'en' ? 'English' : 'Hindi'}. Only return the translated text.`;
+            let translated = await callSandeepAI(systemPrompt, originalText);
+            
+            if (translated) {
+                el.value = translated;
+                showToast("Text translated via Sandeep AI.");
+            } else {
+                el.value = originalText;
+                alert("Translation failed.");
+            }
         }
         let isRecording = false;
         function startReportVoice() {
