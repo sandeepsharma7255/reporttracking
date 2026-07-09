@@ -267,7 +267,7 @@
                 <h2 style="margin-bottom: 5px;"><i class="fas fa-tasks"></i> Today's Action Plan</h2>
                 <form id="planForm" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 20px;">
                     <input type="text" id="planTask" class="input-field" placeholder="What needs to be done today?" style="flex:1; margin-bottom:0;" required>
-                    <button type="submit" class="btn" style="width:auto; margin-top:0;">Add Task</button>
+                    <button type="submit" id="planSubmitBtn" class="btn" style="width:auto; margin-top:0;">Add Task</button>
                     <button type="button" class="btn" style="width:auto; margin-top:0; background: linear-gradient(45deg, #00E5FF, #00BFFF); color: black;" onclick="aiSuggestTask()"><i class="fas fa-magic"></i> AI</button>
                 </form>
                 <div id="planListDiv" style="display:flex; flex-direction:column; gap:10px; max-height: 400px; overflow-y: auto;"></div>
@@ -1139,6 +1139,7 @@
         document.getElementById('inqDate').value = todayStr;
 
         // DAILY PLAN
+        let editPlanId = null;
         async function aiSuggestTask() {
             const el = document.getElementById('planTask');
             el.value = "AI thinking... ⏳";
@@ -1146,7 +1147,29 @@
             if(suggested) { el.value = suggested.trim(); showToast("AI Task Suggested."); }
             else { el.value = ""; }
         }
-        document.getElementById('planForm').addEventListener('submit', function(e) { e.preventDefault(); appData.plans.push({ id: Date.now(), task: document.getElementById('planTask').value, status: 'Pending', date: todayStr }); this.reset(); autoSave(); });
+        document.getElementById('planForm').addEventListener('submit', function(e) { 
+            e.preventDefault(); 
+            let taskText = document.getElementById('planTask').value;
+            if(editPlanId) {
+                appData.plans = appData.plans.map(p => p.id === editPlanId ? { ...p, task: taskText } : p);
+                editPlanId = null;
+                document.getElementById('planSubmitBtn').innerText = 'Add Task';
+            } else {
+                appData.plans.push({ id: Date.now(), task: taskText, status: 'Pending', date: todayStr }); 
+            }
+            this.reset(); autoSave(); renderPlans();
+        });
+        
+        function editPlan(id) {
+            let p = appData.plans.find(x => x.id === id);
+            if(p) {
+                editPlanId = p.id;
+                document.getElementById('planTask').value = p.task;
+                document.getElementById('planSubmitBtn').innerText = 'Save Task';
+                document.getElementById('planTask').focus();
+            }
+        }
+
         function renderPlans() {
             const div = document.getElementById('planListDiv'); div.innerHTML = ''; let todaysPlans = appData.plans.filter(p => p.date === todayStr);
             if(todaysPlans.length === 0) return div.innerHTML = '<p style="color:grey;text-align:center;">No tasks planned for today.</p>';
@@ -1165,6 +1188,7 @@
                             <option value="Progress" ${p.status === 'Progress' ? 'selected' : ''}>In Progress</option>
                             <option value="Completed" ${p.status === 'Completed' ? 'selected' : ''}>Completed</option>
                         </select>
+                        <button class="btn" style="width:auto; padding:5px 8px; font-size:0.8rem; background:#007BFF; margin-right:2px;" onclick="editPlan(${p.id})"><i class="fas fa-edit"></i></button>
                         <button class="delete-btn" onclick="deletePlan(${p.id})"><i class="fas fa-trash"></i></button>
                     </div>
                 </div>`;
