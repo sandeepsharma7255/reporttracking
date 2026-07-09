@@ -170,8 +170,7 @@
             <li class="nav-item active" onclick="switchTab('dashboard')"><i class="fas fa-tachometer-alt"></i> Dashboard</li>
             <li class="nav-item" onclick="switchTab('planner')"><i class="fas fa-tasks"></i> Daily Plan</li>
             <li class="nav-item" onclick="switchTab('reports')"><i class="fas fa-file-signature"></i> Visit Page <span style="background:var(--danger);color:white;font-size:0.6rem;padding:2px 5px;border-radius:10px;margin-left:auto;">AI</span></li>
-            <li class="nav-item" onclick="switchTab('rapido')"><i class="fas fa-route"></i> Travel Logs</li>
-            <li class="nav-item" onclick="switchTab('staff')"><i class="fas fa-users-cog"></i> Staff & Vendors</li>
+
             <li class="nav-item" onclick="switchTab('attendance')"><i class="fas fa-map-marker-alt"></i> Attendance <span style="background:#00E5FF;color:#000;font-size:0.6rem;padding:2px 5px;border-radius:10px;margin-left:auto;font-weight:bold;">GPS</span></li>
             <li class="nav-item" onclick="switchTab('contacts')"><i class="fas fa-address-book"></i> Contacts</li>
             <li class="nav-item" onclick="switchTab('inquiries')"><i class="fas fa-industry"></i> Sales Inquiries</li>
@@ -201,8 +200,6 @@
         <!-- MODULE 1: DASHBOARD -->
         <section id="dashboard" class="module-section active">
             <div class="grid-3">
-                <div class="card"><div class="stat-header"><span>Travel Claims (MTD)</span><i class="fas fa-rupee-sign"></i></div><div class="stat-value" id="dashTravel">₹0</div></div>
-                <div class="card"><div class="stat-header"><span>Active Staff/Vendors</span><i class="fas fa-users"></i></div><div class="stat-value" id="dashStaff" style="color: var(--success);">0</div></div>
                 <div class="card"><div class="stat-header"><span>Days Logged</span><i class="fas fa-calendar-check"></i></div><div class="stat-value" id="dashDuty" style="color: var(--accent-primary);">0</div></div>
             </div>
             
@@ -213,21 +210,12 @@
                 <div class="card"><div class="stat-header"><span>Orders Won</span><i class="fas fa-trophy"></i></div><div class="stat-value" id="dashInqWon" style="color: var(--success);">0</div></div>
             </div>
             
-            <div class="grid-2">
+            <div class="grid-1">
                 <div class="card">
                     <h3><i class="fas fa-clipboard-check"></i> Daily Operations Checklist</h3>
-                    <p style="color:var(--text-muted); font-size:0.8rem; margin-bottom:15px; margin-top:5px;">Ensure tasks are checked for today.</p>
                     <div class="list-item"><span>Today's Plan Created?</span><strong id="chkPlan" style="color:var(--danger)">NO</strong></div>
-                    <div class="list-item"><span>Travel Logs Updated?</span><strong id="chkRapido" style="color:var(--danger)">NO</strong></div>
                     <div class="list-item"><span>Visit Page Logged?</span><strong id="chkReport" style="color:var(--danger)">NO</strong></div>
                     <div class="list-item"><span>GPS Attendance Punched?</span><strong id="chkAttend" style="color:var(--danger)">NO</strong></div>
-                </div>
-                
-                <div class="card">
-                    <h3>📊 Expense Analytics (This Month)</h3>
-                    <div style="position: relative; height: 200px; width: 100%; margin-top: 20px;">
-                        <canvas id="expenseChart"></canvas>
-                    </div>
                 </div>
             </div>
         </section>
@@ -302,54 +290,7 @@
         </section>
 
         <!-- MODULE 4: ADVANCED TRAVEL LOGS -->
-        <section id="rapido" class="module-section">
-            <div class="grid-2">
-                <div class="card">
-                    <h2 style="margin-bottom: 20px;"><i class="fas fa-route"></i> Daily Travel Logger</h2>
-                    <form id="travelForm">
-                        <label>Date</label><input type="date" id="trvDate" class="input-field" required>
-                        <div style="display:flex; gap:10px;">
-                            <div style="flex:1;"><label>From</label><input type="text" id="trvFrom" class="input-field" placeholder="e.g. Office" required></div>
-                            <div style="flex:1;"><label>To</label><input type="text" id="trvTo" class="input-field" placeholder="e.g. Site A" required></div>
-                        </div>
-                        <label>Purpose</label><input type="text" id="trvPurpose" class="input-field" placeholder="e.g. Routine Inspection" required>
-                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                            <div style="flex:1; min-width:100px;"><label>Main Fare (₹)</label><input type="number" id="trvFare" class="input-field" value="0" required></div>
-                            <div style="flex:1; min-width:100px;"><label>Local Taxi (₹)</label><input type="number" id="trvTaxi" class="input-field" value="0" required></div>
-                        </div>
-                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                            <div style="flex:1; min-width:100px;"><label>Food (₹)</label><input type="number" id="trvFood" class="input-field" value="0" required></div>
-                            <div style="flex:1; min-width:100px;"><label>Other Exp (₹)</label><input type="number" id="trvOther" class="input-field" value="0" required></div>
-                        </div>
-                        <button type="submit" class="btn" style="margin-top:10px;">Save Complete Expense</button>
-                    </form>
-                </div>
-                <div class="card">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
-                        <h2><i class="fas fa-history"></i> Travel History</h2>
-                        <button class="btn" style="width:auto; padding:5px 10px; font-size:0.8rem; background:#4caf50;" onclick="exportTravelsExcel()"><i class="fas fa-file-excel"></i> Custom Excel Export</button>
-                    </div>
-                    <div class="table-container" style="max-height: 380px;"><table id="travelTable"></table></div>
-                </div>
-            </div>
-        </section>
 
-        <!-- MODULE 5: STAFF / VENDOR DESK -->
-        <section id="staff" class="module-section">
-            <div class="card">
-                <h2 style="margin-bottom: 15px;"><i class="fas fa-users-cog"></i> Staff & Vendor Log</h2>
-                <form id="staffForm" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 20px;">
-                    <input type="text" id="stfName" class="input-field" placeholder="Name" style="flex:1;" required>
-                    <input type="text" id="stfRole" class="input-field" placeholder="Role / Vendor ID" style="width:150px;" required>
-                    <select id="stfStatus" style="width:auto; flex:1;">
-                        <option value="Present">Present / Active</option><option value="Absent">Absent</option><option value="Completed">Completed</option>
-                    </select>
-                    <input type="number" id="stfWage" class="input-field" placeholder="Daily Wage / Amount (₹)" style="width:180px;" required>
-                    <button type="submit" class="btn" style="width:auto; margin-top:0;">Add Record</button>
-                </form>
-                <div class="table-container"><table id="staffTable"></table></div>
-            </div>
-        </section>
 
         <!-- MODULE 6: GPS ATTENDANCE WITH ACTUAL AREA NAMES -->
         <section id="attendance" class="module-section">
@@ -656,7 +597,7 @@
         // FIRESTORE
         function cleanData(data) { 
             let tDate = data.timerDate || getLocalDateStr(); let tTime = data.totalAppTime || 0; if(tDate !== getLocalDateStr()) { tTime = 0; tDate = getLocalDateStr(); }
-            return { userName: data.userName || currentUser.displayName || "", theme: data.theme || "gold", appPin: data.appPin || "", totalAppTime: tTime, timerDate: tDate, plans: Array.isArray(data.plans) ? data.plans : [], travels: Array.isArray(data.travels) ? data.travels : [], reports: Array.isArray(data.reports) ? data.reports : [], staff: Array.isArray(data.staff) ? data.staff : [], attendance: Array.isArray(data.attendance) ? data.attendance : [], contacts: Array.isArray(data.contacts) ? data.contacts : [], inquiries: Array.isArray(data.inquiries) ? data.inquiries : [] }; 
+            return { userName: data.userName || currentUser.displayName || "", theme: data.theme || "gold", appPin: data.appPin || "", totalAppTime: tTime, timerDate: tDate, plans: Array.isArray(data.plans) ? data.plans : [], reports: Array.isArray(data.reports) ? data.reports : [], attendance: Array.isArray(data.attendance) ? data.attendance : [], contacts: Array.isArray(data.contacts) ? data.contacts : [], inquiries: Array.isArray(data.inquiries) ? data.inquiries : [] }; 
         }
         function loadDataForUser() {
             if (!currentUser) return;
@@ -686,15 +627,7 @@
         function saveSettings() { appData.userName = document.getElementById('profileName').value; autoSave(); }
         function exportBackup() { let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2)); let dlAnchorElem = document.createElement('a'); dlAnchorElem.setAttribute("href", dataStr); dlAnchorElem.setAttribute("download", `CorporateHub_Backup_${todayStr}.json`); dlAnchorElem.click(); showToast("Backup Downloaded Securely!"); }
 
-        // CHART.JS ANALYTICS
-        let expenseChart = null;
-        function updateCharts() {
-            let taxi = 0, food = 0, other = 0, fare = 0; const currentMonth = new Date().getMonth();
-            appData.travels.forEach(t => { if(new Date(t.date).getMonth() === currentMonth) { taxi += parseFloat(t.taxi || 0); food += parseFloat(t.food || 0); other += parseFloat(t.other || 0); fare += parseFloat(t.fare || t.amount || 0); } });
-            const ctx = document.getElementById('expenseChart'); if(!ctx) return;
-            if(expenseChart) expenseChart.destroy();
-            expenseChart = new Chart(ctx.getContext('2d'), { type: 'doughnut', data: { labels: ['Main Fare', 'Local Taxi', 'Food', 'Other'], datasets: [{ data: [fare, taxi, food, other], backgroundColor: ['#00E5FF', '#FFD700', '#00e676', '#ff4d4d'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#A0A0A0', font: {family: 'Inter'} } } }, cutout: '70%' } });
-        }
+
 
         // MONTHLY ATTENDANCE CALENDAR
         function renderCalendar() {
@@ -713,18 +646,15 @@
         }
 
         function updateUI() {
-            let mtdTravel = 0; const currentMonth = new Date().getMonth();
-            appData.travels.forEach(t => { if(new Date(t.date).getMonth() === currentMonth) mtdTravel += parseFloat(t.total || 0); });
-            document.getElementById('dashTravel').innerText = '₹' + mtdTravel; document.getElementById('dashDuty').innerText = appData.attendance.length; document.getElementById('dashStaff').innerText = appData.staff.length;
+            document.getElementById('dashDuty').innerText = appData.attendance.length;
             document.getElementById('dashInqTotal').innerText = appData.inquiries.length;
             document.getElementById('dashInqPending').innerText = appData.inquiries.filter(i => new Date(i.followDate) <= new Date() && i.status !== 'Order Won' && i.status !== 'Order Lost').length;
             document.getElementById('dashInqWon').innerText = appData.inquiries.filter(i => i.status === 'Order Won').length;
             document.getElementById('chkPlan').innerHTML = appData.plans.some(p => p.date === todayStr) ? '<span style="color:var(--success)">YES</span>' : '<span style="color:var(--danger)">NO</span>';
-            document.getElementById('chkRapido').innerHTML = appData.travels.some(t => t.date === todayStr) ? '<span style="color:var(--success)">YES</span>' : '<span style="color:var(--danger)">NO</span>';
             document.getElementById('chkReport').innerHTML = appData.reports.some(r => r.date === todayStr) ? '<span style="color:var(--success)">YES</span>' : '<span style="color:var(--danger)">NO</span>';
             document.getElementById('chkAttend').innerHTML = appData.attendance.some(a => a.date === todayStr) ? '<span style="color:var(--success)">YES</span>' : '<span style="color:var(--danger)">NO</span>';
             document.getElementById('welcomeText').innerHTML = `Corporate Hub: ${appData.userName || 'Agent'}`;
-            renderPlans(); renderTravels(); renderReportsList(); renderStaff(); renderAttendance(); renderContacts(); renderInquiries(); updateCharts(); renderCalendar();
+            renderPlans(); renderReportsList(); renderAttendance(); renderContacts(); renderInquiries(); renderCalendar();
         }
 
         // CRM CONTACTS & INQUIRIES
@@ -1091,81 +1021,6 @@
                 btn.classList.remove('listening');
             }
         }
-
-        // TRAVEL LOGS
-        document.getElementById('travelForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const fare = parseFloat(document.getElementById('trvFare').value) || 0;
-            const taxi = parseFloat(document.getElementById('trvTaxi').value) || 0;
-            const food = parseFloat(document.getElementById('trvFood').value) || 0;
-            const other = parseFloat(document.getElementById('trvOther').value) || 0;
-            const total = fare + taxi + food + other;
-
-            appData.travels.push({
-                id: Date.now(),
-                date: document.getElementById('trvDate').value,
-                from: document.getElementById('trvFrom').value,
-                to: document.getElementById('trvTo').value,
-                purpose: document.getElementById('trvPurpose').value,
-                fare, taxi, food, other, total
-            });
-            this.reset();
-            document.getElementById('trvDate').value = todayStr;
-            autoSave();
-        });
-
-        function renderTravels() {
-            const table = document.getElementById('travelTable');
-            table.innerHTML = `<tr><th>Date</th><th>Route</th><th>Purpose</th><th>Total (₹)</th><th>Action</th></tr>`;
-            if(appData.travels.length === 0) return table.innerHTML += '<tr><td colspan="5" style="text-align:center;">No records</td></tr>';
-            
-            [...appData.travels].sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(t => {
-                table.innerHTML += `
-                <tr>
-                    <td>${t.date}</td>
-                    <td>${t.from} &rarr; ${t.to}</td>
-                    <td>${t.purpose}</td>
-                    <td style="color:var(--accent-primary); font-weight:bold;">₹${t.total}</td>
-                    <td><button class="delete-btn" onclick="deleteTravel(${t.id})"><i class="fas fa-trash"></i></button></td>
-                </tr>`;
-            });
-        }
-        function deleteTravel(id) { appData.travels = appData.travels.filter(t => t.id !== id); autoSave(); }
-        function exportTravelsExcel() { alert("Travel Export Feature Coming Soon"); }
-
-        // STAFF / VENDOR
-        document.getElementById('staffForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            appData.staff.push({
-                id: Date.now(),
-                name: document.getElementById('stfName').value,
-                role: document.getElementById('stfRole').value,
-                status: document.getElementById('stfStatus').value,
-                wage: parseFloat(document.getElementById('stfWage').value) || 0,
-                dateAdded: todayStr
-            });
-            this.reset();
-            autoSave();
-        });
-
-        function renderStaff() {
-            const table = document.getElementById('staffTable');
-            table.innerHTML = `<tr><th>Name</th><th>Role</th><th>Status</th><th>Wage (₹)</th><th>Action</th></tr>`;
-            if(appData.staff.length === 0) return table.innerHTML += '<tr><td colspan="5" style="text-align:center;">No staff logged</td></tr>';
-            
-            appData.staff.forEach(s => {
-                let col = s.status === 'Present' ? 'var(--success)' : (s.status === 'Absent' ? 'var(--danger)' : 'var(--text-muted)');
-                table.innerHTML += `
-                <tr>
-                    <td style="font-weight:bold;">${s.name}</td>
-                    <td>${s.role}</td>
-                    <td style="color:${col}; font-weight:bold;">${s.status}</td>
-                    <td>₹${s.wage}</td>
-                    <td><button class="delete-btn" onclick="deleteStaff(${s.id})"><i class="fas fa-trash"></i></button></td>
-                </tr>`;
-            });
-        }
-        function deleteStaff(id) { appData.staff = appData.staff.filter(s => s.id !== id); autoSave(); }
 
         // ATTENDANCE
         function punchIn() {
