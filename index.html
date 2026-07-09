@@ -559,7 +559,7 @@
             setTimeout(() => btn.innerHTML = oldHtml, 2000);
         }
         
-        document.getElementById('trvDate').value = todayStr; document.getElementById('repDate').value = todayStr; document.getElementById('repTime').value = new Date().toTimeString().slice(0,5);
+        document.getElementById('repDate').value = todayStr; document.getElementById('repTime').value = new Date().toTimeString().slice(0,5);
 
         function format12Hour(time24) {
             if(!time24 || time24 === '-') return "-";
