@@ -328,12 +328,15 @@
                     <h2><i class="fas fa-file-invoice"></i> Master Report Generator</h2>
                     <p style="color:var(--text-muted); font-size:0.85rem; margin:15px 0;">Generate A to Z reports (Attendance, Visits, Plans, Inquiries & Contacts).</p>
                     
-                    <div style="display:flex; gap:10px; margin-bottom:15px;">
-                        <select id="masterReportDays" class="input-field" style="flex:1; margin-bottom:0;">
-                            <option value="1">Today (Daily Report)</option>
-                            <option value="7">Last 7 Days (Weekly)</option>
-                            <option value="30">Last 30 Days (Monthly)</option>
-                        </select>
+                    <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap; align-items:flex-end;">
+                        <div style="flex:1; min-width:120px;">
+                            <label style="font-size:0.8rem;">From Date</label>
+                            <input type="date" id="masterDateFrom" class="input-field" style="margin-bottom:0;" required>
+                        </div>
+                        <div style="flex:1; min-width:120px;">
+                            <label style="font-size:0.8rem;">To Date</label>
+                            <input type="date" id="masterDateTo" class="input-field" style="margin-bottom:0;" required>
+                        </div>
                         <button class="btn" style="width:auto; margin-top:0;" onclick="generateMasterReport()"><i class="fas fa-magic"></i> Generate</button>
                     </div>
 
@@ -679,6 +682,8 @@
         }
         
         document.getElementById('repDate').value = todayStr; document.getElementById('repTime').value = new Date().toTimeString().slice(0,5);
+        document.getElementById('masterDateFrom').value = todayStr;
+        document.getElementById('masterDateTo').value = todayStr;
 
         function format12Hour(time24) {
             if(!time24 || time24 === '-') return "-";
@@ -1309,17 +1314,18 @@
         }
         function deleteReport(id) { appData.reports = appData.reports.filter(r => r.id !== id); autoSave(); renderReportsList(); updateUI(); }
 
-        function getFilteredData(days) {
-            const dateLimit = new Date();
-            dateLimit.setDate(dateLimit.getDate() - days);
+        function getFilteredData(fromDateStr, toDateStr) {
+            const start = new Date(fromDateStr);
+            start.setHours(0,0,0,0);
+            const end = new Date(toDateStr);
+            end.setHours(23,59,59,999);
             
             // Filter all data arrays
-            const reports = appData.reports.filter(r => new Date(r.date) >= dateLimit);
-            const plans = appData.plans.filter(p => new Date(p.date) >= dateLimit);
-            const attendance = appData.attendance.filter(a => new Date(a.date) >= dateLimit);
-            const inquiries = appData.inquiries.filter(i => new Date(i.date) >= dateLimit);
-            // Contacts don't have a date field naturally, but we can filter by ID (Date.now())
-            const contacts = appData.contacts.filter(c => new Date(c.id) >= dateLimit);
+            const reports = appData.reports.filter(r => new Date(r.date) >= start && new Date(r.date) <= end);
+            const plans = appData.plans.filter(p => new Date(p.date) >= start && new Date(p.date) <= end);
+            const attendance = appData.attendance.filter(a => new Date(a.date) >= start && new Date(a.date) <= end);
+            const inquiries = appData.inquiries.filter(i => new Date(i.date) >= start && new Date(i.date) <= end);
+            const contacts = appData.contacts.filter(c => new Date(c.id) >= start && new Date(c.id) <= end);
 
             return { reports, plans, attendance, inquiries, contacts };
         }
@@ -1327,10 +1333,13 @@
         let currentMasterText = "";
 
         function generateMasterReport() {
-            const days = parseInt(document.getElementById('masterReportDays').value);
-            const data = getFilteredData(days);
+            const fromDateStr = document.getElementById('masterDateFrom').value;
+            const toDateStr = document.getElementById('masterDateTo').value;
+            if(!fromDateStr || !toDateStr) return alert("Please select both From and To dates.");
             
-            const title = `A-Z Master Report (${days == 1 ? 'Daily' : days == 7 ? 'Weekly' : 'Monthly'})`;
+            const data = getFilteredData(fromDateStr, toDateStr);
+            
+            const title = `A-Z Master Report (${fromDateStr} to ${toDateStr})`;
             const dateStr = new Date().toLocaleDateString();
 
             // 1. Generate HTML for PDF
@@ -1427,10 +1436,11 @@
         function exportMasterPDF() {
             const element = document.getElementById('pdfExportArea');
             if(!element.innerHTML.trim()) return alert("Please generate a report first!");
-            const days = parseInt(document.getElementById('masterReportDays').value);
+            const fromDateStr = document.getElementById('masterDateFrom').value;
+            const toDateStr = document.getElementById('masterDateTo').value;
             const opt = {
                 margin:       0.5,
-                filename:     `Master_Report_${days}Days.pdf`,
+                filename:     `Master_Report_${fromDateStr}_to_${toDateStr}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2 },
                 jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
@@ -1440,8 +1450,10 @@
         }
 
         function exportMasterExcel() {
-            const days = parseInt(document.getElementById('masterReportDays').value);
-            const data = getFilteredData(days);
+            const fromDateStr = document.getElementById('masterDateFrom').value;
+            const toDateStr = document.getElementById('masterDateTo').value;
+            if(!fromDateStr || !toDateStr) return alert("Please select both From and To dates.");
+            const data = getFilteredData(fromDateStr, toDateStr);
             
             var wb = XLSX.utils.book_new();
 
@@ -1481,7 +1493,7 @@
 
             if(wb.SheetNames.length === 0) return alert("No data to export for this timeframe.");
             
-            XLSX.writeFile(wb, `Master_Report_${days}Days.xlsx`);
+            XLSX.writeFile(wb, `Master_Report_${fromDateStr}_to_${toDateStr}.xlsx`);
             showToast("Generating Excel file...");
         }
 
