@@ -170,7 +170,7 @@
             <li class="nav-item active" onclick="switchTab('dashboard')"><i class="fas fa-tachometer-alt"></i> Dashboard</li>
             <li class="nav-item" onclick="switchTab('planner')"><i class="fas fa-tasks"></i> Daily Plan</li>
             <li class="nav-item" onclick="switchTab('reports')"><i class="fas fa-file-signature"></i> Daily Reports <span style="background:var(--danger);color:white;font-size:0.6rem;padding:2px 5px;border-radius:10px;margin-left:auto;">AI</span></li>
-            <li class="nav-item" onclick="switchTab('rapido')"><i class="fas fa-route"></i> Travel Logs</li>
+            <li class="nav-item" onclick="switchTab('rapido')"><i class="fas fa-route"></i> Visit Page</li>
             <li class="nav-item" onclick="switchTab('staff')"><i class="fas fa-users-cog"></i> Staff & Vendors</li>
             <li class="nav-item" onclick="switchTab('attendance')"><i class="fas fa-map-marker-alt"></i> Attendance <span style="background:#00E5FF;color:#000;font-size:0.6rem;padding:2px 5px;border-radius:10px;margin-left:auto;font-weight:bold;">GPS</span></li>
             <li class="nav-item" onclick="switchTab('settings')"><i class="fas fa-cog"></i> Settings</li>
@@ -209,7 +209,7 @@
                     <h3><i class="fas fa-clipboard-check"></i> Daily Operations Checklist</h3>
                     <p style="color:var(--text-muted); font-size:0.8rem; margin-bottom:15px; margin-top:5px;">Ensure tasks are checked for today.</p>
                     <div class="list-item"><span>Today's Plan Created?</span><strong id="chkPlan" style="color:var(--danger)">NO</strong></div>
-                    <div class="list-item"><span>Travel Logs Updated?</span><strong id="chkRapido" style="color:var(--danger)">NO</strong></div>
+                    <div class="list-item"><span>Visit Page Updated?</span><strong id="chkRapido" style="color:var(--danger)">NO</strong></div>
                     <div class="list-item"><span>Daily Report Logged?</span><strong id="chkReport" style="color:var(--danger)">NO</strong></div>
                     <div class="list-item"><span>GPS Attendance Punched?</span><strong id="chkAttend" style="color:var(--danger)">NO</strong></div>
                 </div>
@@ -290,7 +290,7 @@
         <section id="rapido" class="module-section">
             <div class="grid-2">
                 <div class="card">
-                    <h2 style="margin-bottom: 20px;"><i class="fas fa-route"></i> Daily Travel Logger</h2>
+                    <h2 style="margin-bottom: 20px;"><i class="fas fa-route"></i> Visit Page</h2>
                     <form id="travelForm">
                         <label>Date</label><input type="date" id="trvDate" class="input-field" required>
                         <div style="display:flex; gap:10px;">
@@ -299,8 +299,8 @@
                         </div>
                         <label>Purpose</label><input type="text" id="trvPurpose" class="input-field" placeholder="e.g. Routine Inspection" required>
                         <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                            <div style="flex:1; min-width:100px;"><label>Main Fare (₹)</label><input type="number" id="trvFare" class="input-field" value="0" required></div>
-                            <div style="flex:1; min-width:100px;"><label>Local Taxi (₹)</label><input type="number" id="trvTaxi" class="input-field" value="0" required></div>
+                            <div style="flex:1; min-width:100px;"><label>Going Fare (aane ka) ₹</label><input type="number" id="trvFare" class="input-field" value="0" required></div>
+                            <div style="flex:1; min-width:100px;"><label>Return Fare (jane ka) ₹</label><input type="number" id="trvTaxi" class="input-field" value="0" required></div>
                         </div>
                         <div style="display:flex; gap:10px; flex-wrap:wrap;">
                             <div style="flex:1; min-width:100px;"><label>Food (₹)</label><input type="number" id="trvFood" class="input-field" value="0" required></div>
