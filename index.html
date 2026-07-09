@@ -399,10 +399,7 @@
                     <h2 style="margin-bottom: 15px;"><i class="fas fa-building"></i> Add New Contact</h2>
                     <form id="contactForm">
                         <label>Company Name</label><input type="text" id="cntCompany" class="input-field" placeholder="e.g. Reliance Industries" required>
-                        <div style="display:flex; gap:10px;">
-                            <div style="flex:1;"><label>City</label><input type="text" id="cntCity" class="input-field" placeholder="e.g. Mumbai" required></div>
-                            <div style="flex:1;"><label>State</label><input type="text" id="cntState" class="input-field" placeholder="e.g. Maharashtra" required></div>
-                        </div>
+
                         <label>Full Address</label><input type="text" id="cntAddress" class="input-field" placeholder="e.g. Nariman Point">
                         
                         <h3 style="color:var(--accent-primary); margin:15px 0 10px 0;"><i class="fas fa-user"></i> Key Person Details</h3>
@@ -736,8 +733,6 @@
             const contact = {
                 id: Date.now(),
                 company: document.getElementById('cntCompany').value,
-                city: document.getElementById('cntCity').value,
-                state: document.getElementById('cntState').value,
                 address: document.getElementById('cntAddress').value,
                 name: document.getElementById('cntName').value,
                 desig: document.getElementById('cntDesig').value,
@@ -768,7 +763,7 @@
                             <button class="delete-btn" onclick="deleteContact(${c.id})"><i class="fas fa-trash"></i></button>
                         </div>
                         <p style="font-size:0.85rem; color:var(--text-main); margin-bottom:5px;"><i class="fas fa-user-tie"></i> ${c.name} (${c.desig})</p>
-                        <p style="font-size:0.75rem; color:var(--text-muted);"><i class="fas fa-map-marker-alt"></i> ${c.city}, ${c.state} | Floor: ${c.floor}</p>
+                        ${c.address || c.floor ? `<p style="font-size:0.75rem; color:var(--text-muted);"><i class="fas fa-map-marker-alt"></i> ${c.address ? c.address : ''}${c.address && c.floor ? ' | ' : ''}${c.floor ? 'Floor: ' + c.floor : ''}</p>` : ''}
                         <p style="font-size:0.75rem; color:var(--text-muted); margin-top:3px;"><i class="fas fa-phone"></i> ${c.mobile} | <i class="fas fa-envelope"></i> ${c.email}</p>
                     </div>`;
                 }
