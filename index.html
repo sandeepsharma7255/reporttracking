@@ -298,6 +298,7 @@
                         <div class="ai-textarea-wrapper">
                             <textarea id="repText" placeholder="Start typing or tap mic for dictation..." required></textarea>
                             <div class="ai-tools">
+                                <button type="button" class="icon-btn" title="AI Enhance (Grammar & Summary)" onclick="enhanceTextWithAI('repText', this)"><i class="fas fa-magic"></i></button>
                                 <button type="button" class="icon-btn" title="Translate to English" onclick="magicRewrite('en')">EN</button>
                                 <button type="button" class="icon-btn" title="Translate to Hindi" onclick="magicRewrite('hi')">HI</button>
                                 <button type="button" class="icon-btn" id="micReportBtn" title="Speak" onclick="startReportVoice()"><i class="fas fa-microphone"></i></button>
@@ -428,24 +429,40 @@
                             </div>
                         </div>
 
-                        <h3 style="color:var(--accent-primary); margin:15px 0 10px 0;"><i class="fas fa-bolt"></i> Technical Specs</h3>
-                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                            <div style="flex:1; min-width:120px;">
-                                <label>Transformer Type</label>
-                                <select id="inqType" class="input-field">
-                                    <option value="Power Transformer">Power Transformer</option><option value="Distribution Transformer">Distribution Transformer</option><option value="Dry Type">Dry Type</option><option value="Special Purpose">Special Purpose</option>
-                                </select>
+                        <h3 style="color:var(--accent-primary); margin:15px 0 10px 0;"><i class="fas fa-bolt"></i> Transformers</h3>
+                        <div id="inqTransformersList" style="margin-bottom:15px;"></div>
+                        <div style="background:var(--card-bg); border:1px solid var(--card-border); padding:10px; border-radius:5px; margin-bottom:15px;">
+                            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+                                <div style="flex:1; min-width:120px;">
+                                    <label>Type</label>
+                                    <select id="tfType" class="input-field">
+                                        <option value="Power Transformer">Power Transformer</option>
+                                        <option value="Distribution Transformer (DT)">Distribution Transformer (DT)</option>
+                                        <option value="Reactor">Reactor</option>
+                                        <option value="HVDC Transformer">HVDC Transformer</option>
+                                    </select>
+                                </div>
+                                <div style="flex:1; min-width:100px;">
+                                    <label>Rating</label>
+                                    <div style="display:flex;"><input type="number" id="tfRating" class="input-field" style="border-radius:5px 0 0 5px;" placeholder="e.g. 500"><select id="tfRatingUnit" class="input-field" style="border-radius:0 5px 5px 0; width:70px; border-left:none;"><option value="kVA">kVA</option><option value="MVA">MVA</option></select></div>
+                                </div>
+                                <div style="flex:1; min-width:80px;"><label>Qty</label><input type="number" id="tfQty" class="input-field" value="1"></div>
                             </div>
-                            <div style="flex:1; min-width:80px;"><label>kVA Rating</label><input type="text" id="inqKva" class="input-field" placeholder="e.g. 500 kVA" required></div>
-                            <div style="flex:1; min-width:80px;"><label>Quantity</label><input type="number" id="inqQty" class="input-field" value="1" required></div>
-                        </div>
-                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                            <div style="flex:1; min-width:80px;"><label>Pri Volts</label><input type="text" id="inqPriVolts" class="input-field" placeholder="e.g. 11kV"></div>
-                            <div style="flex:1; min-width:80px;"><label>Sec Volts</label><input type="text" id="inqSecVolts" class="input-field" placeholder="e.g. 433V"></div>
-                            <div style="flex:1; min-width:80px;">
-                                <label>Phase</label>
-                                <select id="inqPhase" class="input-field"><option value="3 Phase">3 Phase</option><option value="1 Phase">1 Phase</option></select>
+                            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+                                <div style="flex:1; min-width:100px;">
+                                    <label>Pri Volts</label>
+                                    <div style="display:flex;"><input type="number" id="tfPri" class="input-field" style="border-radius:5px 0 0 5px;" placeholder="11"><select id="tfPriUnit" class="input-field" style="border-radius:0 5px 5px 0; width:65px; border-left:none;"><option value="kV">kV</option><option value="V">V</option></select></div>
+                                </div>
+                                <div style="flex:1; min-width:100px;">
+                                    <label>Sec Volts</label>
+                                    <div style="display:flex;"><input type="number" id="tfSec" class="input-field" style="border-radius:5px 0 0 5px;" placeholder="433"><select id="tfSecUnit" class="input-field" style="border-radius:0 5px 5px 0; width:65px; border-left:none;"><option value="V">V</option><option value="kV">kV</option></select></div>
+                                </div>
+                                <div style="flex:1; min-width:80px;">
+                                    <label>Phase</label>
+                                    <select id="tfPhase" class="input-field"><option value="3 Phase">3 Phase</option><option value="1 Phase">1 Phase</option></select>
+                                </div>
                             </div>
+                            <button type="button" class="btn" style="background:#333;" onclick="addTransformerToInquiry()">+ Add This Transformer</button>
                         </div>
 
                         <h3 style="color:var(--accent-primary); margin:15px 0 10px 0;"><i class="fas fa-handshake"></i> Commercial Status</h3>
@@ -464,9 +481,14 @@
                                     <option value="Order Lost">Order Lost</option>
                                 </select>
                             </div>
-                            <div style="flex:1; min-width:120px;"><label>Next Follow-up Date</label><input type="date" id="inqFollowDate" class="input-field"></div>
                         </div>
-                        <label>Remarks / Notes</label><input type="text" id="inqRemarks" class="input-field" placeholder="Competitor info, negotiation notes, etc.">
+                        <label>Remarks / Notes</label>
+                        <div class="ai-textarea-wrapper">
+                            <textarea id="inqRemarks" placeholder="Competitor info, negotiation notes, etc."></textarea>
+                            <div class="ai-tools">
+                                <button type="button" class="icon-btn" title="AI Enhance (Grammar & Summary)" onclick="enhanceTextWithAI('inqRemarks', this)"><i class="fas fa-magic"></i></button>
+                            </div>
+                        </div>
 
                         <button type="submit" class="btn" style="margin-top:10px;">Save Inquiry</button>
                     </form>
@@ -547,7 +569,28 @@
             ocean: { p: '#00b0ff', a: '#0091ea', b1: '#00111a', b2: '#001f2e' }, hacker: { p: '#39ff14', a: '#00e676', b1: '#000000', b2: '#050505' }
         };
 
-        // UTILITIES
+        async function enhanceTextWithAI(inputId, btn) {
+            const inputEl = document.getElementById(inputId);
+            if(!inputEl.value.trim()) return alert('Please write some text first!');
+            const oldHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enhancing...';
+            btn.disabled = true;
+            try {
+                const systemPrompt = "You are a professional corporate assistant. Fix all grammar, translate Hinglish/Hindi to professional English, and summarize the following notes clearly and concisely. ONLY output the final professional text, nothing else.";
+                const translated = await callSandeepAI(systemPrompt, inputEl.value);
+                if(translated) {
+                    inputEl.value = translated;
+                    showToast("Text Enhanced!");
+                } else {
+                    alert("AI Enhancement Failed. Please try again.");
+                }
+            } catch(e) {
+                alert("AI Error: " + e.message);
+            } finally {
+                btn.innerHTML = oldHtml;
+                btn.disabled = false;
+            }
+        }
         function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('active'); }
         function showToast(msg) { const t = document.getElementById('toast'); document.getElementById('toastMsg').innerText = msg; t.style.bottom = '30px'; setTimeout(() => t.style.bottom = '-60px', 3000); }
         function switchTab(id) { document.querySelectorAll('.module-section, .nav-item').forEach(e => e.classList.remove('active')); document.getElementById(id).classList.add('active'); event.currentTarget.classList.add('active'); if(window.innerWidth <= 768) toggleSidebar(); }
@@ -631,7 +674,7 @@
         // FIRESTORE
         function cleanData(data) { 
             let tDate = data.timerDate || getLocalDateStr(); let tTime = data.totalAppTime || 0; if(tDate !== getLocalDateStr()) { tTime = 0; tDate = getLocalDateStr(); }
-            return { userName: data.userName || currentUser.displayName || "", theme: data.theme || "gold", appPin: data.appPin || "", totalAppTime: tTime, timerDate: tDate, plans: Array.isArray(data.plans) ? data.plans : [], reports: Array.isArray(data.reports) ? data.reports : [], attendance: Array.isArray(data.attendance) ? data.attendance : [], contacts: Array.isArray(data.contacts) ? data.contacts : [], inquiries: Array.isArray(data.inquiries) ? data.inquiries : [] }; 
+            return { geminiApiKey: data.geminiApiKey || "", userName: data.userName || currentUser.displayName || "", theme: data.theme || "gold", appPin: data.appPin || "", totalAppTime: tTime, timerDate: tDate, plans: Array.isArray(data.plans) ? data.plans : [], reports: Array.isArray(data.reports) ? data.reports : [], attendance: Array.isArray(data.attendance) ? data.attendance : [], contacts: Array.isArray(data.contacts) ? data.contacts : [], inquiries: Array.isArray(data.inquiries) ? data.inquiries : [] }; 
         }
         function loadDataForUser() {
             if (!currentUser) return;
@@ -668,8 +711,9 @@
         function updateCharts() {
             let won = 0, lost = 0, pending = 0;
             appData.inquiries.forEach(i => {
-                if(i.status === 'Order Won') won++;
-                else if(i.status === 'Order Lost') lost++;
+                const s = (i.status || '').toLowerCase();
+                if(s.includes('won')) won++;
+                else if(s.includes('lost')) lost++;
                 else pending++;
             });
             const ctx = document.getElementById('salesChart'); if(!ctx || typeof Chart === 'undefined') return;
@@ -715,7 +759,7 @@
             document.getElementById('dashVisits').innerText = appData.reports.length;
             document.getElementById('dashContacts').innerText = appData.contacts.length;
             document.getElementById('dashInqTotal').innerText = appData.inquiries.length;
-            document.getElementById('dashInqPending').innerText = appData.inquiries.filter(i => new Date(i.followDate) <= new Date() && i.status !== 'Order Won' && i.status !== 'Order Lost').length;
+            document.getElementById('dashInqPending').innerText = appData.inquiries.filter(i => !i.status.toLowerCase().includes('won') && !i.status.toLowerCase().includes('lost')).length;
             document.getElementById('dashInqWon').innerText = appData.inquiries.filter(i => i.status === 'Order Won').length;
             document.getElementById('chkPlan').innerHTML = appData.plans.some(p => p.date === todayStr) ? '<span style="color:var(--success)">YES</span>' : '<span style="color:var(--danger)">NO</span>';
             document.getElementById('chkReport').innerHTML = appData.reports.some(r => r.date === todayStr) ? '<span style="color:var(--success)">YES</span>' : '<span style="color:var(--danger)">NO</span>';
@@ -796,33 +840,83 @@
             document.getElementById('contactForm').scrollIntoView({behavior: "smooth"});
         }
 
+        let currentInquiryTransformers = [];
+        
+        function renderInqTransformersList() {
+            const div = document.getElementById('inqTransformersList');
+            if(currentInquiryTransformers.length === 0) {
+                div.innerHTML = '<p style="font-size:0.8rem; color:var(--text-muted); font-style:italic;">No transformers added yet.</p>';
+                return;
+            }
+            let html = '';
+            currentInquiryTransformers.forEach((tf, index) => {
+                html += `<div style="background:rgba(255,255,255,0.05); padding:8px; border-radius:5px; margin-bottom:5px; display:flex; justify-content:space-between; align-items:center;">
+                    <div style="font-size:0.8rem;">
+                        <span style="color:var(--accent-primary); font-weight:bold;">${tf.qty}x ${tf.type}</span> | ${tf.rating} ${tf.ratingUnit} | ${tf.pri} ${tf.priUnit} / ${tf.sec} ${tf.secUnit} | ${tf.phase}
+                    </div>
+                    <button type="button" class="delete-btn" style="padding:2px 5px;" onclick="removeInqTransformer(${index})"><i class="fas fa-times"></i></button>
+                </div>`;
+            });
+            div.innerHTML = html;
+        }
+
+        function addTransformerToInquiry() {
+            const type = document.getElementById('tfType').value;
+            const rating = document.getElementById('tfRating').value;
+            if(!rating) return alert("Please enter rating value!");
+            currentInquiryTransformers.push({
+                type: type, rating: rating, ratingUnit: document.getElementById('tfRatingUnit').value,
+                qty: document.getElementById('tfQty').value,
+                pri: document.getElementById('tfPri').value || 'N/A', priUnit: document.getElementById('tfPriUnit').value,
+                sec: document.getElementById('tfSec').value || 'N/A', secUnit: document.getElementById('tfSecUnit').value,
+                phase: document.getElementById('tfPhase').value
+            });
+            document.getElementById('tfRating').value = '';
+            document.getElementById('tfPri').value = '';
+            document.getElementById('tfSec').value = '';
+            document.getElementById('tfQty').value = '1';
+            renderInqTransformersList();
+        }
+
+        function removeInqTransformer(idx) { currentInquiryTransformers.splice(idx, 1); renderInqTransformersList(); }
+
         document.getElementById('inqForm').addEventListener('submit', function(e) {
             e.preventDefault();
+            if(currentInquiryTransformers.length === 0) return alert('Please add at least one transformer!');
+            
             const inq = {
                 id: Date.now(),
                 date: document.getElementById('inqDate').value,
                 company: document.getElementById('inqCompany').value,
                 project: document.getElementById('inqProject').value,
                 source: document.getElementById('inqSource').value,
-                type: document.getElementById('inqType').value,
-                kva: document.getElementById('inqKva').value,
-                qty: document.getElementById('inqQty').value,
-                priVolts: document.getElementById('inqPriVolts').value,
-                secVolts: document.getElementById('inqSecVolts').value,
-                phase: document.getElementById('inqPhase').value,
                 delivery: document.getElementById('inqDelivery').value,
                 budget: document.getElementById('inqBudget').value,
                 status: document.getElementById('inqStatus').value,
-                followDate: document.getElementById('inqFollowDate').value,
-                remarks: document.getElementById('inqRemarks').value
+                remarks: document.getElementById('inqRemarks').value,
+                transformers: [...currentInquiryTransformers]
             };
             appData.inquiries.push(inq);
             this.reset();
+            currentInquiryTransformers = [];
+            renderInqTransformersList();
             document.getElementById('inqDate').value = todayStr;
             autoSave();
             renderInquiries();
             updateUI();
         });
+
+        function editInquiryStatus(id) {
+            const inq = appData.inquiries.find(x => x.id === id);
+            if(!inq) return;
+            const newStatus = prompt("Update Status (e.g., Quotation Sent, Order Won, Order Lost, Negotiation):", inq.status);
+            if(newStatus !== null && newStatus.trim() !== '') {
+                inq.status = newStatus.trim();
+                autoSave();
+                renderInquiries();
+                updateUI();
+            }
+        }
 
         function renderInquiries() {
             const div = document.getElementById('inqListDiv'); div.innerHTML = '';
@@ -830,18 +924,29 @@
             let html = '';
             [...appData.inquiries].sort((a,b) => b.id - a.id).forEach(i => {
                 if(i.company.toLowerCase().includes(search) || i.project.toLowerCase().includes(search)) {
-                    let stColor = i.status === 'Order Won' ? 'var(--success)' : (i.status === 'Order Lost' ? 'var(--danger)' : 'var(--warning)');
+                    let stColor = i.status.toLowerCase().includes('won') ? 'var(--success)' : (i.status.toLowerCase().includes('lost') ? 'var(--danger)' : 'var(--warning)');
+                    
+                    let tfHtml = '';
+                    if(i.transformers && i.transformers.length > 0) {
+                        i.transformers.forEach(tf => {
+                            tfHtml += `<div style="font-size:0.75rem; color:var(--text-main); margin-bottom:2px;"><i class="fas fa-bolt" style="color:var(--accent-primary);"></i> ${tf.qty}x ${tf.type} (${tf.rating} ${tf.ratingUnit}) - ${tf.pri}${tf.priUnit}/${tf.sec}${tf.secUnit} ${tf.phase}</div>`;
+                        });
+                    } else {
+                        tfHtml = `<div style="font-size:0.75rem; color:var(--text-muted);">Legacy Entry: ${i.qty}x ${i.type} (${i.kva})</div>`;
+                    }
+
                     html += `<div class="list-item" style="flex-direction:column; align-items:flex-start;">
                         <div style="display:flex; justify-content:space-between; width:100%; margin-bottom:5px;">
                             <strong style="font-size:0.9rem;"><i class="fas fa-industry"></i> ${i.project}</strong>
-                            <button class="delete-btn" onclick="deleteInq(${i.id})"><i class="fas fa-trash"></i></button>
+                            <div>
+                                <button class="btn" style="width:auto; padding:3px 8px; font-size:0.7rem; background:#007BFF; margin-right:5px;" onclick="editInquiryStatus(${i.id})"><i class="fas fa-edit"></i> Status</button>
+                                <button class="delete-btn" onclick="deleteInq(${i.id})"><i class="fas fa-trash"></i></button>
+                            </div>
                         </div>
                         <p style="font-size:0.8rem; color:var(--accent-primary); margin-bottom:5px;"><b>${i.company}</b></p>
-                        <p style="font-size:0.8rem; color:var(--text-main); margin-bottom:5px;"><i class="fas fa-bolt"></i> ${i.qty}x ${i.kva} ${i.type} (${i.phase})</p>
-                        <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:5px;">Volts: ${i.priVolts} / ${i.secVolts}</p>
+                        ${tfHtml}
                         <div style="display:flex; justify-content:space-between; width:100%; align-items:center; margin-top:5px;">
                             <span style="font-size:0.7rem; color:${stColor}; font-weight:bold;">${i.status}</span>
-                            <span style="font-size:0.7rem; color:var(--text-muted);"><i class="fas fa-calendar"></i> Follow: ${i.followDate || 'N/A'}</span>
                         </div>
                         ${i.remarks ? `<p style="font-size:0.75rem; font-style:italic; margin-top:5px; color:var(--text-muted);">"${i.remarks}"</p>` : ''}
                     </div>`;
