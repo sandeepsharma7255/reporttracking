@@ -536,7 +536,7 @@
         const getLocalDateStr = () => { let d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); };
         const todayStr = getLocalDateStr();
 
-        let appData = { plans: [], travels: [], reports: [], staff: [], attendance: [], userName: '', theme: 'gold', totalAppTime: 0, timerDate: todayStr, appPin: '' };
+        let appData = { plans: [], reports: [], attendance: [], contacts: [], inquiries: [], userName: '', theme: 'gold', totalAppTime: 0, timerDate: todayStr, appPin: '' };
         let enteredPin = "";
 
         const themes = {
@@ -672,7 +672,7 @@
                 else if(i.status === 'Order Lost') lost++;
                 else pending++;
             });
-            const ctx = document.getElementById('salesChart'); if(!ctx) return;
+            const ctx = document.getElementById('salesChart'); if(!ctx || typeof Chart === 'undefined') return;
             if(salesChart) salesChart.destroy();
             salesChart = new Chart(ctx.getContext('2d'), { 
                 type: 'pie', 
