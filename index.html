@@ -268,7 +268,7 @@
                 <form id="planForm" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 20px;">
                     <input type="text" id="planTask" class="input-field" placeholder="What needs to be done today?" style="flex:1; margin-bottom:0;" required>
                     <button type="submit" id="planSubmitBtn" class="btn" style="width:auto; margin-top:0;">Add Task</button>
-                    <button type="button" class="btn" style="width:auto; margin-top:0; background: linear-gradient(45deg, #00E5FF, #00BFFF); color: black;" onclick="aiSuggestTask()"><i class="fas fa-magic"></i> AI</button>
+                    <button type="button" id="planAIBtn" class="btn" style="width:auto; margin-top:0; background: linear-gradient(45deg, #00E5FF, #00BFFF); color: black;" onclick="enhanceTextWithAI('planTask', 'planAIBtn')"><i class="fas fa-magic"></i> ✨ AI Enhance</button>
                 </form>
                 <div id="planListDiv" style="display:flex; flex-direction:column; gap:10px; max-height: 400px; overflow-y: auto;"></div>
             </div>
@@ -1140,13 +1140,7 @@
 
         // DAILY PLAN
         let editPlanId = null;
-        async function aiSuggestTask() {
-            const el = document.getElementById('planTask');
-            el.value = "AI thinking... ⏳";
-            let suggested = await callSandeepAI("You are a corporate assistant. Suggest ONE short daily operational task for a field manager. Just the task.", "Suggest a task.");
-            if(suggested) { el.value = suggested.trim(); showToast("AI Task Suggested."); }
-            else { el.value = ""; }
-        }
+
         document.getElementById('planForm').addEventListener('submit', function(e) { 
             e.preventDefault(); 
             let taskText = document.getElementById('planTask').value;
