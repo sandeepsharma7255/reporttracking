@@ -435,33 +435,81 @@
                             <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
                                 <div style="flex:1; min-width:120px;">
                                     <label>Type</label>
-                                    <select id="tfType" class="input-field">
+                                    <select id="tfType" class="input-field" onchange="toggleTransformerFields()">
                                         <option value="Power Transformer">Power Transformer</option>
                                         <option value="Distribution Transformer (DT)">Distribution Transformer (DT)</option>
                                         <option value="Reactor">Reactor</option>
                                         <option value="HVDC Transformer">HVDC Transformer</option>
+                                        <option value="Special Purpose">Special Purpose</option>
                                     </select>
                                 </div>
-                                <div style="flex:1; min-width:100px;">
-                                    <label>Rating</label>
-                                    <div style="display:flex;"><input type="number" id="tfRating" class="input-field" style="border-radius:5px 0 0 5px;" placeholder="e.g. 500"><select id="tfRatingUnit" class="input-field" style="border-radius:0 5px 5px 0; width:70px; border-left:none;"><option value="kVA">kVA</option><option value="MVA">MVA</option></select></div>
-                                </div>
                                 <div style="flex:1; min-width:80px;"><label>Qty</label><input type="number" id="tfQty" class="input-field" value="1"></div>
-                            </div>
-                            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
-                                <div style="flex:1; min-width:100px;">
-                                    <label>Pri Volts</label>
-                                    <div style="display:flex;"><input type="number" id="tfPri" class="input-field" style="border-radius:5px 0 0 5px;" placeholder="11"><select id="tfPriUnit" class="input-field" style="border-radius:0 5px 5px 0; width:65px; border-left:none;"><option value="kV">kV</option><option value="V">V</option></select></div>
-                                </div>
-                                <div style="flex:1; min-width:100px;">
-                                    <label>Sec Volts</label>
-                                    <div style="display:flex;"><input type="number" id="tfSec" class="input-field" style="border-radius:5px 0 0 5px;" placeholder="433"><select id="tfSecUnit" class="input-field" style="border-radius:0 5px 5px 0; width:65px; border-left:none;"><option value="V">V</option><option value="kV">kV</option></select></div>
-                                </div>
                                 <div style="flex:1; min-width:80px;">
                                     <label>Phase</label>
                                     <select id="tfPhase" class="input-field"><option value="3 Phase">3 Phase</option><option value="1 Phase">1 Phase</option></select>
                                 </div>
                             </div>
+                            
+                            <!-- Power & DT Group -->
+                            <div id="grpPower" class="tf-param-group">
+                                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+                                    <div style="flex:1; min-width:100px;">
+                                        <label>Rating</label>
+                                        <div style="display:flex;"><input type="number" id="tfRating" class="input-field" style="border-radius:5px 0 0 5px;" placeholder="e.g. 500"><select id="tfRatingUnit" class="input-field" style="border-radius:0 5px 5px 0; width:70px; border-left:none;"><option value="kVA">kVA</option><option value="MVA">MVA</option></select></div>
+                                    </div>
+                                    <div style="flex:1; min-width:100px;">
+                                        <label>Pri Volts</label>
+                                        <div style="display:flex;"><input type="number" id="tfPri" class="input-field" style="border-radius:5px 0 0 5px;" placeholder="11"><select id="tfPriUnit" class="input-field" style="border-radius:0 5px 5px 0; width:65px; border-left:none;"><option value="kV">kV</option><option value="V">V</option></select></div>
+                                    </div>
+                                    <div style="flex:1; min-width:100px;">
+                                        <label>Sec Volts</label>
+                                        <div style="display:flex;"><input type="number" id="tfSec" class="input-field" style="border-radius:5px 0 0 5px;" placeholder="433"><select id="tfSecUnit" class="input-field" style="border-radius:0 5px 5px 0; width:65px; border-left:none;"><option value="V">V</option><option value="kV">kV</option></select></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Reactor Group -->
+                            <div id="grpReactor" class="tf-param-group" style="display:none;">
+                                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+                                    <div style="flex:1; min-width:100px;">
+                                        <label>Reactive Rating</label>
+                                        <div style="display:flex;"><input type="number" id="tfReactRating" class="input-field" style="border-radius:5px 0 0 5px;" placeholder="e.g. 50"><select id="tfReactUnit" class="input-field" style="border-radius:0 5px 5px 0; width:80px; border-left:none;"><option value="MVAr">MVAr</option><option value="kVAr">kVAr</option><option value="Ohms">Ohms</option></select></div>
+                                    </div>
+                                    <div style="flex:1; min-width:100px;">
+                                        <label>System Voltage</label>
+                                        <div style="display:flex;"><input type="number" id="tfSysVolt" class="input-field" style="border-radius:5px 0 0 5px;" placeholder="400"><select id="tfSysVoltUnit" class="input-field" style="border-radius:0 5px 5px 0; width:65px; border-left:none;"><option value="kV">kV</option></select></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- HVDC Group -->
+                            <div id="grpHvdc" class="tf-param-group" style="display:none;">
+                                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+                                    <div style="flex:1; min-width:100px;">
+                                        <label>MVA Rating</label>
+                                        <input type="number" id="tfHvdcRating" class="input-field" placeholder="e.g. 300">
+                                    </div>
+                                    <div style="flex:1; min-width:100px;">
+                                        <label>AC Line Volts (kV)</label>
+                                        <input type="number" id="tfHvdcLineVolt" class="input-field" placeholder="e.g. 400">
+                                    </div>
+                                    <div style="flex:1; min-width:100px;">
+                                        <label>Valve Volts (kV)</label>
+                                        <input type="number" id="tfHvdcValveVolt" class="input-field" placeholder="e.g. 250">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Special Purpose Group -->
+                            <div id="grpSpecial" class="tf-param-group" style="display:none;">
+                                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+                                    <div style="flex:1;">
+                                        <label>Custom Specifications / Description</label>
+                                        <input type="text" id="tfSpecialDesc" class="input-field" placeholder="e.g. Earthing Transformer, Furnace, etc.">
+                                    </div>
+                                </div>
+                            </div>
+
                             <button type="button" class="btn" style="background:#333;" onclick="addTransformerToInquiry()">+ Add This Transformer</button>
                         </div>
 
@@ -842,6 +890,19 @@
 
         let currentInquiryTransformers = [];
         
+        function toggleTransformerFields() {
+            const type = document.getElementById('tfType').value;
+            document.getElementById('grpPower').style.display = 'none';
+            document.getElementById('grpReactor').style.display = 'none';
+            document.getElementById('grpHvdc').style.display = 'none';
+            document.getElementById('grpSpecial').style.display = 'none';
+            
+            if (type === 'Reactor') document.getElementById('grpReactor').style.display = 'block';
+            else if (type === 'HVDC Transformer') document.getElementById('grpHvdc').style.display = 'block';
+            else if (type === 'Special Purpose') document.getElementById('grpSpecial').style.display = 'block';
+            else document.getElementById('grpPower').style.display = 'block';
+        }
+
         function renderInqTransformersList() {
             const div = document.getElementById('inqTransformersList');
             if(currentInquiryTransformers.length === 0) {
@@ -850,9 +911,15 @@
             }
             let html = '';
             currentInquiryTransformers.forEach((tf, index) => {
+                let specTxt = '';
+                if (tf.type === 'Reactor') specTxt = `${tf.rating} ${tf.ratingUnit} | Sys: ${tf.sysVolt} ${tf.sysVoltUnit}`;
+                else if (tf.type === 'HVDC Transformer') specTxt = `${tf.rating} ${tf.ratingUnit} | AC: ${tf.lineVolt}kV / Valve: ${tf.valveVolt}kV`;
+                else if (tf.type === 'Special Purpose') specTxt = `Spec: ${tf.desc}`;
+                else specTxt = `${tf.rating} ${tf.ratingUnit} | ${tf.pri} ${tf.priUnit} / ${tf.sec} ${tf.secUnit}`;
+
                 html += `<div style="background:rgba(255,255,255,0.05); padding:8px; border-radius:5px; margin-bottom:5px; display:flex; justify-content:space-between; align-items:center;">
                     <div style="font-size:0.8rem;">
-                        <span style="color:var(--accent-primary); font-weight:bold;">${tf.qty}x ${tf.type}</span> | ${tf.rating} ${tf.ratingUnit} | ${tf.pri} ${tf.priUnit} / ${tf.sec} ${tf.secUnit} | ${tf.phase}
+                        <span style="color:var(--accent-primary); font-weight:bold;">${tf.qty}x ${tf.type}</span> | ${specTxt} ${tf.phase ? ' | ' + tf.phase : ''}
                     </div>
                     <button type="button" class="delete-btn" style="padding:2px 5px;" onclick="removeInqTransformer(${index})"><i class="fas fa-times"></i></button>
                 </div>`;
@@ -862,18 +929,38 @@
 
         function addTransformerToInquiry() {
             const type = document.getElementById('tfType').value;
-            const rating = document.getElementById('tfRating').value;
-            if(!rating) return alert("Please enter rating value!");
-            currentInquiryTransformers.push({
-                type: type, rating: rating, ratingUnit: document.getElementById('tfRatingUnit').value,
-                qty: document.getElementById('tfQty').value,
-                pri: document.getElementById('tfPri').value || 'N/A', priUnit: document.getElementById('tfPriUnit').value,
-                sec: document.getElementById('tfSec').value || 'N/A', secUnit: document.getElementById('tfSecUnit').value,
-                phase: document.getElementById('tfPhase').value
-            });
-            document.getElementById('tfRating').value = '';
-            document.getElementById('tfPri').value = '';
-            document.getElementById('tfSec').value = '';
+            const phase = document.getElementById('tfPhase').value;
+            const qty = document.getElementById('tfQty').value;
+            let tfData = { type, qty, phase };
+
+            if (type === 'Reactor') {
+                tfData.rating = document.getElementById('tfReactRating').value;
+                tfData.ratingUnit = document.getElementById('tfReactUnit').value;
+                tfData.sysVolt = document.getElementById('tfSysVolt').value || 'N/A';
+                tfData.sysVoltUnit = document.getElementById('tfSysVoltUnit').value;
+                if(!tfData.rating) return alert("Please enter Reactive Rating!");
+            } else if (type === 'HVDC Transformer') {
+                tfData.rating = document.getElementById('tfHvdcRating').value;
+                tfData.ratingUnit = 'MVA';
+                tfData.lineVolt = document.getElementById('tfHvdcLineVolt').value || 'N/A';
+                tfData.valveVolt = document.getElementById('tfHvdcValveVolt').value || 'N/A';
+                if(!tfData.rating) return alert("Please enter MVA Rating!");
+            } else if (type === 'Special Purpose') {
+                tfData.desc = document.getElementById('tfSpecialDesc').value;
+                tfData.phase = ''; // Not always applicable
+                if(!tfData.desc) return alert("Please enter custom specifications!");
+            } else {
+                tfData.rating = document.getElementById('tfRating').value;
+                tfData.ratingUnit = document.getElementById('tfRatingUnit').value;
+                tfData.pri = document.getElementById('tfPri').value || 'N/A';
+                tfData.priUnit = document.getElementById('tfPriUnit').value;
+                tfData.sec = document.getElementById('tfSec').value || 'N/A';
+                tfData.secUnit = document.getElementById('tfSecUnit').value;
+                if(!tfData.rating) return alert("Please enter Rating!");
+            }
+
+            currentInquiryTransformers.push(tfData);
+            document.querySelectorAll('#inqForm .tf-param-group input').forEach(inp => inp.value = '');
             document.getElementById('tfQty').value = '1';
             renderInqTransformersList();
         }
@@ -929,7 +1016,13 @@
                     let tfHtml = '';
                     if(i.transformers && i.transformers.length > 0) {
                         i.transformers.forEach(tf => {
-                            tfHtml += `<div style="font-size:0.75rem; color:var(--text-main); margin-bottom:2px;"><i class="fas fa-bolt" style="color:var(--accent-primary);"></i> ${tf.qty}x ${tf.type} (${tf.rating} ${tf.ratingUnit}) - ${tf.pri}${tf.priUnit}/${tf.sec}${tf.secUnit} ${tf.phase}</div>`;
+                            let specTxt = '';
+                            if (tf.type === 'Reactor') specTxt = `${tf.rating}${tf.ratingUnit} - Sys: ${tf.sysVolt}${tf.sysVoltUnit}`;
+                            else if (tf.type === 'HVDC Transformer') specTxt = `${tf.rating}${tf.ratingUnit} - AC: ${tf.lineVolt}kV / Vlv: ${tf.valveVolt}kV`;
+                            else if (tf.type === 'Special Purpose') specTxt = `Spec: ${tf.desc}`;
+                            else specTxt = `${tf.rating}${tf.ratingUnit} - ${tf.pri}${tf.priUnit}/${tf.sec}${tf.secUnit}`;
+
+                            tfHtml += `<div style="font-size:0.75rem; color:var(--text-main); margin-bottom:2px;"><i class="fas fa-bolt" style="color:var(--accent-primary);"></i> ${tf.qty}x ${tf.type} (${specTxt}) ${tf.phase ? tf.phase : ''}</div>`;
                         });
                     } else {
                         tfHtml = `<div style="font-size:0.75rem; color:var(--text-muted);">Legacy Entry: ${i.qty}x ${i.type} (${i.kva})</div>`;
