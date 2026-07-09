@@ -285,9 +285,23 @@
                             <div style="flex:1; min-width:100px;"><label>Going Time</label><input type="time" id="repTime" class="input-field" required></div>
                             <div style="flex:1; min-width:100px;"><label>Return Time</label><input type="time" id="repReturnTime" class="input-field" required></div>
                         </div>
-                        <div style="display:flex; gap:10px;">
-                            <div style="flex:1;"><label>Met With (Name/Client)</label><input type="text" id="repMetName" class="input-field" placeholder="e.g. Mr. Sharma"></div>
-                            <div style="flex:1;"><label>Mobile Number</label><input type="tel" id="repMetPhone" class="input-field" placeholder="e.g. 9876543210" maxlength="10"></div>
+                        <div style="margin-bottom:15px;">
+                            <label>Company Name</label>
+                            <input type="text" id="repCompany" class="input-field" placeholder="e.g. Reliance Industries" required>
+                        </div>
+                        
+                        <h3 style="color:var(--accent-primary); margin:15px 0 10px 0; font-size: 0.9rem;"><i class="fas fa-users"></i> People Met With</h3>
+                        <div id="repPersonsList" style="margin-bottom:15px;"></div>
+                        <div style="background:var(--card-bg); border:1px solid var(--card-border); padding:10px; border-radius:5px; margin-bottom:15px;">
+                            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+                                <div style="flex:1; min-width:120px;"><label>Name</label><input type="text" id="rpName" class="input-field"></div>
+                                <div style="flex:1; min-width:120px;"><label>Designation</label><input type="text" id="rpDesig" class="input-field" placeholder="e.g. Manager"></div>
+                            </div>
+                            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+                                <div style="flex:1; min-width:120px;"><label>Mobile</label><input type="tel" id="rpMobile" class="input-field"></div>
+                                <div style="flex:1; min-width:120px;"><label>Email</label><input type="email" id="rpEmail" class="input-field"></div>
+                            </div>
+                            <button type="button" class="btn" style="background:#333; padding: 5px; font-size:0.8rem;" onclick="addPersonToReport()">+ Add Person Met</button>
                         </div>
                         <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">
                             <div style="flex:1; min-width:80px;"><label>Going Fare (aane ka) ₹</label><input type="number" id="repGoing" class="input-field" value="0"></div>
@@ -1192,6 +1206,45 @@
         function deletePlan(id) { appData.plans = appData.plans.filter(p => p.id !== id); autoSave(); }
 
         // DAILY REPORTS
+        let currentReportPersons = [];
+
+        function renderReportPersonsList() {
+            const div = document.getElementById('repPersonsList');
+            if(currentReportPersons.length === 0) {
+                div.innerHTML = '<p style="font-size:0.8rem; color:var(--text-muted); font-style:italic;">No persons added yet.</p>';
+                return;
+            }
+            let html = '';
+            currentReportPersons.forEach((p, idx) => {
+                html += `<div style="background:rgba(255,255,255,0.05); padding:5px 8px; border-radius:5px; margin-bottom:5px; display:flex; justify-content:space-between; align-items:center;">
+                    <div style="font-size:0.75rem;">
+                        <span style="color:var(--accent-primary); font-weight:bold;"><i class="fas fa-user-tie"></i> ${p.name}</span> ${p.desig ? `(${p.desig})` : ''}
+                        <br><span style="color:var(--text-muted);"><i class="fas fa-phone"></i> ${p.mobile} ${p.email ? '| <i class="fas fa-envelope"></i> ' + p.email : ''}</span>
+                    </div>
+                    <button type="button" class="delete-btn" style="padding:2px 5px;" onclick="removeReportPerson(${idx})"><i class="fas fa-times"></i></button>
+                </div>`;
+            });
+            div.innerHTML = html;
+        }
+
+        function addPersonToReport() {
+            const name = document.getElementById('rpName').value;
+            if(!name) return alert("Please enter at least a Name!");
+            currentReportPersons.push({
+                name: name,
+                desig: document.getElementById('rpDesig').value,
+                mobile: document.getElementById('rpMobile').value,
+                email: document.getElementById('rpEmail').value
+            });
+            document.getElementById('rpName').value = '';
+            document.getElementById('rpDesig').value = '';
+            document.getElementById('rpMobile').value = '';
+            document.getElementById('rpEmail').value = '';
+            renderReportPersonsList();
+        }
+
+        function removeReportPerson(idx) { currentReportPersons.splice(idx, 1); renderReportPersonsList(); }
+
         document.getElementById('reportForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const rep = {
@@ -1199,8 +1252,8 @@
                 date: document.getElementById('repDate').value,
                 time: document.getElementById('repTime').value,
                 returnTime: document.getElementById('repReturnTime').value,
-                metName: document.getElementById('repMetName').value,
-                metPhone: document.getElementById('repMetPhone').value,
+                company: document.getElementById('repCompany').value,
+                persons: [...currentReportPersons],
                 goingFare: parseFloat(document.getElementById('repGoing').value) || 0,
                 returnFare: parseFloat(document.getElementById('repReturn').value) || 0,
                 food: parseFloat(document.getElementById('repFood').value) || 0,
@@ -1208,10 +1261,13 @@
             };
             appData.reports.push(rep);
             this.reset();
+            currentReportPersons = [];
+            renderReportPersonsList();
             document.getElementById('repDate').value = todayStr;
             document.getElementById('repTime').value = new Date().toTimeString().slice(0,5);
             document.getElementById('repReturnTime').value = new Date().toTimeString().slice(0,5);
             autoSave();
+            renderReportsList();
         });
 
         function renderReportsList() {
@@ -1219,19 +1275,29 @@
             div.innerHTML = '';
             if(appData.reports.length === 0) return div.innerHTML = '<p style="color:grey;text-align:center;">No reports found.</p>';
             [...appData.reports].sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(r => {
+                let pListHtml = '';
+                if(r.persons && r.persons.length > 0) {
+                    r.persons.forEach(p => {
+                        pListHtml += `<div style="font-size:0.75rem; color:var(--text-main); margin-bottom:2px;"><i class="fas fa-user"></i> ${p.name} ${p.desig ? `(${p.desig})` : ''} ${p.mobile ? `- ${p.mobile}` : ''}</div>`;
+                    });
+                } else if(r.metName) {
+                    pListHtml = `<div style="font-size:0.75rem; color:var(--text-muted);">Legacy Entry: ${r.metName} ${r.metPhone ? `(${r.metPhone})` : ''}</div>`;
+                }
+
                 div.innerHTML += `
                 <div class="list-item" style="flex-direction:column; align-items:flex-start;">
                     <div style="display:flex; justify-content:space-between; width:100%; margin-bottom:5px;">
                         <span style="font-size:0.75rem; color:var(--text-muted);"><i class="fas fa-clock"></i> ${r.date} | Go: ${format12Hour(r.time)} | Return: ${r.returnTime ? format12Hour(r.returnTime) : '--:--'}</span>
                         <button class="delete-btn" onclick="deleteReport(${r.id})"><i class="fas fa-trash"></i></button>
                     </div>
-                    ${r.metName ? `<p style="font-size:0.85rem; color:var(--accent-primary); margin-bottom:5px;"><i class="fas fa-user-tie"></i> Met: ${r.metName} ${r.metPhone ? `(${r.metPhone})` : ''}</p>` : ''}
+                    ${r.company ? `<p style="font-size:0.9rem; color:var(--accent-primary); margin-bottom:5px;"><b><i class="fas fa-building"></i> ${r.company}</b></p>` : ''}
+                    <div style="width:100%; margin-bottom:5px;">${pListHtml}</div>
                     ${(r.goingFare || r.returnFare || r.food) ? `<p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:5px;"><b>Expenses:</b> Going: ₹${r.goingFare || 0} | Return: ₹${r.returnFare || 0} | Food: ₹${r.food || 0}</p>` : ''}
                     <p style="font-size:0.9rem; line-height:1.4;">${r.text}</p>
                 </div>`;
             });
         }
-        function deleteReport(id) { appData.reports = appData.reports.filter(r => r.id !== id); autoSave(); }
+        function deleteReport(id) { appData.reports = appData.reports.filter(r => r.id !== id); autoSave(); renderReportsList(); updateUI(); }
 
         function generateReport(days) {
             const dateLimit = new Date();
@@ -1242,8 +1308,14 @@
             let output = `Daily Updates & Meetings Report (${days} Days)\nGenerated on: ${new Date().toLocaleDateString()}\n\n`;
             filtered.forEach(r => {
                 output += `[${r.date} ${format12Hour(r.time)}] `;
-                if(r.metName) output += `Met: ${r.metName} - `;
-                output += `${r.text}\n\n`;
+                if(r.company) output += `Visit to: ${r.company} `;
+                if(r.persons && r.persons.length > 0) {
+                    let pNames = r.persons.map(p => p.name).join(', ');
+                    output += `| Met with: ${pNames} `;
+                } else if(r.metName) {
+                    output += `| Met with: ${r.metName} `;
+                }
+                output += `\nUpdate: ${r.text}\n\n`;
             });
             document.getElementById('compiledReportBox').style.display = 'block';
             document.getElementById('compiledOutput').value = output;
