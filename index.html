@@ -330,12 +330,21 @@
                     
                     <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap; align-items:flex-end;">
                         <div style="flex:1; min-width:120px;">
+                            <label style="font-size:0.8rem;">Quick Select</label>
+                            <select id="masterReportPreset" class="input-field" style="margin-bottom:0;" onchange="updateMasterDates(this.value)">
+                                <option value="today">Daily (Today)</option>
+                                <option value="weekly">Weekly (Last 7 Days)</option>
+                                <option value="monthly">Monthly (This Month)</option>
+                                <option value="custom">Custom Range</option>
+                            </select>
+                        </div>
+                        <div style="flex:1; min-width:120px;">
                             <label style="font-size:0.8rem;">From Date</label>
-                            <input type="date" id="masterDateFrom" class="input-field" style="margin-bottom:0;" required>
+                            <input type="date" id="masterDateFrom" class="input-field" style="margin-bottom:0;" required onchange="document.getElementById('masterReportPreset').value='custom'">
                         </div>
                         <div style="flex:1; min-width:120px;">
                             <label style="font-size:0.8rem;">To Date</label>
-                            <input type="date" id="masterDateTo" class="input-field" style="margin-bottom:0;" required>
+                            <input type="date" id="masterDateTo" class="input-field" style="margin-bottom:0;" required onchange="document.getElementById('masterReportPreset').value='custom'">
                         </div>
                         <button class="btn" style="width:auto; margin-top:0;" onclick="generateMasterReport()"><i class="fas fa-magic"></i> Generate</button>
                     </div>
@@ -684,6 +693,21 @@
         document.getElementById('repDate').value = todayStr; document.getElementById('repTime').value = new Date().toTimeString().slice(0,5);
         document.getElementById('masterDateFrom').value = todayStr;
         document.getElementById('masterDateTo').value = todayStr;
+
+        function formatDateForInput(d) {
+            return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+        }
+        function updateMasterDates(preset) {
+            const today = new Date();
+            let fromDate = new Date();
+            let toDate = new Date();
+            if (preset === 'today') { fromDate = today; }
+            else if (preset === 'weekly') { fromDate.setDate(today.getDate() - 7); }
+            else if (preset === 'monthly') { fromDate = new Date(today.getFullYear(), today.getMonth(), 1); }
+            
+            document.getElementById('masterDateFrom').value = formatDateForInput(fromDate);
+            document.getElementById('masterDateTo').value = formatDateForInput(toDate);
+        }
 
         function format12Hour(time24) {
             if(!time24 || time24 === '-') return "-";
@@ -1315,17 +1339,15 @@
         function deleteReport(id) { appData.reports = appData.reports.filter(r => r.id !== id); autoSave(); renderReportsList(); updateUI(); }
 
         function getFilteredData(fromDateStr, toDateStr) {
-            const start = new Date(fromDateStr);
-            start.setHours(0,0,0,0);
-            const end = new Date(toDateStr);
-            end.setHours(23,59,59,999);
+            // String comparison works perfectly for YYYY-MM-DD
+            const reports = appData.reports.filter(r => r.date >= fromDateStr && r.date <= toDateStr);
+            const plans = appData.plans.filter(p => p.date >= fromDateStr && p.date <= toDateStr);
+            const attendance = appData.attendance.filter(a => a.date >= fromDateStr && a.date <= toDateStr);
+            const inquiries = appData.inquiries.filter(i => i.date >= fromDateStr && i.date <= toDateStr);
             
-            // Filter all data arrays
-            const reports = appData.reports.filter(r => new Date(r.date) >= start && new Date(r.date) <= end);
-            const plans = appData.plans.filter(p => new Date(p.date) >= start && new Date(p.date) <= end);
-            const attendance = appData.attendance.filter(a => new Date(a.date) >= start && new Date(a.date) <= end);
-            const inquiries = appData.inquiries.filter(i => new Date(i.date) >= start && new Date(i.date) <= end);
-            const contacts = appData.contacts.filter(c => new Date(c.id) >= start && new Date(c.id) <= end);
+            const startTs = new Date(fromDateStr).setHours(0,0,0,0);
+            const endTs = new Date(toDateStr).setHours(23,59,59,999);
+            const contacts = appData.contacts.filter(c => c.id >= startTs && c.id <= endTs);
 
             return { reports, plans, attendance, inquiries, contacts };
         }
