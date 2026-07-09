@@ -171,6 +171,7 @@
             <li class="nav-item" onclick="switchTab('planner')"><i class="fas fa-tasks"></i> Daily Plan</li>
             <li class="nav-item" onclick="switchTab('reports')"><i class="fas fa-file-signature"></i> Visit Page <span style="background:var(--danger);color:white;font-size:0.6rem;padding:2px 5px;border-radius:10px;margin-left:auto;">AI</span></li>
 
+            <li class="nav-item" onclick="switchTab('master-reports')"><i class="fas fa-chart-pie"></i> Master Reports</li>
             <li class="nav-item" onclick="switchTab('attendance')"><i class="fas fa-map-marker-alt"></i> Attendance <span style="background:#00E5FF;color:#000;font-size:0.6rem;padding:2px 5px;border-radius:10px;margin-left:auto;font-weight:bold;">GPS</span></li>
             <li class="nav-item" onclick="switchTab('contacts')"><i class="fas fa-address-book"></i> Contacts</li>
             <li class="nav-item" onclick="switchTab('inquiries')"><i class="fas fa-industry"></i> Sales Inquiries</li>
@@ -190,8 +191,8 @@
             </div>
             
             <div style="display:flex; align-items:center; gap:15px;">
-                <div class="live-timer" title="Active Screen Time Today">
-                    <i class="fas fa-stopwatch"></i> <span id="appTimerDisplay">00:00:00</span>
+                <div class="live-timer" title="Current Time">
+                    <i class="fas fa-clock"></i> <span id="appTimerDisplay">00:00:00</span>
                 </div>
                 <button class="btn" style="width:auto; padding:8px 15px; font-size:0.8rem; background: transparent; border: 1px solid var(--danger); color: var(--danger);" onclick="logout()"><i class="fas fa-power-off"></i></button>
             </div>
@@ -199,23 +200,63 @@
 
         <!-- MODULE 1: DASHBOARD -->
         <section id="dashboard" class="module-section active">
+            <h3 style="color:var(--accent-primary); margin:0 0 10px 0;"><i class="fas fa-chart-line"></i> Corporate Summary</h3>
             <div class="grid-3">
                 <div class="card"><div class="stat-header"><span>Days Logged</span><i class="fas fa-calendar-check"></i></div><div class="stat-value" id="dashDuty" style="color: var(--accent-primary);">0</div></div>
+                <div class="card"><div class="stat-header"><span>Total Visits</span><i class="fas fa-building"></i></div><div class="stat-value" id="dashVisits" style="color: #fff;">0</div></div>
+                <div class="card"><div class="stat-header"><span>Saved Contacts</span><i class="fas fa-address-book"></i></div><div class="stat-value" id="dashContacts" style="color: #00E5FF;">0</div></div>
             </div>
             
-            <h3 style="color:var(--accent-primary); margin:20px 0 10px 0;"><i class="fas fa-chart-line"></i> Sales Analytics</h3>
+            <h3 style="color:var(--accent-primary); margin:20px 0 10px 0;"><i class="fas fa-industry"></i> Sales Inquiries</h3>
             <div class="grid-3">
                 <div class="card"><div class="stat-header"><span>Total Inquiries</span><i class="fas fa-industry"></i></div><div class="stat-value" id="dashInqTotal" style="color: #fff;">0</div></div>
                 <div class="card"><div class="stat-header"><span>Pending Follow-ups</span><i class="fas fa-clock"></i></div><div class="stat-value" id="dashInqPending" style="color: var(--warning);">0</div></div>
                 <div class="card"><div class="stat-header"><span>Orders Won</span><i class="fas fa-trophy"></i></div><div class="stat-value" id="dashInqWon" style="color: var(--success);">0</div></div>
             </div>
             
-            <div class="grid-1">
+            <div class="grid-2">
                 <div class="card">
                     <h3><i class="fas fa-clipboard-check"></i> Daily Operations Checklist</h3>
                     <div class="list-item"><span>Today's Plan Created?</span><strong id="chkPlan" style="color:var(--danger)">NO</strong></div>
                     <div class="list-item"><span>Visit Page Logged?</span><strong id="chkReport" style="color:var(--danger)">NO</strong></div>
                     <div class="list-item"><span>GPS Attendance Punched?</span><strong id="chkAttend" style="color:var(--danger)">NO</strong></div>
+                </div>
+                <div class="card">
+                    <h3>📊 Sales Status Overview</h3>
+                    <div style="position: relative; height: 200px; width: 100%; margin-top: 20px;">
+                        <canvas id="salesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MODULE 1A: MASTER REPORTS -->
+        <section id="master-reports" class="module-section">
+            <div class="card">
+                <h2 style="margin-bottom: 20px;"><i class="fas fa-chart-pie"></i> Unified Master Reports</h2>
+                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 20px; align-items:center;">
+                    <div style="flex:1; min-width:150px;">
+                        <label>Report Type</label>
+                        <select id="reportType" class="input-field" onchange="toggleReportDateType()">
+                            <option value="daily">Daily Report</option>
+                            <option value="weekly">Weekly Report</option>
+                            <option value="monthly">Monthly Report</option>
+                        </select>
+                    </div>
+                    <div style="flex:1; min-width:150px;" id="reportDateContainer">
+                        <label>Select Date / Week Start</label>
+                        <input type="date" id="reportDateSelector" class="input-field" value="">
+                    </div>
+                    <div style="flex:1; min-width:150px; display:none;" id="reportMonthContainer">
+                        <label>Select Month</label>
+                        <input type="month" id="reportMonthSelector" class="input-field" value="">
+                    </div>
+                    <button class="btn" style="width:auto; height:45px; align-self:flex-end;" onclick="generateMasterReport()"><i class="fas fa-sync"></i> Generate</button>
+                    <button class="btn" style="width:auto; height:45px; align-self:flex-end; background:#00E5FF; color:#000;" onclick="printMasterReport()"><i class="fas fa-print"></i> Print</button>
+                </div>
+                
+                <div id="masterReportOutput" style="background:#1e1e1e; padding:20px; border-radius:10px; min-height:300px; color:#ccc; display:none;">
+                    <!-- Rendered Report Goes Here -->
                 </div>
             </div>
         </section>
@@ -543,18 +584,11 @@
         function clearPin() { enteredPin = ""; document.querySelectorAll('.dot').forEach(d => d.classList.remove('filled')); }
         function saveSecuritySettings() { appData.appPin = document.getElementById('pinInput').value; autoSave(); showToast("Security PIN Updated!"); }
 
-        // SMART ACTIVE TIMER
-        let isAppActive = true;
-        document.addEventListener('visibilitychange', () => { isAppActive = !document.hidden; });
+        // LIVE REAL-TIME CLOCK
         setInterval(() => {
-            if(currentUser && isAppActive) { 
-                let currentStr = getLocalDateStr();
-                if(appData.timerDate !== currentStr) { appData.totalAppTime = 0; appData.timerDate = currentStr; autoSave(); }
-                appData.totalAppTime = (appData.totalAppTime || 0) + 1; 
-                document.getElementById('appTimerDisplay').innerText = formatSecondsToTime(appData.totalAppTime); 
-                if(appData.totalAppTime % 60 === 0) silentSave(); 
-            }
+            document.getElementById('appTimerDisplay').innerText = new Date().toLocaleTimeString(); 
         }, 1000);
+        document.getElementById('appTimerDisplay').innerText = new Date().toLocaleTimeString();
 
         function changeTheme() { appData.theme = document.getElementById('themeSelect').value; const col = themes[appData.theme] || themes.gold; const root = document.documentElement; root.style.setProperty('--accent-primary', col.p); root.style.setProperty('--gold-primary', col.p); root.style.setProperty('--accent-secondary', col.a); root.style.setProperty('--bg-main', col.b1); root.style.setProperty('--bg-secondary', col.b2); }
 
@@ -629,6 +663,37 @@
 
 
 
+        // CHART.JS SALES ANALYTICS
+        let salesChart = null;
+        function updateCharts() {
+            let won = 0, lost = 0, pending = 0;
+            appData.inquiries.forEach(i => {
+                if(i.status === 'Order Won') won++;
+                else if(i.status === 'Order Lost') lost++;
+                else pending++;
+            });
+            const ctx = document.getElementById('salesChart'); if(!ctx) return;
+            if(salesChart) salesChart.destroy();
+            salesChart = new Chart(ctx.getContext('2d'), { 
+                type: 'pie', 
+                data: { 
+                    labels: ['Order Won', 'Pending', 'Order Lost'], 
+                    datasets: [{ 
+                        data: [won, pending, lost], 
+                        backgroundColor: ['#00e676', '#FFD700', '#ff4d4d'], 
+                        borderWidth: 0 
+                    }] 
+                }, 
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { 
+                        legend: { position: 'right', labels: { color: '#A0A0A0', font: {family: 'Inter'} } } 
+                    }
+                } 
+            });
+        }
+
         // MONTHLY ATTENDANCE CALENDAR
         function renderCalendar() {
             const cal = document.getElementById('dutyCalendar');
@@ -647,6 +712,8 @@
 
         function updateUI() {
             document.getElementById('dashDuty').innerText = appData.attendance.length;
+            document.getElementById('dashVisits').innerText = appData.reports.length;
+            document.getElementById('dashContacts').innerText = appData.contacts.length;
             document.getElementById('dashInqTotal').innerText = appData.inquiries.length;
             document.getElementById('dashInqPending').innerText = appData.inquiries.filter(i => new Date(i.followDate) <= new Date() && i.status !== 'Order Won' && i.status !== 'Order Lost').length;
             document.getElementById('dashInqWon').innerText = appData.inquiries.filter(i => i.status === 'Order Won').length;
@@ -655,6 +722,7 @@
             document.getElementById('chkAttend').innerHTML = appData.attendance.some(a => a.date === todayStr) ? '<span style="color:var(--success)">YES</span>' : '<span style="color:var(--danger)">NO</span>';
             document.getElementById('welcomeText').innerHTML = `Corporate Hub: ${appData.userName || 'Agent'}`;
             renderPlans(); renderReportsList(); renderAttendance(); renderContacts(); renderInquiries(); renderCalendar();
+            updateCharts();
         }
 
         // CRM CONTACTS & INQUIRIES
@@ -1064,6 +1132,137 @@
         }
         function deleteAttendance(id) { appData.attendance = appData.attendance.filter(a => a.id !== id); autoSave(); }
         function exportData(type) { alert(`Export for ${type} coming soon`); }
+        // MASTER REPORTS LOGIC
+        function toggleReportDateType() {
+            const type = document.getElementById('reportType').value;
+            if(type === 'monthly') {
+                document.getElementById('reportDateContainer').style.display = 'none';
+                document.getElementById('reportMonthContainer').style.display = 'block';
+            } else {
+                document.getElementById('reportDateContainer').style.display = 'block';
+                document.getElementById('reportMonthContainer').style.display = 'none';
+            }
+        }
+
+        function generateMasterReport() {
+            const type = document.getElementById('reportType').value;
+            let startDate, endDate, titleStr;
+
+            if(type === 'monthly') {
+                const m = document.getElementById('reportMonthSelector').value; // YYYY-MM
+                if(!m) return alert('Select a month');
+                const [yyyy, mm] = m.split('-');
+                startDate = new Date(yyyy, parseInt(mm)-1, 1);
+                endDate = new Date(yyyy, parseInt(mm), 0);
+                titleStr = `Monthly Report: ${m}`;
+            } else if(type === 'weekly') {
+                const d = document.getElementById('reportDateSelector').value;
+                if(!d) return alert('Select a start date for the week');
+                startDate = new Date(d);
+                endDate = new Date(startDate);
+                endDate.setDate(endDate.getDate() + 6);
+                titleStr = `Weekly Report: ${startDate.toISOString().slice(0,10)} to ${endDate.toISOString().slice(0,10)}`;
+            } else {
+                const d = document.getElementById('reportDateSelector').value;
+                if(!d) return alert('Select a date');
+                startDate = new Date(d);
+                endDate = new Date(d);
+                titleStr = `Daily Report: ${d}`;
+            }
+
+            // Filter data
+            const isBetween = (dStr) => {
+                const d = new Date(dStr);
+                d.setHours(0,0,0,0);
+                startDate.setHours(0,0,0,0);
+                endDate.setHours(23,59,59,999);
+                return d >= startDate && d <= endDate;
+            };
+
+            const fPlans = appData.plans.filter(p => isBetween(p.date));
+            const fVisits = appData.reports.filter(r => isBetween(r.date));
+            const fAtt = appData.attendance.filter(a => isBetween(a.date));
+            const fCont = appData.contacts.filter(c => isBetween(c.dateAdded));
+            const fInq = appData.inquiries.filter(i => isBetween(i.dateAdded));
+
+            // Generate HTML
+            let html = `
+                <div style="background:var(--bg-secondary); padding:20px; border-radius:10px; color:var(--text-main); font-family:'Inter', sans-serif;" id="printableReport">
+                    <div style="text-align:center; border-bottom:1px solid #333; padding-bottom:15px; margin-bottom:20px;">
+                        <h1 style="color:var(--accent-primary); margin:0;">${appData.userName || 'Corporate Hub'}</h1>
+                        <h2 style="margin:5px 0 0 0; color:#fff;">${titleStr}</h2>
+                    </div>
+
+                    <h3 style="color:var(--gold-primary); border-bottom:1px solid #333; padding-bottom:5px;">1. Attendance & Operations</h3>
+                    <p>Total Days Punched: ${fAtt.length}</p>
+                    <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
+                        <tr style="background:#333;"><th style="padding:8px;text-align:left;border:1px solid #444;">Date</th><th style="padding:8px;text-align:left;border:1px solid #444;">Type</th><th style="padding:8px;text-align:left;border:1px solid #444;">In</th><th style="padding:8px;text-align:left;border:1px solid #444;">Out</th></tr>
+                        ${fAtt.map(a => `<tr><td style="padding:8px;border:1px solid #444;">${a.date}</td><td style="padding:8px;border:1px solid #444;">${a.type}</td><td style="padding:8px;border:1px solid #444;">${a.timeIn}</td><td style="padding:8px;border:1px solid #444;">${a.timeOut||'--'}</td></tr>`).join('')}
+                    </table>
+
+                    <h3 style="color:var(--gold-primary); border-bottom:1px solid #333; padding-bottom:5px;">2. Daily Plans Achieved</h3>
+                    <p>Total Tasks: ${fPlans.length} | Completed: ${fPlans.filter(p=>p.status==='Completed').length}</p>
+                    <ul style="margin-bottom:20px; padding-left:20px;">
+                        ${fPlans.map(p => `<li><strong>${p.date}:</strong> ${p.task} - <span style="color:${p.status==='Completed'?'#00e676':'#ff4d4d'}">${p.status}</span></li>`).join('')}
+                    </ul>
+
+                    <h3 style="color:var(--gold-primary); border-bottom:1px solid #333; padding-bottom:5px;">3. Client Visits (Visit Page)</h3>
+                    <p>Total Visits Logged: ${fVisits.length}</p>
+                    <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
+                        <tr style="background:#333;"><th style="padding:8px;text-align:left;border:1px solid #444;">Date</th><th style="padding:8px;text-align:left;border:1px solid #444;">Company</th><th style="padding:8px;text-align:left;border:1px solid #444;">Expenses (₹)</th><th style="padding:8px;text-align:left;border:1px solid #444;">Remarks</th></tr>
+                        ${fVisits.map(v => `<tr><td style="padding:8px;border:1px solid #444;">${v.date}</td><td style="padding:8px;border:1px solid #444;">${v.partyName}</td><td style="padding:8px;border:1px solid #444;color:#00E5FF">₹${v.totalExpense}</td><td style="padding:8px;border:1px solid #444;">${v.remarks}</td></tr>`).join('')}
+                    </table>
+
+                    <h3 style="color:var(--gold-primary); border-bottom:1px solid #333; padding-bottom:5px;">4. Contacts Added</h3>
+                    <p>New Contacts: ${fCont.length}</p>
+                    <ul style="margin-bottom:20px; padding-left:20px;">
+                        ${fCont.map(c => `<li><strong>${c.company}</strong> - ${c.name} (${c.designation})</li>`).join('')}
+                    </ul>
+
+                    <h3 style="color:var(--gold-primary); border-bottom:1px solid #333; padding-bottom:5px;">5. Sales Inquiries</h3>
+                    <p>Total Inquiries: ${fInq.length}</p>
+                    <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
+                        <tr style="background:#333;"><th style="padding:8px;text-align:left;border:1px solid #444;">Date</th><th style="padding:8px;text-align:left;border:1px solid #444;">Company</th><th style="padding:8px;text-align:left;border:1px solid #444;">Project</th><th style="padding:8px;text-align:left;border:1px solid #444;">Status</th></tr>
+                        ${fInq.map(i => `<tr><td style="padding:8px;border:1px solid #444;">${i.dateAdded}</td><td style="padding:8px;border:1px solid #444;">${i.company}</td><td style="padding:8px;border:1px solid #444;">${i.projectName}</td><td style="padding:8px;border:1px solid #444;font-weight:bold;">${i.status}</td></tr>`).join('')}
+                    </table>
+                    
+                    <div style="text-align:center; font-size:0.8rem; color:#888; margin-top:30px;">
+                        Generated via Corporate Hub CRM &middot; ${new Date().toLocaleString()}
+                    </div>
+                </div>
+            `;
+            
+            const out = document.getElementById('masterReportOutput');
+            out.innerHTML = html;
+            out.style.display = 'block';
+        }
+
+        function printMasterReport() {
+            const out = document.getElementById('printableReport');
+            if(!out) return alert('Please generate a report first.');
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Master Report</title>
+                    <style>
+                        body { font-family: 'Inter', sans-serif; background: #fff; color: #000; padding: 20px; }
+                        h1, h2, h3 { color: #000 !important; border-color: #000 !important; }
+                        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                        th, td { padding: 8px; border: 1px solid #000 !important; }
+                        th { background: #eee !important; }
+                        * { background: transparent !important; color: #000 !important; }
+                    </style>
+                </head>
+                <body>
+                    ${out.innerHTML}
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.focus();
+            setTimeout(() => { printWindow.print(); printWindow.close(); }, 250);
+        }
     </script>
 </body>
 </html>
