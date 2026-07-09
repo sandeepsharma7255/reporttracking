@@ -242,9 +242,10 @@
                 <div class="card">
                     <h2 style="margin-bottom: 10px;"><i class="fas fa-edit"></i> Visit Page</h2>
                     <form id="reportForm">
-                        <div style="display:flex; gap:10px;">
-                            <div style="flex:1;"><label>Date</label><input type="date" id="repDate" class="input-field" required></div>
-                            <div style="flex:1;"><label>Time (Edit If Needed)</label><input type="time" id="repTime" class="input-field" required></div>
+                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                            <div style="flex:1; min-width:100px;"><label>Date</label><input type="date" id="repDate" class="input-field" required></div>
+                            <div style="flex:1; min-width:100px;"><label>Going Time</label><input type="time" id="repTime" class="input-field" required></div>
+                            <div style="flex:1; min-width:100px;"><label>Return Time</label><input type="time" id="repReturnTime" class="input-field" required></div>
                         </div>
                         <div style="display:flex; gap:10px;">
                             <div style="flex:1;"><label>Met With (Name/Client)</label><input type="text" id="repMetName" class="input-field" placeholder="e.g. Mr. Sharma"></div>
@@ -644,6 +645,7 @@
                 id: Date.now(),
                 date: document.getElementById('repDate').value,
                 time: document.getElementById('repTime').value,
+                returnTime: document.getElementById('repReturnTime').value,
                 metName: document.getElementById('repMetName').value,
                 metPhone: document.getElementById('repMetPhone').value,
                 goingFare: parseFloat(document.getElementById('repGoing').value) || 0,
@@ -655,6 +657,7 @@
             this.reset();
             document.getElementById('repDate').value = todayStr;
             document.getElementById('repTime').value = new Date().toTimeString().slice(0,5);
+            document.getElementById('repReturnTime').value = new Date().toTimeString().slice(0,5);
             autoSave();
         });
 
@@ -666,7 +669,7 @@
                 div.innerHTML += `
                 <div class="list-item" style="flex-direction:column; align-items:flex-start;">
                     <div style="display:flex; justify-content:space-between; width:100%; margin-bottom:5px;">
-                        <span style="font-size:0.75rem; color:var(--text-muted);"><i class="fas fa-clock"></i> ${r.date} | ${format12Hour(r.time)}</span>
+                        <span style="font-size:0.75rem; color:var(--text-muted);"><i class="fas fa-clock"></i> ${r.date} | Go: ${format12Hour(r.time)} | Return: ${r.returnTime ? format12Hour(r.returnTime) : '--:--'}</span>
                         <button class="delete-btn" onclick="deleteReport(${r.id})"><i class="fas fa-trash"></i></button>
                     </div>
                     ${r.metName ? `<p style="font-size:0.85rem; color:var(--accent-primary); margin-bottom:5px;"><i class="fas fa-user-tie"></i> Met: ${r.metName} ${r.metPhone ? `(${r.metPhone})` : ''}</p>` : ''}
