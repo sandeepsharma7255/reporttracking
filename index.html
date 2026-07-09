@@ -530,9 +530,24 @@
                 if (doc.exists) appData = cleanData({ ...appData, ...doc.data() }); else { appData = cleanData(appData); autoSave(); }
                 if(appData.appPin && appData.appPin.toString().trim().length === 4) showPinScreen();
                 document.getElementById('themeSelect').value = appData.theme; changeTheme(); document.getElementById('profileName').value = appData.userName; document.getElementById('pinInput').value = appData.appPin; updateUI();
-            }).catch(err => { alert("Database Load Error."); });
+            }).catch(err => { 
+                console.error("Firebase Load Error:", err);
+                alert("Database Load Error: " + err.message + "\n\n(If it says 'Missing or insufficient permissions', please go to Firebase Console -> Firestore Database -> Rules, and set them to allow read/write.)"); 
+            });
         }
-        function autoSave() { if(!currentUser) return; appData = cleanData(appData); db.collection('corporateOperationsData').doc(currentUser.uid).set(appData, {merge: true}).then(() => { document.getElementById('syncStatus').innerHTML = `🟢 Cloud Secured`; showToast('Data Synced! ☁️'); }).catch(err => { document.getElementById('syncStatus').innerHTML = `🔴 Sync Failed!`; }); updateUI(); }
+        function autoSave() { 
+            if(!currentUser) return; 
+            appData = cleanData(appData); 
+            db.collection('corporateOperationsData').doc(currentUser.uid).set(appData, {merge: true}).then(() => { 
+                document.getElementById('syncStatus').innerHTML = `🟢 Cloud Secured`; 
+                showToast('Data Synced! ☁️'); 
+            }).catch(err => { 
+                console.error("Firebase Sync Error:", err);
+                document.getElementById('syncStatus').innerHTML = `🔴 Sync Failed: ` + err.message; 
+                alert("Sync Error: " + err.message);
+            }); 
+            updateUI(); 
+        }
         function silentSave() { if(currentUser) db.collection('corporateOperationsData').doc(currentUser.uid).set(cleanData(appData), {merge:true}); }
         function saveSettings() { appData.userName = document.getElementById('profileName').value; autoSave(); }
         function exportBackup() { let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2)); let dlAnchorElem = document.createElement('a'); dlAnchorElem.setAttribute("href", dataStr); dlAnchorElem.setAttribute("download", `CorporateHub_Backup_${todayStr}.json`); dlAnchorElem.click(); showToast("Backup Downloaded Securely!"); }
