@@ -385,17 +385,21 @@
 
                         <label>Full Address</label><input type="text" id="cntAddress" class="input-field" placeholder="e.g. Nariman Point">
                         
-                        <h3 style="color:var(--accent-primary); margin:15px 0 10px 0;"><i class="fas fa-user"></i> Key Person Details</h3>
-                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                            <div style="flex:1; min-width:120px;"><label>Name</label><input type="text" id="cntName" class="input-field" required></div>
-                            <div style="flex:1; min-width:120px;"><label>Designation</label><input type="text" id="cntDesig" class="input-field" placeholder="e.g. Chief Engineer" required></div>
+                        <h3 style="color:var(--accent-primary); margin:15px 0 10px 0;"><i class="fas fa-users"></i> Key Persons</h3>
+                        <div id="contactPersonsList" style="margin-bottom:15px;"></div>
+                        <div style="background:var(--card-bg); border:1px solid var(--card-border); padding:10px; border-radius:5px; margin-bottom:15px;">
+                            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+                                <div style="flex:1; min-width:120px;"><label>Name</label><input type="text" id="cpName" class="input-field"></div>
+                                <div style="flex:1; min-width:120px;"><label>Designation</label><input type="text" id="cpDesig" class="input-field" placeholder="e.g. Chief Engineer"></div>
+                            </div>
+                            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+                                <div style="flex:1; min-width:120px;"><label>Mobile</label><input type="tel" id="cpMobile" class="input-field"></div>
+                                <div style="flex:1; min-width:120px;"><label>Email</label><input type="email" id="cpEmail" class="input-field"></div>
+                                <div style="flex:1; min-width:80px;"><label>Floor/Dept</label><input type="text" id="cpFloor" class="input-field" placeholder="e.g. 4th Floor"></div>
+                            </div>
+                            <button type="button" class="btn" style="background:#333;" onclick="addPersonToContact()">+ Add Person</button>
                         </div>
-                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                            <div style="flex:1; min-width:120px;"><label>Mobile</label><input type="tel" id="cntMobile" class="input-field" required></div>
-                            <div style="flex:1; min-width:120px;"><label>Email</label><input type="email" id="cntEmail" class="input-field"></div>
-                            <div style="flex:1; min-width:80px;"><label>Floor/Dept</label><input type="text" id="cntFloor" class="input-field" placeholder="e.g. 4th Floor"></div>
-                        </div>
-                        <button type="submit" class="btn" style="margin-top:10px;">Save Contact</button>
+                        <button type="submit" class="btn" style="margin-top:10px;">Save Company & Contacts</button>
                     </form>
                 </div>
                 <div class="card">
@@ -722,7 +726,30 @@
         // FIRESTORE
         function cleanData(data) { 
             let tDate = data.timerDate || getLocalDateStr(); let tTime = data.totalAppTime || 0; if(tDate !== getLocalDateStr()) { tTime = 0; tDate = getLocalDateStr(); }
-            return { geminiApiKey: data.geminiApiKey || "", userName: data.userName || currentUser.displayName || "", theme: data.theme || "gold", appPin: data.appPin || "", totalAppTime: tTime, timerDate: tDate, plans: Array.isArray(data.plans) ? data.plans : [], reports: Array.isArray(data.reports) ? data.reports : [], attendance: Array.isArray(data.attendance) ? data.attendance : [], contacts: Array.isArray(data.contacts) ? data.contacts : [], inquiries: Array.isArray(data.inquiries) ? data.inquiries : [] }; 
+            
+            // Contacts Migration Logic (Flattened to Grouped)
+            let migratedContacts = [];
+            let oldContacts = Array.isArray(data.contacts) ? data.contacts : [];
+            oldContacts.forEach(c => {
+                if(c.persons) {
+                    migratedContacts.push(c); // Already migrated
+                } else if(c.company) {
+                    let existing = migratedContacts.find(mc => mc.company === c.company && mc.address === c.address);
+                    let p = { id: c.id || Date.now()+Math.random(), name: c.name||'', desig: c.desig||'', mobile: c.mobile||'', email: c.email||'', floor: c.floor||'' };
+                    if(existing) {
+                        existing.persons.push(p);
+                    } else {
+                        migratedContacts.push({
+                            id: Date.now() + Math.random(),
+                            company: c.company,
+                            address: c.address || '',
+                            persons: [p]
+                        });
+                    }
+                }
+            });
+
+            return { geminiApiKey: data.geminiApiKey || "", userName: data.userName || currentUser.displayName || "", theme: data.theme || "gold", appPin: data.appPin || "", totalAppTime: tTime, timerDate: tDate, plans: Array.isArray(data.plans) ? data.plans : [], reports: Array.isArray(data.reports) ? data.reports : [], attendance: Array.isArray(data.attendance) ? data.attendance : [], contacts: migratedContacts, inquiries: Array.isArray(data.inquiries) ? data.inquiries : [] }; 
         }
         function loadDataForUser() {
             if (!currentUser) return;
@@ -818,18 +845,59 @@
         }
 
         // CRM CONTACTS & INQUIRIES
+        // CRM CONTACTS & INQUIRIES
         let editContactId = null;
+        let currentContactPersons = [];
+
+        function renderContactPersonsList() {
+            const div = document.getElementById('contactPersonsList');
+            if(currentContactPersons.length === 0) {
+                div.innerHTML = '<p style="font-size:0.8rem; color:var(--text-muted); font-style:italic;">No persons added yet.</p>';
+                return;
+            }
+            let html = '';
+            currentContactPersons.forEach((p, idx) => {
+                html += `<div style="background:rgba(255,255,255,0.05); padding:8px; border-radius:5px; margin-bottom:5px; display:flex; justify-content:space-between; align-items:center;">
+                    <div style="font-size:0.8rem;">
+                        <span style="color:var(--accent-primary); font-weight:bold;"><i class="fas fa-user-tie"></i> ${p.name}</span> (${p.desig})
+                        <div style="color:var(--text-muted); font-size:0.75rem; margin-top:2px;"><i class="fas fa-phone"></i> ${p.mobile} ${p.email ? '| <i class="fas fa-envelope"></i> ' + p.email : ''} ${p.floor ? '| ' + p.floor : ''}</div>
+                    </div>
+                    <button type="button" class="delete-btn" style="padding:2px 5px;" onclick="removeContactPerson(${idx})"><i class="fas fa-times"></i></button>
+                </div>`;
+            });
+            div.innerHTML = html;
+        }
+
+        function addPersonToContact() {
+            const name = document.getElementById('cpName').value;
+            const mobile = document.getElementById('cpMobile').value;
+            if(!name || !mobile) return alert("Please enter at least Name and Mobile number for the person!");
+            currentContactPersons.push({
+                id: Date.now() + Math.random(),
+                name: name,
+                desig: document.getElementById('cpDesig').value,
+                mobile: mobile,
+                email: document.getElementById('cpEmail').value,
+                floor: document.getElementById('cpFloor').value
+            });
+            document.getElementById('cpName').value = '';
+            document.getElementById('cpDesig').value = '';
+            document.getElementById('cpMobile').value = '';
+            document.getElementById('cpEmail').value = '';
+            document.getElementById('cpFloor').value = '';
+            renderContactPersonsList();
+        }
+
+        function removeContactPerson(idx) { currentContactPersons.splice(idx, 1); renderContactPersonsList(); }
+
         document.getElementById('contactForm').addEventListener('submit', function(e) {
             e.preventDefault();
+            if(currentContactPersons.length === 0) return alert('Please add at least one person to this company!');
             const contact = {
                 id: editContactId || Date.now(),
                 company: document.getElementById('cntCompany').value,
                 address: document.getElementById('cntAddress').value,
-                name: document.getElementById('cntName').value,
-                desig: document.getElementById('cntDesig').value,
-                mobile: document.getElementById('cntMobile').value,
-                email: document.getElementById('cntEmail').value,
-                floor: document.getElementById('cntFloor').value
+                persons: [...currentContactPersons]
             };
             if(editContactId) {
                 appData.contacts = appData.contacts.map(c => c.id === editContactId ? contact : c);
@@ -838,6 +906,8 @@
                 appData.contacts.push(contact);
             }
             this.reset();
+            currentContactPersons = [];
+            renderContactPersonsList();
             autoSave();
             renderContacts();
         });
@@ -852,7 +922,27 @@
             let companies = {};
             [...appData.contacts].forEach(c => {
                 companies[c.company] = true;
-                if(c.company.toLowerCase().includes(search) || c.name.toLowerCase().includes(search)) {
+                
+                // Search filter (company name or any person's name)
+                let match = c.company.toLowerCase().includes(search);
+                if(c.persons) {
+                    if(c.persons.some(p => p.name.toLowerCase().includes(search) || p.mobile.includes(search))) match = true;
+                }
+                
+                if(match) {
+                    let pListHtml = '';
+                    if(c.persons && c.persons.length > 0) {
+                        c.persons.forEach(p => {
+                            pListHtml += `<div style="background:rgba(0,0,0,0.2); padding:5px; border-radius:5px; margin-bottom:4px; font-size:0.8rem; border-left:2px solid var(--accent-primary);">
+                                <div style="display:flex; justify-content:space-between;">
+                                    <span><b><i class="fas fa-user-tie"></i> ${p.name}</b> (${p.desig})</span>
+                                    <span><i class="fas fa-phone"></i> ${p.mobile}</span>
+                                </div>
+                                ${p.email || p.floor ? `<div style="color:var(--text-muted); font-size:0.75rem; margin-top:2px;">${p.email ? '<i class="fas fa-envelope"></i> ' + p.email : ''} ${p.email && p.floor ? '|' : ''} ${p.floor ? 'Floor: ' + p.floor : ''}</div>` : ''}
+                            </div>`;
+                        });
+                    }
+
                     html += `<div class="list-item" style="flex-direction:column; align-items:flex-start;">
                         <div style="display:flex; justify-content:space-between; width:100%; margin-bottom:5px;">
                             <strong style="color:var(--accent-primary);"><i class="fas fa-building"></i> ${c.company}</strong>
@@ -861,9 +951,10 @@
                                 <button class="delete-btn" onclick="deleteContact(${c.id})"><i class="fas fa-trash"></i></button>
                             </div>
                         </div>
-                        <p style="font-size:0.85rem; color:var(--text-main); margin-bottom:5px;"><i class="fas fa-user-tie"></i> ${c.name} (${c.desig})</p>
-                        ${c.address || c.floor ? `<p style="font-size:0.75rem; color:var(--text-muted);"><i class="fas fa-map-marker-alt"></i> ${c.address ? c.address : ''}${c.address && c.floor ? ' | ' : ''}${c.floor ? 'Floor: ' + c.floor : ''}</p>` : ''}
-                        <p style="font-size:0.75rem; color:var(--text-muted); margin-top:3px;"><i class="fas fa-phone"></i> ${c.mobile} | <i class="fas fa-envelope"></i> ${c.email}</p>
+                        ${c.address ? `<p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:8px;"><i class="fas fa-map-marker-alt"></i> ${c.address}</p>` : ''}
+                        <div style="width:100%;">
+                            ${pListHtml}
+                        </div>
                     </div>`;
                 }
             });
@@ -880,11 +971,8 @@
             editContactId = id;
             document.getElementById('cntCompany').value = c.company || '';
             document.getElementById('cntAddress').value = c.address || '';
-            document.getElementById('cntName').value = c.name || '';
-            document.getElementById('cntDesig').value = c.desig || '';
-            document.getElementById('cntMobile').value = c.mobile || '';
-            document.getElementById('cntEmail').value = c.email || '';
-            document.getElementById('cntFloor').value = c.floor || '';
+            currentContactPersons = c.persons ? [...c.persons] : [];
+            renderContactPersonsList();
             document.getElementById('contactForm').scrollIntoView({behavior: "smooth"});
         }
 
