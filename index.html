@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
@@ -323,18 +325,26 @@
                 </div>
                 
                 <div class="card">
-                    <h2><i class="fas fa-cogs"></i> Compile & Export Reports</h2>
-                    <p style="color:var(--text-muted); font-size:0.85rem; margin:15px 0;">Combine all updates and meetings into a single professional format.</p>
-                    <button class="btn" onclick="generateReport(7)"><i class="fas fa-file-alt"></i> Build Weekly Report</button>
-                    <button class="btn" style="margin-top:10px; background: transparent; border: 1px solid var(--accent-primary); color: var(--accent-primary);" onclick="generateReport(30)"><i class="fas fa-calendar-alt"></i> Build Monthly Report</button>
-                    <button class="btn" style="margin-top:10px; background: linear-gradient(45deg, #b026ff, #8a2be2); color: white; border: none;" onclick="aiSummarizeReports()"><i class="fas fa-magic"></i> AI Summarize</button>
+                    <h2><i class="fas fa-file-invoice"></i> Master Report Generator</h2>
+                    <p style="color:var(--text-muted); font-size:0.85rem; margin:15px 0;">Generate A to Z reports (Attendance, Visits, Plans, Inquiries & Contacts).</p>
                     
+                    <div style="display:flex; gap:10px; margin-bottom:15px;">
+                        <select id="masterReportDays" class="input-field" style="flex:1; margin-bottom:0;">
+                            <option value="1">Today (Daily Report)</option>
+                            <option value="7">Last 7 Days (Weekly)</option>
+                            <option value="30">Last 30 Days (Monthly)</option>
+                        </select>
+                        <button class="btn" style="width:auto; margin-top:0;" onclick="generateMasterReport()"><i class="fas fa-magic"></i> Generate</button>
+                    </div>
+
                     <div id="compiledReportBox" style="display:none; margin-top:15px;">
-                        <textarea id="compiledOutput" style="height: 150px; font-size:0.8rem; background:rgba(0,0,0,0.5);" readonly></textarea>
-                        <div style="display:flex; gap:10px; margin-top:10px;">
-                            <button class="btn" style="font-size:0.8rem; padding:8px;" onclick="copyReport()"><i class="fas fa-copy"></i> Copy</button>
-                            <button class="btn" style="font-size:0.8rem; padding:8px; background:#4caf50; color:#fff; border:none;" onclick="exportReportExcel()"><i class="fas fa-file-excel"></i> Excel</button>
-                            <button class="btn" style="font-size:0.8rem; padding:8px; background:#ff4d4d; color:#fff; border:none;" onclick="exportReportPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+                        <div id="pdfExportArea" style="background:#fff; color:#000; padding:20px; font-size:0.85rem; border-radius:5px; max-height:200px; overflow-y:auto; border:1px solid #ccc; font-family: Arial, sans-serif;">
+                            <!-- PDF HTML Content Will Be Rendered Here -->
+                        </div>
+                        <div style="display:flex; gap:10px; margin-top:15px; flex-wrap:wrap;">
+                            <button class="btn" style="font-size:0.8rem; padding:8px; flex:1;" onclick="copyMasterReport()"><i class="fas fa-copy"></i> Copy Text</button>
+                            <button class="btn" style="font-size:0.8rem; padding:8px; background:#4caf50; color:#fff; border:none; flex:1;" onclick="exportMasterExcel()"><i class="fas fa-file-excel"></i> Excel</button>
+                            <button class="btn" style="font-size:0.8rem; padding:8px; background:#ff4d4d; color:#fff; border:none; flex:1;" onclick="exportMasterPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
                         </div>
                     </div>
                 </div>
@@ -1299,35 +1309,181 @@
         }
         function deleteReport(id) { appData.reports = appData.reports.filter(r => r.id !== id); autoSave(); renderReportsList(); updateUI(); }
 
-        function generateReport(days) {
+        function getFilteredData(days) {
             const dateLimit = new Date();
             dateLimit.setDate(dateLimit.getDate() - days);
-            const filtered = appData.reports.filter(r => new Date(r.date) >= dateLimit).sort((a,b) => new Date(a.date) - new Date(b.date));
-            if(filtered.length === 0) return alert("No reports found in this timeframe.");
             
-            let output = `Daily Updates & Meetings Report (${days} Days)\nGenerated on: ${new Date().toLocaleDateString()}\n\n`;
-            filtered.forEach(r => {
-                output += `[${r.date} ${format12Hour(r.time)}] `;
-                if(r.company) output += `Visit to: ${r.company} `;
-                if(r.persons && r.persons.length > 0) {
-                    let pNames = r.persons.map(p => p.name).join(', ');
-                    output += `| Met with: ${pNames} `;
-                } else if(r.metName) {
-                    output += `| Met with: ${r.metName} `;
-                }
-                output += `\nUpdate: ${r.text}\n\n`;
-            });
+            // Filter all data arrays
+            const reports = appData.reports.filter(r => new Date(r.date) >= dateLimit);
+            const plans = appData.plans.filter(p => new Date(p.date) >= dateLimit);
+            const attendance = appData.attendance.filter(a => new Date(a.date) >= dateLimit);
+            const inquiries = appData.inquiries.filter(i => new Date(i.date) >= dateLimit);
+            // Contacts don't have a date field naturally, but we can filter by ID (Date.now())
+            const contacts = appData.contacts.filter(c => new Date(c.id) >= dateLimit);
+
+            return { reports, plans, attendance, inquiries, contacts };
+        }
+
+        let currentMasterText = "";
+
+        function generateMasterReport() {
+            const days = parseInt(document.getElementById('masterReportDays').value);
+            const data = getFilteredData(days);
+            
+            const title = `A-Z Master Report (${days == 1 ? 'Daily' : days == 7 ? 'Weekly' : 'Monthly'})`;
+            const dateStr = new Date().toLocaleDateString();
+
+            // 1. Generate HTML for PDF
+            let html = `
+                <div style="font-family: Arial, sans-serif; color: #333;">
+                    <h2 style="color: #0056b3; border-bottom: 2px solid #0056b3; padding-bottom: 5px;">${title}</h2>
+                    <p><b>Generated:</b> ${dateStr}</p>
+            `;
+            
+            let text = `${title}\nGenerated on: ${dateStr}\n\n`;
+
+            if(data.attendance.length > 0) {
+                html += `<h3 style="color:#d9534f; margin-top:15px;">1. Attendance</h3><ul>`;
+                text += `=== 1. ATTENDANCE ===\n`;
+                data.attendance.forEach(a => {
+                    const loc = a.address ? ` at ${a.address}` : '';
+                    const str = `[${a.date}] ${a.type} at ${a.time}${loc}`;
+                    html += `<li>${str}</li>`;
+                    text += `${str}\n`;
+                });
+                html += `</ul>`;
+                text += `\n`;
+            }
+
+            if(data.plans.length > 0) {
+                html += `<h3 style="color:#f0ad4e; margin-top:15px;">2. Action Plans</h3><ul>`;
+                text += `=== 2. ACTION PLANS ===\n`;
+                data.plans.forEach(p => {
+                    const str = `[${p.date}] ${p.task} - Status: ${p.status}`;
+                    html += `<li>${str}</li>`;
+                    text += `${str}\n`;
+                });
+                html += `</ul>`;
+                text += `\n`;
+            }
+
+            if(data.reports.length > 0) {
+                html += `<h3 style="color:#5cb85c; margin-top:15px;">3. Field Visits & Reports</h3>`;
+                text += `=== 3. FIELD VISITS & REPORTS ===\n`;
+                data.reports.forEach(r => {
+                    let pNames = '';
+                    if(r.persons && r.persons.length > 0) pNames = r.persons.map(p => p.name).join(', ');
+                    else if(r.metName) pNames = r.metName;
+
+                    const exp = (r.goingFare || r.returnFare || r.food) ? ` (Exp: Rs.${(r.goingFare||0)+(r.returnFare||0)+(r.food||0)})` : '';
+                    
+                    html += `<div style="margin-bottom:10px; padding-bottom:5px; border-bottom:1px solid #eee;">
+                        <b>[${r.date}] ${r.company ? r.company : 'Visit'}</b><br>
+                        <i style="font-size:0.9em; color:#666;">Met: ${pNames || 'N/A'}${exp}</i><br>
+                        ${r.text}
+                    </div>`;
+                    
+                    text += `[${r.date}] ${r.company ? r.company : 'Visit'} | Met: ${pNames || 'N/A'}${exp}\nUpdate: ${r.text}\n\n`;
+                });
+            }
+
+            if(data.inquiries.length > 0) {
+                html += `<h3 style="color:#5bc0de; margin-top:15px;">4. Sales Inquiries</h3><ul>`;
+                text += `=== 4. SALES INQUIRIES ===\n`;
+                data.inquiries.forEach(i => {
+                    const str = `[${i.date}] ${i.project} (${i.company}) - Status: ${i.status}`;
+                    html += `<li>${str}</li>`;
+                    text += `${str}\n`;
+                });
+                html += `</ul>`;
+                text += `\n`;
+            }
+
+            if(data.contacts.length > 0) {
+                html += `<h3 style="color:#795548; margin-top:15px;">5. New Contacts Added</h3><ul>`;
+                text += `=== 5. NEW CONTACTS ===\n`;
+                data.contacts.forEach(c => {
+                    const str = `${c.company} (${c.address}) - ${c.persons ? c.persons.length : 0} persons logged.`;
+                    html += `<li>${str}</li>`;
+                    text += `${str}\n`;
+                });
+                html += `</ul>`;
+                text += `\n`;
+            }
+
+            html += `</div>`;
+            
             document.getElementById('compiledReportBox').style.display = 'block';
-            document.getElementById('compiledOutput').value = output;
+            document.getElementById('pdfExportArea').innerHTML = html;
+            currentMasterText = text;
         }
-        function copyReport() {
-            const text = document.getElementById('compiledOutput');
-            text.select();
-            document.execCommand('copy');
-            showToast("Report copied to clipboard!");
+
+        function copyMasterReport() {
+            navigator.clipboard.writeText(currentMasterText).then(() => {
+                showToast("Text copied to clipboard!");
+            });
         }
-        function exportReportExcel() { alert("Report Excel Export Feature Coming Soon"); }
-        function exportReportPDF() { alert("Report PDF Export Feature Coming Soon"); }
+
+        function exportMasterPDF() {
+            const element = document.getElementById('pdfExportArea');
+            if(!element.innerHTML.trim()) return alert("Please generate a report first!");
+            const days = parseInt(document.getElementById('masterReportDays').value);
+            const opt = {
+                margin:       0.5,
+                filename:     `Master_Report_${days}Days.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+            showToast("Generating PDF...");
+        }
+
+        function exportMasterExcel() {
+            const days = parseInt(document.getElementById('masterReportDays').value);
+            const data = getFilteredData(days);
+            
+            var wb = XLSX.utils.book_new();
+
+            if(data.reports.length > 0) {
+                let wsData = data.reports.map(r => ({
+                    Date: r.date, Time: r.time, Company: r.company || 'N/A',
+                    'Persons Met': r.persons ? r.persons.map(p => p.name).join(', ') : (r.metName || 'N/A'),
+                    'Update': r.text, 'Going Fare': r.goingFare||0, 'Return Fare': r.returnFare||0, 'Food': r.food||0
+                }));
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(wsData), "Visits");
+            }
+            if(data.inquiries.length > 0) {
+                let wsData = data.inquiries.map(i => ({
+                    Date: i.date, Project: i.project, Company: i.company,
+                    Status: i.status, Remarks: i.remarks || ''
+                }));
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(wsData), "Inquiries");
+            }
+            if(data.attendance.length > 0) {
+                let wsData = data.attendance.map(a => ({
+                    Date: a.date, Time: a.time, Type: a.type, Location: a.address || ''
+                }));
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(wsData), "Attendance");
+            }
+            if(data.plans.length > 0) {
+                let wsData = data.plans.map(p => ({
+                    Date: p.date, Task: p.task, Status: p.status
+                }));
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(wsData), "Action Plans");
+            }
+            if(data.contacts.length > 0) {
+                let wsData = data.contacts.map(c => ({
+                    Company: c.company, Address: c.address, 'Total Persons': c.persons ? c.persons.length : 0
+                }));
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(wsData), "New Contacts");
+            }
+
+            if(wb.SheetNames.length === 0) return alert("No data to export for this timeframe.");
+            
+            XLSX.writeFile(wb, `Master_Report_${days}Days.xlsx`);
+            showToast("Generating Excel file...");
+        }
 
         // ACTUAL AI CALL UTILITY (Adapted for Sandeep AI endpoint)
         async function callSandeepAI(systemPrompt, userPrompt) {
