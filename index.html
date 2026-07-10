@@ -235,30 +235,39 @@
         <!-- MODULE 1A: MASTER REPORTS -->
         <section id="master-reports" class="module-section">
             <div class="card">
-                <h2 style="margin-bottom: 20px;"><i class="fas fa-chart-pie"></i> Unified Master Reports</h2>
-                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 20px; align-items:center;">
-                    <div style="flex:1; min-width:150px;">
-                        <label>Report Type</label>
-                        <select id="reportType" class="input-field" onchange="toggleReportDateType()">
-                            <option value="daily">Daily Report</option>
-                            <option value="weekly">Weekly Report</option>
-                            <option value="monthly">Monthly Report</option>
+                <h2><i class="fas fa-file-invoice"></i> Master Report Generator</h2>
+                <p style="color:var(--text-muted); font-size:0.85rem; margin:15px 0;">Generate A to Z reports (Attendance, Visits, Plans, Inquiries & Contacts).</p>
+                
+                <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap; align-items:flex-end;">
+                    <div style="flex:1; min-width:120px;">
+                        <label style="font-size:0.8rem;">Quick Select</label>
+                        <select id="masterReportPreset" class="input-field" style="margin-bottom:0;" onchange="updateMasterDates(this.value)">
+                            <option value="today">Daily (Today)</option>
+                            <option value="weekly">Weekly (Last 7 Days)</option>
+                            <option value="monthly">Monthly (This Month)</option>
+                            <option value="custom">Custom Range</option>
                         </select>
                     </div>
-                    <div style="flex:1; min-width:150px;" id="reportDateContainer">
-                        <label>Select Date / Week Start</label>
-                        <input type="date" id="reportDateSelector" class="input-field" value="">
+                    <div style="flex:1; min-width:120px;">
+                        <label style="font-size:0.8rem;">From Date</label>
+                        <input type="date" id="masterDateFrom" class="input-field" style="margin-bottom:0;" required onchange="document.getElementById('masterReportPreset').value='custom'">
                     </div>
-                    <div style="flex:1; min-width:150px; display:none;" id="reportMonthContainer">
-                        <label>Select Month</label>
-                        <input type="month" id="reportMonthSelector" class="input-field" value="">
+                    <div style="flex:1; min-width:120px;">
+                        <label style="font-size:0.8rem;">To Date</label>
+                        <input type="date" id="masterDateTo" class="input-field" style="margin-bottom:0;" required onchange="document.getElementById('masterReportPreset').value='custom'">
                     </div>
-                    <button class="btn" style="width:auto; height:45px; align-self:flex-end;" onclick="generateMasterReport()"><i class="fas fa-sync"></i> Generate</button>
-                    <button class="btn" style="width:auto; height:45px; align-self:flex-end; background:#00E5FF; color:#000;" onclick="printMasterReport()"><i class="fas fa-print"></i> Print</button>
+                    <button class="btn" style="width:auto; margin-top:0;" onclick="generateMasterReport()"><i class="fas fa-magic"></i> Generate</button>
                 </div>
-                
-                <div id="masterReportOutput" style="background:#1e1e1e; padding:20px; border-radius:10px; min-height:300px; color:#ccc; display:none;">
-                    <!-- Rendered Report Goes Here -->
+
+                <div id="compiledReportBox" style="display:none; margin-top:15px;">
+                    <div id="pdfExportArea" style="background:#fff; color:#000; padding:20px; font-size:0.85rem; border-radius:5px; max-height:200px; overflow-y:auto; border:1px solid #ccc; font-family: Arial, sans-serif;">
+                        <!-- PDF HTML Content Will Be Rendered Here -->
+                    </div>
+                    <div style="display:flex; gap:10px; margin-top:15px; flex-wrap:wrap;">
+                        <button class="btn" style="font-size:0.8rem; padding:8px; flex:1;" onclick="copyMasterReport()"><i class="fas fa-copy"></i> Copy Text</button>
+                        <button class="btn" style="font-size:0.8rem; padding:8px; background:#4caf50; color:#fff; border:none; flex:1;" onclick="exportMasterExcel()"><i class="fas fa-file-excel"></i> Excel</button>
+                        <button class="btn" style="font-size:0.8rem; padding:8px; background:#ff4d4d; color:#fff; border:none; flex:1;" onclick="exportMasterPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+                    </div>
                 </div>
             </div>
         </section>
@@ -327,42 +336,7 @@
                     </form>
                 </div>
                 
-                <div class="card">
-                    <h2><i class="fas fa-file-invoice"></i> Master Report Generator</h2>
-                    <p style="color:var(--text-muted); font-size:0.85rem; margin:15px 0;">Generate A to Z reports (Attendance, Visits, Plans, Inquiries & Contacts).</p>
-                    
-                    <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap; align-items:flex-end;">
-                        <div style="flex:1; min-width:120px;">
-                            <label style="font-size:0.8rem;">Quick Select</label>
-                            <select id="masterReportPreset" class="input-field" style="margin-bottom:0;" onchange="updateMasterDates(this.value)">
-                                <option value="today">Daily (Today)</option>
-                                <option value="weekly">Weekly (Last 7 Days)</option>
-                                <option value="monthly">Monthly (This Month)</option>
-                                <option value="custom">Custom Range</option>
-                            </select>
-                        </div>
-                        <div style="flex:1; min-width:120px;">
-                            <label style="font-size:0.8rem;">From Date</label>
-                            <input type="date" id="masterDateFrom" class="input-field" style="margin-bottom:0;" required onchange="document.getElementById('masterReportPreset').value='custom'">
-                        </div>
-                        <div style="flex:1; min-width:120px;">
-                            <label style="font-size:0.8rem;">To Date</label>
-                            <input type="date" id="masterDateTo" class="input-field" style="margin-bottom:0;" required onchange="document.getElementById('masterReportPreset').value='custom'">
-                        </div>
-                        <button class="btn" style="width:auto; margin-top:0;" onclick="generateMasterReport()"><i class="fas fa-magic"></i> Generate</button>
-                    </div>
-
-                    <div id="compiledReportBox" style="display:none; margin-top:15px;">
-                        <div id="pdfExportArea" style="background:#fff; color:#000; padding:20px; font-size:0.85rem; border-radius:5px; max-height:200px; overflow-y:auto; border:1px solid #ccc; font-family: Arial, sans-serif;">
-                            <!-- PDF HTML Content Will Be Rendered Here -->
-                        </div>
-                        <div style="display:flex; gap:10px; margin-top:15px; flex-wrap:wrap;">
-                            <button class="btn" style="font-size:0.8rem; padding:8px; flex:1;" onclick="copyMasterReport()"><i class="fas fa-copy"></i> Copy Text</button>
-                            <button class="btn" style="font-size:0.8rem; padding:8px; background:#4caf50; color:#fff; border:none; flex:1;" onclick="exportMasterExcel()"><i class="fas fa-file-excel"></i> Excel</button>
-                            <button class="btn" style="font-size:0.8rem; padding:8px; background:#ff4d4d; color:#fff; border:none; flex:1;" onclick="exportMasterPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
-                        </div>
-                    </div>
-                </div>
+                <!-- Master report generator moved to its own module tab -->
             </div>
             <div class="card" style="margin-top:20px;">
                 <h2 style="margin-bottom: 20px;"><i class="fas fa-history"></i> Reports & Meeting History</h2>
@@ -1758,137 +1732,7 @@
         }
         function deleteAttendance(id) { appData.attendance = appData.attendance.filter(a => a.id !== id); autoSave(); }
         function exportData(type) { alert(`Export for ${type} coming soon`); }
-        // MASTER REPORTS LOGIC
-        function toggleReportDateType() {
-            const type = document.getElementById('reportType').value;
-            if(type === 'monthly') {
-                document.getElementById('reportDateContainer').style.display = 'none';
-                document.getElementById('reportMonthContainer').style.display = 'block';
-            } else {
-                document.getElementById('reportDateContainer').style.display = 'block';
-                document.getElementById('reportMonthContainer').style.display = 'none';
-            }
-        }
 
-        function generateMasterReport() {
-            const type = document.getElementById('reportType').value;
-            let startDate, endDate, titleStr;
-
-            if(type === 'monthly') {
-                const m = document.getElementById('reportMonthSelector').value; // YYYY-MM
-                if(!m) return alert('Select a month');
-                const [yyyy, mm] = m.split('-');
-                startDate = new Date(yyyy, parseInt(mm)-1, 1);
-                endDate = new Date(yyyy, parseInt(mm), 0);
-                titleStr = `Monthly Report: ${m}`;
-            } else if(type === 'weekly') {
-                const d = document.getElementById('reportDateSelector').value;
-                if(!d) return alert('Select a start date for the week');
-                startDate = new Date(d);
-                endDate = new Date(startDate);
-                endDate.setDate(endDate.getDate() + 6);
-                titleStr = `Weekly Report: ${startDate.toISOString().slice(0,10)} to ${endDate.toISOString().slice(0,10)}`;
-            } else {
-                const d = document.getElementById('reportDateSelector').value;
-                if(!d) return alert('Select a date');
-                startDate = new Date(d);
-                endDate = new Date(d);
-                titleStr = `Daily Report: ${d}`;
-            }
-
-            // Filter data
-            const isBetween = (dStr) => {
-                const d = new Date(dStr);
-                d.setHours(0,0,0,0);
-                startDate.setHours(0,0,0,0);
-                endDate.setHours(23,59,59,999);
-                return d >= startDate && d <= endDate;
-            };
-
-            const fPlans = appData.plans.filter(p => isBetween(p.date));
-            const fVisits = appData.reports.filter(r => isBetween(r.date));
-            const fAtt = appData.attendance.filter(a => isBetween(a.date));
-            const fCont = appData.contacts.filter(c => isBetween(c.dateAdded));
-            const fInq = appData.inquiries.filter(i => isBetween(i.dateAdded));
-
-            // Generate HTML
-            let html = `
-                <div style="background:var(--bg-secondary); padding:20px; border-radius:10px; color:var(--text-main); font-family:'Inter', sans-serif;" id="printableReport">
-                    <div style="text-align:center; border-bottom:1px solid #333; padding-bottom:15px; margin-bottom:20px;">
-                        <h1 style="color:var(--accent-primary); margin:0;">${appData.userName || 'Corporate Hub'}</h1>
-                        <h2 style="margin:5px 0 0 0; color:#fff;">${titleStr}</h2>
-                    </div>
-
-                    <h3 style="color:var(--gold-primary); border-bottom:1px solid #333; padding-bottom:5px;">1. Attendance & Operations</h3>
-                    <p>Total Days Punched: ${fAtt.length}</p>
-                    <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
-                        <tr style="background:#333;"><th style="padding:8px;text-align:left;border:1px solid #444;">Date</th><th style="padding:8px;text-align:left;border:1px solid #444;">Type</th><th style="padding:8px;text-align:left;border:1px solid #444;">In</th><th style="padding:8px;text-align:left;border:1px solid #444;">Out</th></tr>
-                        ${fAtt.map(a => `<tr><td style="padding:8px;border:1px solid #444;">${a.date}</td><td style="padding:8px;border:1px solid #444;">${a.type}</td><td style="padding:8px;border:1px solid #444;">${a.timeIn}</td><td style="padding:8px;border:1px solid #444;">${a.timeOut||'--'}</td></tr>`).join('')}
-                    </table>
-
-                    <h3 style="color:var(--gold-primary); border-bottom:1px solid #333; padding-bottom:5px;">2. Daily Plans Achieved</h3>
-                    <p>Total Tasks: ${fPlans.length} | Completed: ${fPlans.filter(p=>p.status==='Completed').length}</p>
-                    <ul style="margin-bottom:20px; padding-left:20px;">
-                        ${fPlans.map(p => `<li><strong>${p.date}:</strong> ${p.task} - <span style="color:${p.status==='Completed'?'#00e676':'#ff4d4d'}">${p.status}</span></li>`).join('')}
-                    </ul>
-
-                    <h3 style="color:var(--gold-primary); border-bottom:1px solid #333; padding-bottom:5px;">3. Client Visits (Visit Page)</h3>
-                    <p>Total Visits Logged: ${fVisits.length}</p>
-                    <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
-                        <tr style="background:#333;"><th style="padding:8px;text-align:left;border:1px solid #444;">Date</th><th style="padding:8px;text-align:left;border:1px solid #444;">Company</th><th style="padding:8px;text-align:left;border:1px solid #444;">Expenses (₹)</th><th style="padding:8px;text-align:left;border:1px solid #444;">Remarks</th></tr>
-                        ${fVisits.map(v => `<tr><td style="padding:8px;border:1px solid #444;">${v.date}</td><td style="padding:8px;border:1px solid #444;">${v.partyName}</td><td style="padding:8px;border:1px solid #444;color:#00E5FF">₹${v.totalExpense}</td><td style="padding:8px;border:1px solid #444;">${v.remarks}</td></tr>`).join('')}
-                    </table>
-
-                    <h3 style="color:var(--gold-primary); border-bottom:1px solid #333; padding-bottom:5px;">4. Contacts Added</h3>
-                    <p>New Contacts: ${fCont.length}</p>
-                    <ul style="margin-bottom:20px; padding-left:20px;">
-                        ${fCont.map(c => `<li><strong>${c.company}</strong> - ${c.name} (${c.designation})</li>`).join('')}
-                    </ul>
-
-                    <h3 style="color:var(--gold-primary); border-bottom:1px solid #333; padding-bottom:5px;">5. Sales Inquiries</h3>
-                    <p>Total Inquiries: ${fInq.length}</p>
-                    <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
-                        <tr style="background:#333;"><th style="padding:8px;text-align:left;border:1px solid #444;">Date</th><th style="padding:8px;text-align:left;border:1px solid #444;">Company</th><th style="padding:8px;text-align:left;border:1px solid #444;">Project</th><th style="padding:8px;text-align:left;border:1px solid #444;">Status</th></tr>
-                        ${fInq.map(i => `<tr><td style="padding:8px;border:1px solid #444;">${i.dateAdded}</td><td style="padding:8px;border:1px solid #444;">${i.company}</td><td style="padding:8px;border:1px solid #444;">${i.projectName}</td><td style="padding:8px;border:1px solid #444;font-weight:bold;">${i.status}</td></tr>`).join('')}
-                    </table>
-                    
-                    <div style="text-align:center; font-size:0.8rem; color:#888; margin-top:30px;">
-                        Generated via Corporate Hub CRM &middot; ${new Date().toLocaleString()}
-                    </div>
-                </div>
-            `;
-            
-            const out = document.getElementById('masterReportOutput');
-            out.innerHTML = html;
-            out.style.display = 'block';
-        }
-
-        function printMasterReport() {
-            const out = document.getElementById('printableReport');
-            if(!out) return alert('Please generate a report first.');
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(`
-                <html>
-                <head>
-                    <title>Master Report</title>
-                    <style>
-                        body { font-family: 'Inter', sans-serif; background: #fff; color: #000; padding: 20px; }
-                        h1, h2, h3 { color: #000 !important; border-color: #000 !important; }
-                        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-                        th, td { padding: 8px; border: 1px solid #000 !important; }
-                        th { background: #eee !important; }
-                        * { background: transparent !important; color: #000 !important; }
-                    </style>
-                </head>
-                <body>
-                    ${out.innerHTML}
-                </body>
-                </html>
-            `);
-            printWindow.document.close();
-            printWindow.focus();
-            setTimeout(() => { printWindow.print(); printWindow.close(); }, 250);
-        }
     </script>
 </body>
 </html>
