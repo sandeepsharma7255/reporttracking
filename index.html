@@ -1218,7 +1218,12 @@
         }
 
         function renderPlans() {
-            const div = document.getElementById('planListDiv'); div.innerHTML = ''; let todaysPlans = appData.plans.filter(p => p.date === todayStr);
+            const div = document.getElementById('planListDiv'); div.innerHTML = ''; 
+            // Rollover: Show today's tasks PLUS any uncompleted past tasks
+            let todaysPlans = appData.plans.filter(p => p.date === todayStr || (p.date < todayStr && p.status !== 'Completed'));
+            
+            todaysPlans.sort((a,b) => a.date.localeCompare(b.date)); // Sort oldest uncompleted first
+            
             if(todaysPlans.length === 0) return div.innerHTML = '<p style="color:grey;text-align:center;">No tasks planned for today.</p>';
             todaysPlans.forEach(p => {
                 let badgeCol = p.status === 'Completed' ? 'var(--success)' : (p.status === 'Progress' ? 'var(--warning)' : 'var(--danger)'); let strike = p.status === 'Completed' ? 'line-through' : 'none'; let txtCol = p.status === 'Completed' ? 'var(--text-muted)' : 'var(--text-main)';
