@@ -236,7 +236,7 @@
         <section id="master-reports" class="module-section">
             <div class="card">
                 <h2><i class="fas fa-file-invoice"></i> Master Report Generator</h2>
-                <p style="color:var(--text-muted); font-size:0.85rem; margin:15px 0;">Generate A to Z reports (Attendance, Visits, Plans, Inquiries & Contacts).</p>
+                <p style="color:var(--text-muted); font-size:0.85rem; margin:15px 0;">Generate Daily, Weekly, and Monthly Reports (Attendance, Visits, Plans, Inquiries & Contacts).</p>
                 
                 <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap; align-items:flex-end;">
                     <div style="flex:1; min-width:120px;">
@@ -1379,9 +1379,12 @@
             const attendance = appData.attendance.filter(a => a.date >= fromDateStr && a.date <= toDateStr);
             const inquiries = appData.inquiries.filter(i => i.date >= fromDateStr && i.date <= toDateStr);
             
-            const startTs = new Date(fromDateStr).setHours(0,0,0,0);
-            const endTs = new Date(toDateStr).setHours(23,59,59,999);
-            const contacts = appData.contacts.filter(c => c.id >= startTs && c.id <= endTs);
+            const contacts = appData.contacts.filter(c => {
+                const d = new Date(c.id);
+                const tzOffset = d.getTimezoneOffset() * 60000;
+                const localDateStr = new Date(d - tzOffset).toISOString().slice(0,10);
+                return localDateStr >= fromDateStr && localDateStr <= toDateStr;
+            });
 
             return { reports, plans, attendance, inquiries, contacts };
         }
@@ -1395,84 +1398,86 @@
             
             const data = getFilteredData(fromDateStr, toDateStr);
             
-            const title = `A-Z Master Report (${fromDateStr} to ${toDateStr})`;
+            const title = `Master Report (${fromDateStr} to ${toDateStr})`;
             const dateStr = new Date().toLocaleDateString();
 
-            // 1. Generate HTML for PDF
+            // Generate HTML for PDF
             let html = `
-                <div style="font-family: Arial, sans-serif; color: #333;">
-                    <h2 style="color: #0056b3; border-bottom: 2px solid #0056b3; padding-bottom: 5px;">${title}</h2>
-                    <p><b>Generated:</b> ${dateStr}</p>
+                <div style="font-family: 'Arial', sans-serif; color: #000; font-size: 12px;">
+                    <div style="text-align:center; border-bottom: 2px solid #333; margin-bottom: 15px; padding-bottom:5px;">
+                        <h2 style="color: #333; margin:0;">${appData.userName || 'Corporate Hub'}</h2>
+                        <h3 style="margin:5px 0; color: #555;">${title}</h3>
+                        <p style="font-size:10px; color:#666; margin:0;">Generated on: ${dateStr}</p>
+                    </div>
             `;
             
             let text = `${title}\nGenerated on: ${dateStr}\n\n`;
 
+            const tableStyle = 'width:100%; border-collapse:collapse; margin-bottom:15px;';
+            const thStyle = 'background:#eee; padding:6px; text-align:left; border:1px solid #aaa; font-weight:bold;';
+            const tdStyle = 'padding:6px; border:1px solid #aaa;';
+
             if(data.attendance.length > 0) {
-                html += `<h3 style="color:#d9534f; margin-top:15px;">1. Attendance</h3><ul>`;
+                html += `<h4 style="color:#d9534f; margin:10px 0 5px 0;">1. Attendance & Operations</h4>`;
+                html += `<table style="${tableStyle}"><tr><th style="${thStyle}">Date</th><th style="${thStyle}">Type</th><th style="${thStyle}">In</th><th style="${thStyle}">Out</th></tr>`;
                 text += `=== 1. ATTENDANCE ===\n`;
                 data.attendance.forEach(a => {
-                    const loc = a.address ? ` at ${a.address}` : '';
-                    const str = `[${a.date}] ${a.type} at ${a.time}${loc}`;
-                    html += `<li>${str}</li>`;
-                    text += `${str}\n`;
+                    html += `<tr><td style="${tdStyle}">${a.date}</td><td style="${tdStyle}">${a.type}</td><td style="${tdStyle}">${a.timeIn}</td><td style="${tdStyle}">${a.timeOut || '--'}</td></tr>`;
+                    text += `[${a.date}] ${a.type} | In: ${a.timeIn} | Out: ${a.timeOut||'--'}\n`;
                 });
-                html += `</ul>`;
+                html += `</table>`;
                 text += `\n`;
             }
 
             if(data.plans.length > 0) {
-                html += `<h3 style="color:#f0ad4e; margin-top:15px;">2. Action Plans</h3><ul>`;
+                html += `<h4 style="color:#f0ad4e; margin:10px 0 5px 0;">2. Action Plans</h4>`;
+                html += `<table style="${tableStyle}"><tr><th style="${thStyle}">Date</th><th style="${thStyle}">Task</th><th style="${thStyle}">Status</th></tr>`;
                 text += `=== 2. ACTION PLANS ===\n`;
                 data.plans.forEach(p => {
-                    const str = `[${p.date}] ${p.task} - Status: ${p.status}`;
-                    html += `<li>${str}</li>`;
-                    text += `${str}\n`;
+                    html += `<tr><td style="${tdStyle}">${p.date}</td><td style="${tdStyle}">${p.task}</td><td style="${tdStyle}; font-weight:bold; color:${p.status==='Completed'?'green':'red'};">${p.status}</td></tr>`;
+                    text += `[${p.date}] ${p.task} - Status: ${p.status}\n`;
                 });
-                html += `</ul>`;
+                html += `</table>`;
                 text += `\n`;
             }
 
             if(data.reports.length > 0) {
-                html += `<h3 style="color:#5cb85c; margin-top:15px;">3. Field Visits & Reports</h3>`;
+                html += `<h4 style="color:#5cb85c; margin:10px 0 5px 0;">3. Field Visits & Reports</h4>`;
+                html += `<table style="${tableStyle}"><tr><th style="${thStyle}">Date</th><th style="${thStyle}">Company</th><th style="${thStyle}">Met Persons</th><th style="${thStyle}">Expenses (₹)</th><th style="${thStyle}">Remarks</th></tr>`;
                 text += `=== 3. FIELD VISITS & REPORTS ===\n`;
                 data.reports.forEach(r => {
                     let pNames = '';
                     if(r.persons && r.persons.length > 0) pNames = r.persons.map(p => p.name).join(', ');
                     else if(r.metName) pNames = r.metName;
-
-                    const exp = (r.goingFare || r.returnFare || r.food) ? ` (Exp: Rs.${(r.goingFare||0)+(r.returnFare||0)+(r.food||0)})` : '';
+                    const totExp = (r.goingFare||0)+(r.returnFare||0)+(r.food||0);
                     
-                    html += `<div style="margin-bottom:10px; padding-bottom:5px; border-bottom:1px solid #eee;">
-                        <b>[${r.date}] ${r.company ? r.company : 'Visit'}</b><br>
-                        <i style="font-size:0.9em; color:#666;">Met: ${pNames || 'N/A'}${exp}</i><br>
-                        ${r.text}
-                    </div>`;
-                    
-                    text += `[${r.date}] ${r.company ? r.company : 'Visit'} | Met: ${pNames || 'N/A'}${exp}\nUpdate: ${r.text}\n\n`;
+                    html += `<tr><td style="${tdStyle}">${r.date}</td><td style="${tdStyle}">${r.company || 'Visit'}</td><td style="${tdStyle}">${pNames || 'N/A'}</td><td style="${tdStyle}">₹${totExp}</td><td style="${tdStyle}">${r.text}</td></tr>`;
+                    text += `[${r.date}] ${r.company ? r.company : 'Visit'} | Met: ${pNames || 'N/A'} (Exp: Rs.${totExp})\nUpdate: ${r.text}\n\n`;
                 });
+                html += `</table>`;
             }
 
             if(data.inquiries.length > 0) {
-                html += `<h3 style="color:#5bc0de; margin-top:15px;">4. Sales Inquiries</h3><ul>`;
+                html += `<h4 style="color:#5bc0de; margin:10px 0 5px 0;">4. Sales Inquiries</h4>`;
+                html += `<table style="${tableStyle}"><tr><th style="${thStyle}">Date</th><th style="${thStyle}">Company</th><th style="${thStyle}">Project</th><th style="${thStyle}">Status</th></tr>`;
                 text += `=== 4. SALES INQUIRIES ===\n`;
                 data.inquiries.forEach(i => {
-                    const str = `[${i.date}] ${i.project} (${i.company}) - Status: ${i.status}`;
-                    html += `<li>${str}</li>`;
-                    text += `${str}\n`;
+                    html += `<tr><td style="${tdStyle}">${i.date}</td><td style="${tdStyle}">${i.company}</td><td style="${tdStyle}">${i.project}</td><td style="${tdStyle}">${i.status}</td></tr>`;
+                    text += `[${i.date}] ${i.project} (${i.company}) - Status: ${i.status}\n`;
                 });
-                html += `</ul>`;
+                html += `</table>`;
                 text += `\n`;
             }
 
             if(data.contacts.length > 0) {
-                html += `<h3 style="color:#795548; margin-top:15px;">5. New Contacts Added</h3><ul>`;
+                html += `<h4 style="color:#795548; margin:10px 0 5px 0;">5. New Contacts Added</h4>`;
+                html += `<table style="${tableStyle}"><tr><th style="${thStyle}">Company</th><th style="${thStyle}">Address</th><th style="${thStyle}">Persons Logged</th></tr>`;
                 text += `=== 5. NEW CONTACTS ===\n`;
                 data.contacts.forEach(c => {
-                    const str = `${c.company} (${c.address}) - ${c.persons ? c.persons.length : 0} persons logged.`;
-                    html += `<li>${str}</li>`;
-                    text += `${str}\n`;
+                    html += `<tr><td style="${tdStyle}">${c.company}</td><td style="${tdStyle}">${c.address}</td><td style="${tdStyle}">${c.persons ? c.persons.length : 0}</td></tr>`;
+                    text += `${c.company} (${c.address}) - ${c.persons ? c.persons.length : 0} persons logged.\n`;
                 });
-                html += `</ul>`;
+                html += `</table>`;
                 text += `\n`;
             }
 
