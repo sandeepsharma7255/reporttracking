@@ -266,7 +266,10 @@
         <!-- MODULE 2: DAILY PLAN -->
         <section id="planner" class="module-section">
             <div class="card">
-                <h2 style="margin-bottom: 5px;"><i class="fas fa-tasks"></i> Today's Action Plan</h2>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+                    <h2 style="margin-bottom: 0;"><i class="fas fa-tasks"></i> Today's Action Plan</h2>
+                    <button type="button" onclick="openPlanHistory()" class="btn" style="width:auto; padding:5px 10px; font-size:0.8rem; background:transparent; border:1px solid var(--accent-primary); color:var(--accent-primary); margin:0;"><i class="fas fa-history"></i> History</button>
+                </div>
                 <form id="planForm" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 20px;">
                     <input type="text" id="planTask" class="input-field" placeholder="What needs to be done today?" style="flex:1; margin-bottom:0;" required>
                     <button type="submit" id="planSubmitBtn" class="btn" style="width:auto; margin-top:0;">Add Task</button>
@@ -618,6 +621,20 @@
                 </div>
             </div>
         </section>
+        
+        <!-- PLAN HISTORY MODAL -->
+        <div id="planHistoryModal" class="modal-overlay">
+            <div class="modal" style="width: 90%; max-width: 600px; background:var(--card-bg); padding:20px; border-radius:10px; border:1px solid var(--card-border);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <h2 style="margin:0; color:var(--accent-primary);"><i class="fas fa-history"></i> Plan History</h2>
+                    <button type="button" class="icon-btn" onclick="document.getElementById('planHistoryModal').classList.remove('active')"><i class="fas fa-times"></i></button>
+                </div>
+                <div id="planHistoryContent" style="max-height: 60vh; overflow-y: auto; padding-right: 5px;">
+                    <!-- History injected here -->
+                </div>
+            </div>
+        </div>
+
     </main>
 
     <!-- FIREBASE & JAVASCRIPT ENGINE -->
@@ -1215,6 +1232,44 @@
                 document.getElementById('planSubmitBtn').innerText = 'Save Task';
                 document.getElementById('planTask').focus();
             }
+        }
+
+        function openPlanHistory() {
+            const content = document.getElementById('planHistoryContent');
+            content.innerHTML = '';
+            
+            const grouped = {};
+            appData.plans.forEach(p => {
+                if(!grouped[p.date]) grouped[p.date] = [];
+                grouped[p.date].push(p);
+            });
+            
+            const dates = Object.keys(grouped).sort((a,b) => b.localeCompare(a)); // Newest first
+            
+            if(dates.length === 0) {
+                content.innerHTML = '<p style="text-align:center; color:grey; padding:20px;">No plan history found.</p>';
+            } else {
+                let html = '';
+                dates.forEach(d => {
+                    html += `<h3 style="margin: 15px 0 5px 0; color:var(--text-main); border-bottom:1px solid var(--card-border); padding-bottom:5px;">${d}</h3>`;
+                    grouped[d].forEach(p => {
+                        let badgeCol = p.status === 'Completed' ? 'var(--success)' : (p.status === 'Progress' ? 'var(--warning)' : 'var(--danger)'); 
+                        let strike = p.status === 'Completed' ? 'line-through' : 'none'; 
+                        let txtCol = p.status === 'Completed' ? 'var(--text-muted)' : 'var(--text-main)';
+                        
+                        html += `
+                        <div class="list-item" style="border-left-color:${badgeCol}; margin-bottom:5px; padding:8px 15px;">
+                            <div style="flex:1;">
+                                <span style="font-size:0.6rem; font-weight:bold; padding:2px 6px; border-radius:10px; border:1px solid ${badgeCol}; color:${badgeCol};">${p.status.toUpperCase()}</span>
+                                <p style="font-size:0.85rem; margin-top:5px; text-decoration:${strike}; color:${txtCol}">${p.task}</p>
+                            </div>
+                        </div>`;
+                    });
+                });
+                content.innerHTML = html;
+            }
+            
+            document.getElementById('planHistoryModal').classList.add('active');
         }
 
         function renderPlans() {
