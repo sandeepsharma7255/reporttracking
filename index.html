@@ -240,7 +240,7 @@
                     </div>
                 </div>
                 <div class="card">
-                    <div class="stat-header"><span>Total Monthly Expenses</span><i class="fas fa-wallet"></i></div>
+                    <div class="stat-header"><span>Total Expenses Overview</span><i class="fas fa-wallet"></i></div>
                     <div class="stat-value" id="dashExpense" style="color: #ff5252; margin-top:5px;">₹0</div>
                 </div>
             </div>
@@ -1047,24 +1047,24 @@
             const lOT = document.getElementById('lblOrdersTarget'); if(lOT) lOT.innerText = `Target: ${tOrders}`;
 
             let visitExp = 0;
-            appData.reports.filter(r => r.date.startsWith(currentMonth)).forEach(r => {
+            appData.reports.forEach(r => {
                 visitExp += (parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0);
             });
             let personalExp = 0;
             if(appData.personalExpenses) {
-                appData.personalExpenses.filter(e => e.date.startsWith(currentMonth)).forEach(e => {
+                appData.personalExpenses.forEach(e => {
                     personalExp += (parseFloat(e.amount)||0);
                 });
             }
             if(appData.expenseSheets) {
-                appData.expenseSheets.filter(s => s.date.startsWith(currentMonth)).forEach(s => {
+                appData.expenseSheets.forEach(s => {
                     personalExp += (parseFloat(s.total)||0);
                 });
             }
             let totalExp = visitExp + personalExp;
 
             const dE = document.getElementById('dashExpense'); 
-            if(dE) dE.innerHTML = `₹${totalExp.toLocaleString()}<div style="font-size:0.75rem; color:#fff; margin-top:5px; font-weight:normal;">Visits: ₹${visitExp.toLocaleString()} | Personal: ₹${personalExp.toLocaleString()}</div>`;
+            if(dE) dE.innerHTML = `₹${totalExp.toLocaleString()}<div style="font-size:0.75rem; color:#fff; margin-top:5px; font-weight:normal;">Total Expenses Overview<br>Visits: ₹${visitExp.toLocaleString()} | Personal: ₹${personalExp.toLocaleString()}</div>`;
 
             if(typeof renderPersonalExpenses === 'function') renderPersonalExpenses();
 
@@ -2179,7 +2179,12 @@
                      <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><strong style="color:var(--danger)">Legacy Single Expenses</strong></div>`;
                  [...legacyExpenses].sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(e => {
                      html += `<div style="display:flex; justify-content:space-between; font-size:0.8rem; padding:4px 0; border-bottom:1px dashed rgba(255,255,255,0.1);">
-                        <span>${e.date} - ${e.desc}</span><span style="color:var(--danger)">₹${e.amount}</span>
+                        <span>${e.date} - ${e.desc}</span>
+                        <div style="display:flex; gap:10px; align-items:center;">
+                            <span style="color:var(--danger)">₹${e.amount}</span>
+                            <i class="fas fa-edit" style="color:var(--accent-primary); cursor:pointer;" onclick="editLegacyItem(${e.id})"></i>
+                            <i class="fas fa-trash" style="color:var(--danger); cursor:pointer;" onclick="deleteLegacyItem(${e.id})"></i>
+                        </div>
                      </div>`;
                  });
                  html += `</div>`;
@@ -2197,14 +2202,63 @@
                         </div>
                     </div>
                     <div style="font-size:0.8rem; padding-left:10px; border-left:2px solid var(--card-border);">`;
-                s.items.forEach(i => {
+                s.items.forEach((i, idx) => {
                     html += `<div style="display:flex; justify-content:space-between; padding:3px 0;">
-                        <span>${i.desc}</span><span>₹${i.amount}</span>
+                        <span>${i.desc}</span>
+                        <div style="display:flex; gap:10px; align-items:center;">
+                            <span>₹${i.amount}</span>
+                            <i class="fas fa-edit" style="color:var(--accent-primary); cursor:pointer;" onclick="editSheetItem(${s.id}, ${idx})"></i>
+                            <i class="fas fa-trash" style="color:var(--danger); cursor:pointer;" onclick="deleteSheetItem(${s.id}, ${idx})"></i>
+                        </div>
                     </div>`;
                 });
                 html += `</div></div>`;
             });
             div.innerHTML = html;
+        }
+
+        function deleteLegacyItem(id) {
+            if(!confirm("Delete this legacy expense?")) return;
+            appData.personalExpenses = appData.personalExpenses.filter(e => e.id !== id);
+            autoSave(); updateUI(); renderExpenseHistory();
+        }
+
+        function editLegacyItem(id) {
+            let item = appData.personalExpenses.find(e => e.id === id);
+            if(!item) return;
+            let newDesc = prompt("Edit Description:", item.desc);
+            if(newDesc === null) return;
+            let newAmtStr = prompt("Edit Amount:", item.amount);
+            if(newAmtStr === null) return;
+            let newAmt = parseFloat(newAmtStr);
+            if(isNaN(newAmt)) return alert("Invalid amount");
+            item.desc = newDesc; item.amount = newAmt;
+            autoSave(); updateUI(); renderExpenseHistory();
+        }
+
+        function deleteSheetItem(sheetId, itemIdx) {
+            let sheet = appData.expenseSheets.find(s => s.id === sheetId);
+            if(!sheet) return;
+            if(!confirm("Delete this item?")) return;
+            sheet.items.splice(itemIdx, 1);
+            sheet.total = sheet.items.reduce((sum, i) => sum + parseFloat(i.amount||0), 0);
+            if(sheet.items.length === 0) appData.expenseSheets = appData.expenseSheets.filter(s => s.id !== sheetId);
+            autoSave(); updateUI(); renderExpenseHistory();
+        }
+
+        function editSheetItem(sheetId, itemIdx) {
+            let sheet = appData.expenseSheets.find(s => s.id === sheetId);
+            if(!sheet) return;
+            let item = sheet.items[itemIdx];
+            let newDesc = prompt("Edit Description:", item.desc);
+            if(newDesc === null) return;
+            let newAmtStr = prompt("Edit Amount:", item.amount);
+            if(newAmtStr === null) return;
+            let newAmt = parseFloat(newAmtStr);
+            if(isNaN(newAmt)) return alert("Invalid amount");
+            item.desc = newDesc; item.amount = newAmt;
+            sheet.total = sheet.items.reduce((sum, i) => sum + parseFloat(i.amount||0), 0);
+            autoSave(); updateUI(); renderExpenseHistory();
         }
 
         function generateExpensePDF() {
