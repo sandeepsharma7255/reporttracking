@@ -14,6 +14,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
 
     <style>
         :root {
@@ -177,6 +178,7 @@
             <li class="nav-item" onclick="switchTab('attendance')"><i class="fas fa-map-marker-alt"></i> Attendance <span style="background:#00E5FF;color:#000;font-size:0.6rem;padding:2px 5px;border-radius:10px;margin-left:auto;font-weight:bold;">GPS</span></li>
             <li class="nav-item" onclick="switchTab('contacts')"><i class="fas fa-address-book"></i> Contacts</li>
             <li class="nav-item" onclick="switchTab('inquiries')"><i class="fas fa-industry"></i> Sales Inquiries</li>
+            <li class="nav-item" onclick="switchTab('quotation')"><i class="fas fa-file-invoice-dollar"></i> Quotations</li>
             <li class="nav-item" onclick="switchTab('settings')"><i class="fas fa-cog"></i> Settings</li>
         </ul>
         <div style="margin-top: auto; text-align: center; font-size: 0.8rem; color: var(--accent-primary); font-weight: 800;">
@@ -433,6 +435,14 @@
 
                         <label>Full Address</label><input type="text" id="cntAddress" class="input-field" placeholder="e.g. Nariman Point">
                         
+                        <label>Visiting Card (Image Upload)</label>
+                        <div style="display:flex; gap:10px; margin-bottom:15px; flex-direction:column; background:rgba(0,0,0,0.2); padding:10px; border-radius:8px; border:1px dashed var(--card-border);">
+                            <input type="file" id="cntImage" class="input-field" style="margin-bottom:0; padding:5px;" accept="image/*" capture="environment">
+                            <img id="cntImgPreview" style="display:none; width:100%; border-radius:5px; border:1px solid var(--card-border);">
+                            <input type="hidden" id="cntImgUrl">
+                            <span id="cntUploadStatus" style="font-size:0.8rem; color:var(--text-muted);"></span>
+                        </div>
+                        
                         <h3 style="color:var(--accent-primary); margin:15px 0 10px 0;"><i class="fas fa-users"></i> Key Persons</h3>
                         <div id="contactPersonsList" style="margin-bottom:15px;"></div>
                         <div style="background:var(--card-bg); border:1px solid var(--card-border); padding:10px; border-radius:5px; margin-bottom:15px;">
@@ -605,6 +615,51 @@
             </div>
         </section>
 
+        <!-- QUOTATION GENERATOR -->
+        <section id="quotation" class="module-section">
+            <div class="grid-2">
+                <div class="card">
+                    <h2 style="margin-bottom: 15px;"><i class="fas fa-file-invoice-dollar"></i> Create Quotation</h2>
+                    <label>Select Client</label>
+                    <select id="quoteCompany" class="input-field"><option value="">Select Company</option></select>
+                    
+                    <label>Subject</label>
+                    <input type="text" id="quoteSubject" class="input-field" placeholder="e.g. Quotation for 500kVA Transformer">
+                    
+                    <h3 style="color:var(--accent-primary); margin:15px 0 10px 0;"><i class="fas fa-box"></i> Add Item</h3>
+                    <div style="background:var(--card-bg); border:1px solid var(--card-border); padding:10px; border-radius:5px; margin-bottom:15px;">
+                        <input type="text" id="qItemDesc" class="input-field" placeholder="Item Description (e.g. 500kVA, 11/0.433kV Transformer)">
+                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                            <div style="flex:1;"><label>Qty</label><input type="number" id="qItemQty" class="input-field" value="1"></div>
+                            <div style="flex:1;"><label>Unit Price (₹)</label><input type="number" id="qItemPrice" class="input-field"></div>
+                        </div>
+                        <button type="button" class="btn" style="background:#333;" onclick="addQuoteItem()">+ Add to Quote</button>
+                    </div>
+
+                    <div id="quoteItemsList" style="margin-bottom:15px;"></div>
+
+                    <h3 style="color:var(--accent-primary); margin:15px 0 10px 0;"><i class="fas fa-handshake"></i> Terms & Conditions</h3>
+                    <div style="display:flex; gap:10px;">
+                        <div style="flex:1"><label>GST (%)</label><input type="number" id="quoteGST" class="input-field" value="18"></div>
+                        <div style="flex:1"><label>Validity</label><input type="text" id="quoteValidity" class="input-field" value="30 Days"></div>
+                    </div>
+                    <label>Delivery Terms</label><input type="text" id="quoteDelivery" class="input-field" value="Ex-Works">
+                    <label>Payment Terms</label><input type="text" id="quotePayment" class="input-field" value="30% Advance, Balance against Proforma Invoice">
+                    
+                    <button class="btn" onclick="generateQuotationPDF()">Generate Professional PDF</button>
+                </div>
+
+                <div class="card" style="background:#fff; color:#000;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <h2 style="color:#333; margin:0;"><i class="fas fa-file-pdf"></i> Preview</h2>
+                    </div>
+                    <div id="quotePreviewArea" style="border:1px solid #ccc; padding:20px; font-size:12px; font-family:Arial, sans-serif; overflow-x:auto;">
+                        <div style="text-align:center; color:#999; margin-top:50px; font-size:14px;">Add items and click Generate PDF to view quotation preview.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- SETTINGS -->
         <section id="settings" class="module-section">
             <div class="grid-2">
@@ -670,6 +725,7 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth(); 
         const db = firebase.firestore();
+        const storage = firebase.storage();
         
         // Fix for "Client is offline" network issues on some ISPs/browsers
         db.settings({ 
@@ -1036,6 +1092,7 @@
                 id: editContactId || Date.now(),
                 company: document.getElementById('cntCompany').value,
                 address: document.getElementById('cntAddress').value,
+                cardImage: document.getElementById('cntImgUrl').value || '',
                 persons: [...currentContactPersons]
             };
             if(editContactId) {
@@ -1113,6 +1170,15 @@
             editContactId = id;
             document.getElementById('cntCompany').value = c.company || '';
             document.getElementById('cntAddress').value = c.address || '';
+            document.getElementById('cntImgUrl').value = c.cardImage || '';
+            if(c.cardImage) {
+                document.getElementById('cntImgPreview').style.display = 'block';
+                document.getElementById('cntImgPreview').src = c.cardImage;
+                document.getElementById('cntUploadStatus').innerText = "Loaded existing card";
+            } else {
+                document.getElementById('cntImgPreview').style.display = 'none';
+                document.getElementById('cntUploadStatus').innerText = '';
+            }
             currentContactPersons = c.persons ? [...c.persons] : [];
             renderContactPersonsList();
             document.getElementById('contactForm').scrollIntoView({behavior: "smooth"});
