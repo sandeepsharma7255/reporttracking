@@ -2127,6 +2127,7 @@
             renderPendingExpenses();
             autoSave();
             updateUI();
+            renderExpenseHistory();
             showToast("Expense Sheet Saved Successfully!");
         }
 
@@ -2135,6 +2136,7 @@
             appData.expenseSheets = appData.expenseSheets.filter(s => s.id !== id);
             autoSave();
             updateUI();
+            renderExpenseHistory();
         }
 
         function renderExpenseHistory() {
