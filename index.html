@@ -224,6 +224,12 @@
                     <div class="list-item"><span>GPS Attendance Punched?</span><strong id="chkAttend" style="color:var(--danger)">NO</strong></div>
                 </div>
                 <div class="card">
+                    <h3><i class="fas fa-bell" style="color:var(--warning);"></i> Action Required: Follow-ups</h3>
+                    <div id="dashFollowUpList" style="margin-top:10px; max-height:150px; overflow-y:auto; padding-right:5px;">
+                        <p style="color:var(--text-muted); font-size:0.8rem; font-style:italic;">No pending follow-ups for today.</p>
+                    </div>
+                </div>
+                <div class="card" style="grid-column: 1 / -1;">
                     <h3>📊 Sales Status Overview</h3>
                     <div style="position: relative; height: 200px; width: 100%; margin-top: 20px;">
                         <canvas id="salesChart"></canvas>
@@ -547,6 +553,10 @@
                                     <option value="Order Won">Order Won</option>
                                     <option value="Order Lost">Order Lost</option>
                                 </select>
+                            </div>
+                            <div style="flex:1; min-width:120px;">
+                                <label>Next Follow-up Date</label>
+                                <input type="date" id="inqFollowUp" class="input-field">
                             </div>
                         </div>
                         <label>Remarks / Notes</label>
@@ -886,6 +896,34 @@
             document.getElementById('chkReport').innerHTML = appData.reports.some(r => r.date === todayStr) ? '<span style="color:var(--success)">YES</span>' : '<span style="color:var(--danger)">NO</span>';
             document.getElementById('chkAttend').innerHTML = appData.attendance.some(a => a.date === todayStr) ? '<span style="color:var(--success)">YES</span>' : '<span style="color:var(--danger)">NO</span>';
             document.getElementById('welcomeText').innerHTML = `Corporate Hub: ${appData.userName || 'Agent'}`;
+
+            // Build dashFollowUpList
+            let pendingFollowUps = appData.inquiries.filter(i => {
+                if(!i.followUp) return false;
+                if(i.status === 'Order Won' || i.status === 'Order Lost') return false;
+                return i.followUp <= todayStr;
+            });
+            let fuHtml = '';
+            if(pendingFollowUps.length === 0) {
+                fuHtml = '<p style="color:var(--text-muted); font-size:0.8rem; font-style:italic;">No pending follow-ups for today.</p>';
+            } else {
+                pendingFollowUps.forEach(i => {
+                    let contact = appData.contacts.find(c => c.company === i.company);
+                    let waHtml = '';
+                    if (contact && contact.persons && contact.persons.length > 0) {
+                        let phone = contact.persons[0].mobile;
+                        waHtml = `<a href="https://wa.me/91${phone.replace(/\D/g,'')}?text=Hello ${encodeURIComponent(contact.persons[0].name)}, following up regarding ${encodeURIComponent(i.project)}..." target="_blank" style="color:#25D366; float:right; font-size:1.1rem;" title="WhatsApp Contact"><i class="fab fa-whatsapp"></i></a>`;
+                    }
+                    fuHtml += `<div class="list-item" style="display:block;">
+                        <strong style="color:var(--accent-primary); font-size:0.85rem;">${i.company}</strong> ${waHtml}
+                        <div style="font-size:0.75rem;">${i.project} - <span style="color:var(--warning);">${i.status}</span></div>
+                        <div style="font-size:0.7rem; color:var(--text-muted); margin-top:3px;"><i class="fas fa-calendar-times"></i> Scheduled: ${i.followUp}</div>
+                    </div>`;
+                });
+            }
+            const dfList = document.getElementById('dashFollowUpList');
+            if(dfList) dfList.innerHTML = fuHtml;
+
             renderPlans(); renderReportsList(); renderAttendance(); renderContacts(); renderInquiries(); renderCalendar();
             updateCharts();
         }
@@ -980,9 +1018,12 @@
                     if(c.persons && c.persons.length > 0) {
                         c.persons.forEach(p => {
                             pListHtml += `<div style="background:rgba(0,0,0,0.2); padding:5px; border-radius:5px; margin-bottom:4px; font-size:0.8rem; border-left:2px solid var(--accent-primary);">
-                                <div style="display:flex; justify-content:space-between;">
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
                                     <span><b><i class="fas fa-user-tie"></i> ${p.name}</b> (${p.desig})</span>
-                                    <span><i class="fas fa-phone"></i> ${p.mobile}</span>
+                                    <span>
+                                        <a href="https://wa.me/91${p.mobile.replace(/\D/g,'')}?text=Hello ${encodeURIComponent(p.name)}," target="_blank" style="color:#25D366; margin-right:8px; font-size:1.1rem;" title="WhatsApp Chat"><i class="fab fa-whatsapp"></i></a>
+                                        <i class="fas fa-phone"></i> ${p.mobile}
+                                    </span>
                                 </div>
                                 ${p.email || p.floor ? `<div style="color:var(--text-muted); font-size:0.75rem; margin-top:2px;">${p.email ? '<i class="fas fa-envelope"></i> ' + p.email : ''} ${p.email && p.floor ? '|' : ''} ${p.floor ? 'Floor: ' + p.floor : ''}</div>` : ''}
                             </div>`;
@@ -1114,6 +1155,7 @@
                 delivery: document.getElementById('inqDelivery').value,
                 budget: document.getElementById('inqBudget').value,
                 status: document.getElementById('inqStatus').value,
+                followUp: document.getElementById('inqFollowUp').value,
                 remarks: document.getElementById('inqRemarks').value,
                 transformers: [...currentInquiryTransformers]
             };
@@ -1162,6 +1204,13 @@
                         tfHtml = `<div style="font-size:0.75rem; color:var(--text-muted);">Legacy Entry: ${i.qty}x ${i.type} (${i.kva})</div>`;
                     }
 
+                    let contact = appData.contacts.find(c => c.company === i.company);
+                    let waHtml = '';
+                    if (contact && contact.persons && contact.persons.length > 0) {
+                        let phone = contact.persons[0].mobile;
+                        waHtml = `<a href="https://wa.me/91${phone.replace(/\D/g,'')}?text=Hello ${encodeURIComponent(contact.persons[0].name)}, regarding inquiry for ${encodeURIComponent(i.project)}..." target="_blank" style="color:#25D366; margin-left:8px; font-size:1.1rem;" title="WhatsApp Contact"><i class="fab fa-whatsapp"></i></a>`;
+                    }
+
                     html += `<div class="list-item" style="flex-direction:column; align-items:flex-start;">
                         <div style="display:flex; justify-content:space-between; width:100%; margin-bottom:5px;">
                             <strong style="font-size:0.9rem;"><i class="fas fa-industry"></i> ${i.project}</strong>
@@ -1170,10 +1219,11 @@
                                 <button class="delete-btn" onclick="deleteInq(${i.id})"><i class="fas fa-trash"></i></button>
                             </div>
                         </div>
-                        <p style="font-size:0.8rem; color:var(--accent-primary); margin-bottom:5px;"><b>${i.company}</b></p>
+                        <p style="font-size:0.8rem; color:var(--accent-primary); margin-bottom:5px; display:flex; align-items:center;"><b>${i.company}</b> ${waHtml}</p>
                         ${tfHtml}
                         <div style="display:flex; justify-content:space-between; width:100%; align-items:center; margin-top:5px;">
                             <span style="font-size:0.7rem; color:${stColor}; font-weight:bold;">${i.status}</span>
+                            ${i.followUp ? `<span style="font-size:0.7rem; color:var(--text-muted);"><i class="fas fa-calendar-alt"></i> Follow-up: ${i.followUp}</span>` : ''}
                         </div>
                         ${i.remarks ? `<p style="font-size:0.75rem; font-style:italic; margin-top:5px; color:var(--text-muted);">"${i.remarks}"</p>` : ''}
                     </div>`;
