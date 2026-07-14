@@ -216,6 +216,33 @@
                 <div class="card"><div class="stat-header"><span>Orders Won</span><i class="fas fa-trophy"></i></div><div class="stat-value" id="dashInqWon" style="color: var(--success);">0</div></div>
             </div>
             
+            <h3 style="color:var(--accent-primary); margin:20px 0 10px 0;"><i class="fas fa-bullseye"></i> Monthly Targets & Expenses</h3>
+            <div class="grid-3">
+                <div class="card" style="display:flex; flex-direction:column; justify-content:center;">
+                    <div class="stat-header"><span>Monthly Visits Progress</span><i class="fas fa-walking"></i></div>
+                    <div style="width:100%; background:rgba(255,255,255,0.1); border-radius:10px; margin:10px 0; height:15px; overflow:hidden;">
+                        <div id="progVisits" style="width:0%; background:var(--accent-primary); height:100%; transition:width 1s;"></div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--text-muted);">
+                        <span id="lblVisitsDone">0 Done</span><span id="lblVisitsTarget">Target: 50</span>
+                    </div>
+                </div>
+                <div class="card" style="display:flex; flex-direction:column; justify-content:center;">
+                    <div class="stat-header"><span>Monthly Orders Won</span><i class="fas fa-trophy"></i></div>
+                    <div style="width:100%; background:rgba(255,255,255,0.1); border-radius:10px; margin:10px 0; height:15px; overflow:hidden;">
+                        <div id="progOrders" style="width:0%; background:var(--success); height:100%; transition:width 1s;"></div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--text-muted);">
+                        <span id="lblOrdersDone">0 Won</span><span id="lblOrdersTarget">Target: 10</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="stat-header"><span>Monthly Expenses (Est)</span><i class="fas fa-wallet"></i></div>
+                    <div class="stat-value" id="dashExpense" style="color: #ff5252; margin-top:5px;">₹0</div>
+                    <div style="font-size:0.75rem; color:var(--text-muted); margin-top:5px;">Based on logged Visit Reports</div>
+                </div>
+            </div>
+            
             <div class="grid-2">
                 <div class="card">
                     <h3><i class="fas fa-clipboard-check"></i> Daily Operations Checklist</h3>
@@ -592,6 +619,11 @@
                         <option value="sunset">Sunset Orange</option><option value="amethyst">Amethyst Purple</option>
                         <option value="ocean">Deep Ocean</option><option value="hacker">Hacker Terminal</option>
                     </select>
+                    
+                    <h2 style="margin-bottom: 20px; margin-top:30px;"><i class="fas fa-bullseye"></i> Monthly Targets</h2>
+                    <label>Target Field Visits</label><input type="number" id="targetVisits" class="input-field" placeholder="e.g. 50">
+                    <label>Target Orders Won</label><input type="number" id="targetOrders" class="input-field" placeholder="e.g. 10">
+                    
                     <button class="btn" onclick="saveSettings()">Save Configuration</button>
                 </div>
 
@@ -805,14 +837,14 @@
                 }
             });
 
-            return { geminiApiKey: data.geminiApiKey || "", userName: data.userName || currentUser.displayName || "", theme: data.theme || "gold", appPin: data.appPin || "", totalAppTime: tTime, timerDate: tDate, plans: Array.isArray(data.plans) ? data.plans : [], reports: Array.isArray(data.reports) ? data.reports : [], attendance: Array.isArray(data.attendance) ? data.attendance : [], contacts: migratedContacts, inquiries: Array.isArray(data.inquiries) ? data.inquiries : [] }; 
+            return { geminiApiKey: data.geminiApiKey || "", userName: data.userName || currentUser.displayName || "", theme: data.theme || "gold", appPin: data.appPin || "", targetVisits: data.targetVisits || 50, targetOrders: data.targetOrders || 10, totalAppTime: tTime, timerDate: tDate, plans: Array.isArray(data.plans) ? data.plans : [], reports: Array.isArray(data.reports) ? data.reports : [], attendance: Array.isArray(data.attendance) ? data.attendance : [], contacts: migratedContacts, inquiries: Array.isArray(data.inquiries) ? data.inquiries : [] }; 
         }
         function loadDataForUser() {
             if (!currentUser) return;
             db.collection('corporateOperationsData').doc(currentUser.uid).get().then((doc) => {
                 if (doc.exists) appData = cleanData({ ...appData, ...doc.data() }); else { appData = cleanData(appData); autoSave(); }
                 if(appData.appPin && appData.appPin.toString().trim().length === 4) showPinScreen();
-                document.getElementById('themeSelect').value = appData.theme; changeTheme(); document.getElementById('profileName').value = appData.userName; document.getElementById('pinInput').value = appData.appPin; updateUI();
+                document.getElementById('themeSelect').value = appData.theme; changeTheme(); document.getElementById('profileName').value = appData.userName; document.getElementById('pinInput').value = appData.appPin; document.getElementById('targetVisits').value = appData.targetVisits; document.getElementById('targetOrders').value = appData.targetOrders; updateUI();
             }).catch(err => { 
                 console.error("Firebase Load Error:", err);
                 alert("Database Load Error: " + err.message + "\n\n(If it says 'Missing or insufficient permissions', please go to Firebase Console -> Firestore Database -> Rules, and set them to allow read/write.)"); 
@@ -832,7 +864,7 @@
             updateUI(); 
         }
         function silentSave() { if(currentUser) db.collection('corporateOperationsData').doc(currentUser.uid).set(cleanData(appData), {merge:true}); }
-        function saveSettings() { appData.userName = document.getElementById('profileName').value; autoSave(); }
+        function saveSettings() { appData.userName = document.getElementById('profileName').value; appData.targetVisits = parseInt(document.getElementById('targetVisits').value) || 0; appData.targetOrders = parseInt(document.getElementById('targetOrders').value) || 0; autoSave(); showToast('Settings Saved!'); }
         function exportBackup() { let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2)); let dlAnchorElem = document.createElement('a'); dlAnchorElem.setAttribute("href", dataStr); dlAnchorElem.setAttribute("download", `CorporateHub_Backup_${todayStr}.json`); dlAnchorElem.click(); showToast("Backup Downloaded Securely!"); }
 
 
@@ -896,6 +928,29 @@
             document.getElementById('chkReport').innerHTML = appData.reports.some(r => r.date === todayStr) ? '<span style="color:var(--success)">YES</span>' : '<span style="color:var(--danger)">NO</span>';
             document.getElementById('chkAttend').innerHTML = appData.attendance.some(a => a.date === todayStr) ? '<span style="color:var(--success)">YES</span>' : '<span style="color:var(--danger)">NO</span>';
             document.getElementById('welcomeText').innerHTML = `Corporate Hub: ${appData.userName || 'Agent'}`;
+
+            // Phase 2: Analytics & Goals calculations
+            const currentMonth = todayStr.slice(0,7); // YYYY-MM
+            let monthVisits = appData.reports.filter(r => r.date.startsWith(currentMonth)).length;
+            let monthWon = appData.inquiries.filter(i => i.date.startsWith(currentMonth) && i.status === 'Order Won').length;
+            
+            let tVisits = appData.targetVisits || 50;
+            let tOrders = appData.targetOrders || 10;
+            let pctVisits = Math.min(100, Math.round((monthVisits / tVisits) * 100)) || 0;
+            let pctOrders = Math.min(100, Math.round((monthWon / tOrders) * 100)) || 0;
+            
+            const pV = document.getElementById('progVisits'); if(pV) pV.style.width = pctVisits + '%';
+            const pO = document.getElementById('progOrders'); if(pO) pO.style.width = pctOrders + '%';
+            const lV = document.getElementById('lblVisitsDone'); if(lV) lV.innerText = `${monthVisits} Done`;
+            const lVT = document.getElementById('lblVisitsTarget'); if(lVT) lVT.innerText = `Target: ${tVisits}`;
+            const lO = document.getElementById('lblOrdersDone'); if(lO) lO.innerText = `${monthWon} Won`;
+            const lOT = document.getElementById('lblOrdersTarget'); if(lOT) lOT.innerText = `Target: ${tOrders}`;
+
+            let totalExp = 0;
+            appData.reports.filter(r => r.date.startsWith(currentMonth)).forEach(r => {
+                totalExp += (parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0);
+            });
+            const dE = document.getElementById('dashExpense'); if(dE) dE.innerText = `₹${totalExp}`;
 
             // Build dashFollowUpList
             let pendingFollowUps = appData.inquiries.filter(i => {
