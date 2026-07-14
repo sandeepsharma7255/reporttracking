@@ -420,7 +420,10 @@
                 </div>
                 
                 <div class="card">
-                    <h2 style="margin-bottom: 15px;"><i class="fas fa-history"></i> Expense History</h2>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+                        <h2 style="margin-bottom: 0;"><i class="fas fa-history"></i> Expense History</h2>
+                        <button class="btn" style="width:auto; padding:5px 10px; font-size:0.8rem; background:#ff4d4d;" onclick="generateExpensePDF()"><i class="fas fa-file-pdf"></i> Generate PDF</button>
+                    </div>
                     <div id="expenseHistoryList" style="max-height:600px; overflow-y:auto; padding-right:5px;"></div>
                 </div>
             </div>
@@ -2204,8 +2207,100 @@
             div.innerHTML = html;
         }
 
-        // We also need to hook renderExpenseHistory() into the switchTab or updateUI
+        function generateExpensePDF() {
+            let allSheets = appData.expenseSheets || [];
+            let legacyExpenses = appData.personalExpenses || [];
+            let reports = appData.reports || [];
 
+            let reportsWithExp = reports.filter(r => (parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0) > 0);
+            
+            if(allSheets.length === 0 && legacyExpenses.length === 0 && reportsWithExp.length === 0) {
+                return alert("No expenses to generate.");
+            }
+
+            let html = `<div style="font-family:Arial,sans-serif; padding:20px; color:#000;">
+                <h1 style="text-align:center; color:#333; margin-bottom:20px; border-bottom:2px solid #ccc; padding-bottom:10px;">Complete Expense Report</h1>
+                <p><strong>Employee/Agent:</strong> ${appData.userName || 'Agent'}</p>
+                <p><strong>Generated On:</strong> ${new Date().toLocaleString()}</p>
+                <hr style="margin-bottom:20px;">
+            `;
+
+            let tableStyle = "width:100%; border-collapse:collapse; margin-bottom:20px; font-size:12px;";
+            let thStyle = "border:1px solid #ccc; padding:8px; background:#f4f4f4; text-align:left;";
+            let tdStyle = "border:1px solid #ccc; padding:8px;";
+
+            html += `<table style="${tableStyle}">
+                <tr>
+                    <th style="${thStyle}">Date</th>
+                    <th style="${thStyle}">Category</th>
+                    <th style="${thStyle}">Description</th>
+                    <th style="${thStyle}">Amount (₹)</th>
+                </tr>`;
+
+            let grandTotal = 0;
+
+            // 1. Visit Expenses
+            [...reportsWithExp].sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(r => {
+                let tot = (parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0);
+                grandTotal += tot;
+                html += `<tr>
+                    <td style="${tdStyle}">${r.date}</td>
+                    <td style="${tdStyle}; color:green; font-weight:bold;">Field Visit</td>
+                    <td style="${tdStyle}">${r.company || 'Visit'} (Fare & Food)</td>
+                    <td style="${tdStyle}; text-align:right;">${tot.toFixed(2)}</td>
+                </tr>`;
+            });
+
+            // 2. Legacy Expenses
+            [...legacyExpenses].sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(e => {
+                let amt = parseFloat(e.amount)||0;
+                grandTotal += amt;
+                html += `<tr>
+                    <td style="${tdStyle}">${e.date}</td>
+                    <td style="${tdStyle}; color:red;">Legacy Log</td>
+                    <td style="${tdStyle}">${e.desc}</td>
+                    <td style="${tdStyle}; text-align:right;">${amt.toFixed(2)}</td>
+                </tr>`;
+            });
+
+            // 3. Expense Sheets
+            [...allSheets].sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(s => {
+                s.items.forEach(i => {
+                    let amt = parseFloat(i.amount)||0;
+                    grandTotal += amt;
+                    html += `<tr>
+                        <td style="${tdStyle}">${s.date}</td>
+                        <td style="${tdStyle}; color:blue;">Expense Sheet</td>
+                        <td style="${tdStyle}">${i.desc}</td>
+                        <td style="${tdStyle}; text-align:right;">${amt.toFixed(2)}</td>
+                    </tr>`;
+                });
+            });
+
+            html += `<tr>
+                <td colspan="3" style="${tdStyle}; text-align:right; font-size:14px; font-weight:bold; background:#f4f4f4;">Grand Total:</td>
+                <td style="${tdStyle}; text-align:right; font-size:14px; font-weight:bold; background:#f4f4f4;">₹${grandTotal.toLocaleString()}</td>
+            </tr>
+            </table></div>`;
+
+            const wrapper = document.createElement('div');
+            wrapper.innerHTML = html;
+            
+            const opt = {
+                margin:       0.5,
+                filename:     `Complete_Expense_Report_${todayStr}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+            
+            showToast("Generating Expense PDF...");
+            if (typeof html2pdf !== 'undefined') {
+                html2pdf().set(opt).from(wrapper).save();
+            } else {
+                alert("PDF engine not loaded yet. Please try again.");
+            }
+        }
     </script>
 </body>
 </html>
