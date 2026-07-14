@@ -2143,26 +2143,38 @@
             const div = document.getElementById('expenseHistoryList');
             if(!div) return;
             
-            // Migrate old personalExpenses to expenseSheets if necessary for viewing
             let allSheets = appData.expenseSheets || [];
-            if(appData.personalExpenses && appData.personalExpenses.length > 0) {
-                // To keep it simple, we don't auto-modify appData, just merge for display
-                // Wait, it's better to officially migrate them ONCE on load, but we'll just merge them dynamically here for now
-            }
+            let legacyExpenses = appData.personalExpenses || [];
+            let reports = appData.reports || [];
 
-            if(allSheets.length === 0 && (!appData.personalExpenses || appData.personalExpenses.length === 0)) {
+            if(allSheets.length === 0 && legacyExpenses.length === 0 && reports.length === 0) {
                 div.innerHTML = '<p style="color:var(--text-muted); font-size:0.85rem;">No expenses found.</p>';
                 return;
             }
 
             let html = '';
+
+            // 1. Render Field Visit Expenses (From Reports)
+            let reportsWithExp = reports.filter(r => (parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0) > 0);
+            if(reportsWithExp.length > 0) {
+                 html += `<div style="background:rgba(0,255,0,0.05); padding:10px; border-radius:8px; border:1px solid var(--success); margin-bottom:10px;">
+                     <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                        <strong style="color:var(--success);">Field Visit Expenses (Auto-extracted)</strong>
+                     </div>`;
+                 [...reportsWithExp].sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(r => {
+                     let tot = (parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0);
+                     html += `<div style="display:flex; justify-content:space-between; font-size:0.8rem; padding:4px 0; border-bottom:1px dashed rgba(255,255,255,0.1);">
+                        <span>${r.date} - ${r.company || 'Visit'} (Fare & Food)</span><span style="color:var(--success)">₹${tot}</span>
+                     </div>`;
+                 });
+                 html += `</div>`;
+            }
             
-            // Render legacy personal expenses first as one chunk if they exist (or convert them inline for display)
-            let legacyExpenses = appData.personalExpenses || [];
+            // 2. Render legacy personal expenses
             if (legacyExpenses.length > 0) {
                  html += `<div style="background:rgba(255,0,0,0.05); padding:10px; border-radius:8px; border:1px solid var(--danger); margin-bottom:10px;">
-                     <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><strong>Legacy Single Expenses</strong></div>`;
-                 legacyExpenses.forEach(e => {
+                     <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><strong style="color:var(--danger)">Legacy Single Expenses</strong></div>`;
+                 [...legacyExpenses].sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(e => {
                      html += `<div style="display:flex; justify-content:space-between; font-size:0.8rem; padding:4px 0; border-bottom:1px dashed rgba(255,255,255,0.1);">
                         <span>${e.date} - ${e.desc}</span><span style="color:var(--danger)">₹${e.amount}</span>
                      </div>`;
@@ -2170,6 +2182,7 @@
                  html += `</div>`;
             }
 
+            // 3. Render modern expense sheets
             let sortedSheets = [...allSheets].sort((a,b) => new Date(b.date) - new Date(a.date) || b.id - a.id);
             sortedSheets.forEach(s => {
                 html += `<div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; border:1px solid var(--card-border); margin-bottom:10px;">
