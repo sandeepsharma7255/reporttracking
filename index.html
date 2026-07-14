@@ -893,7 +893,7 @@
                 }
             });
 
-            return { geminiApiKey: data.geminiApiKey || "", userName: data.userName || currentUser.displayName || "", theme: data.theme || "gold", appPin: data.appPin || "", targetVisits: data.targetVisits || 50, targetOrders: data.targetOrders || 10, totalAppTime: tTime, timerDate: tDate, plans: Array.isArray(data.plans) ? data.plans : [], reports: Array.isArray(data.reports) ? data.reports : [], attendance: Array.isArray(data.attendance) ? data.attendance : [], contacts: migratedContacts, inquiries: Array.isArray(data.inquiries) ? data.inquiries : [] }; 
+            return { geminiApiKey: data.geminiApiKey || "", userName: data.userName || currentUser.displayName || "", theme: data.theme || "gold", appPin: data.appPin || "", targetVisits: data.targetVisits || 50, targetOrders: data.targetOrders || 10, totalAppTime: tTime, timerDate: tDate, plans: Array.isArray(data.plans) ? data.plans : [], reports: Array.isArray(data.reports) ? data.reports : [], attendance: Array.isArray(data.attendance) ? data.attendance : [], contacts: migratedContacts, inquiries: Array.isArray(data.inquiries) ? data.inquiries : [], personalExpenses: Array.isArray(data.personalExpenses) ? data.personalExpenses : [] }; 
         }
         function loadDataForUser() {
             if (!currentUser) return;
