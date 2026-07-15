@@ -183,7 +183,7 @@
             <li class="nav-item" onclick="switchTab('settings')"><i class="fas fa-cog"></i> Settings</li>
         </ul>
         <div style="margin-top: auto; text-align: center; font-size: 0.8rem; color: var(--accent-primary); font-weight: 800;">
-            Developed by<br>Sandeep Kumar<br><span style="color:#aaa; font-size:0.6rem;">v1.2</span>
+            Developed by<br>Sandeep Kumar<br><span style="color:#aaa; font-size:0.6rem;">v1.3</span>
         </div>
     </aside>
 
@@ -2147,9 +2147,9 @@
                 const div = document.getElementById('expenseHistoryList');
                 if(!div) return;
                 
-                let allSheets = appData.expenseSheets || [];
-                let legacyExpenses = appData.personalExpenses || [];
-                let reports = appData.reports || [];
+                let allSheets = Array.isArray(appData.expenseSheets) ? appData.expenseSheets : Object.values(appData.expenseSheets || {});
+                let legacyExpenses = Array.isArray(appData.personalExpenses) ? appData.personalExpenses : Object.values(appData.personalExpenses || {});
+                let reports = Array.isArray(appData.reports) ? appData.reports : Object.values(appData.reports || {});
 
                 let reportsWithExp = reports.filter(r => (parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0) > 0);
 
@@ -2268,9 +2268,9 @@
         }
 
         function generateExpensePDF() {
-            let allSheets = appData.expenseSheets || [];
-            let legacyExpenses = appData.personalExpenses || [];
-            let reports = appData.reports || [];
+            let allSheets = Array.isArray(appData.expenseSheets) ? appData.expenseSheets : Object.values(appData.expenseSheets || {});
+            let legacyExpenses = Array.isArray(appData.personalExpenses) ? appData.personalExpenses : Object.values(appData.personalExpenses || {});
+            let reports = Array.isArray(appData.reports) ? appData.reports : Object.values(appData.reports || {});
 
             let reportsWithExp = reports.filter(r => (parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0) > 0);
             
