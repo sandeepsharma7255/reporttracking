@@ -846,20 +846,130 @@
         let currentUser = null, isLoginMode = true;
         const getLocalDateStr = () => { let d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); };
         // --- ERP & AI Module Logic ---
+        
+        // --- ADVANCED ERP FEATURES --- //
+        
+        // 1. Voice Recognition
+        function startVoiceRecognition(targetId) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                showToast("Your browser does not support Voice Recognition. Please use Chrome/Edge.");
+                return;
+            }
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'en-IN'; // English with Indian context (mixes well with Hindi terms)
+            recognition.interimResults = false;
+            
+            const btn = event.currentTarget;
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-microphone fa-beat" style="color:red"></i>';
+            
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+                const target = document.getElementById(targetId);
+                if(target) target.value += (target.value ? " " : "") + transcript;
+                btn.innerHTML = originalHtml;
+            };
+            
+            recognition.onerror = function() {
+                showToast("Voice recognition failed. Try again.");
+                btn.innerHTML = originalHtml;
+            };
+            
+            recognition.onend = function() {
+                btn.innerHTML = originalHtml;
+            };
+            
+            recognition.start();
+        }
+
+        // 2. PDF Export
+        function exportToPDF(elementId) {
+            const el = document.getElementById(elementId);
+            if(!el) return;
+            const cloned = el.cloneNode(true);
+            // clean up action buttons from PDF
+            const actions = cloned.querySelectorAll('.erp-actions');
+            actions.forEach(a => a.remove());
+            
+            showToast("Generating PDF...");
+            html2pdf().set({ margin: 10, filename: 'Sandeep_AI_Document.pdf' }).from(cloned).save();
+        }
+
+        // 3. WhatsApp Integration
+        function sendToWhatsApp(elementId) {
+            const el = document.getElementById(elementId);
+            if(!el) return;
+            const clone = el.cloneNode(true);
+            const actions = clone.querySelectorAll('.erp-actions');
+            actions.forEach(a => a.remove());
+            const text = clone.innerText;
+            window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+        }
+
+        // 4. Notifications & Alerts
+        function requestPushNotifications() {
+            if ("Notification" in window) {
+                if (Notification.permission === "default") {
+                    Notification.requestPermission();
+                }
+            }
+        }
+        function simulateSmartAlert() {
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification("Sandeep AI ERP Alert", {
+                    body: "Smart Alert: Adani Project BG expiring in 2 days!",
+                    icon: "https://cdn-icons-png.flaticon.com/512/893/893257.png"
+                });
+            } else {
+                showToast("Smart Alert: Adani Project BG expiring in 2 days!");
+            }
+        }
+        
+        // Setup initial timers
+        setTimeout(() => { requestPushNotifications(); }, 3000);
+        setTimeout(() => { simulateSmartAlert(); }, 10000); // Trigger mock alert after 10s
+
+        // 5. Dashboard Charts
+        let erpChartInstance = null;
+        function renderErpCharts() {
+            const ctx = document.getElementById('erpChart');
+            if(!ctx) return;
+            if(erpChartInstance) erpChartInstance.destroy();
+            
+            erpChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Tenders Won', 'Pending Bids', 'Lost'],
+                    datasets: [{
+                        data: [12, 5, 3],
+                        backgroundColor: ['#00e676', '#ffea00', '#ff1744'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#fff' } }
+                    }
+                }
+            });
+        }
+
         const erpModules = {
             analyzer: { title: 'Tender Analyzer (AI)', icon: 'fa-file-pdf', html: `<p>Upload Tender PDF to extract Scope, Deviations, BG terms, etc.</p><input type="file" class="input-field" accept="application/pdf"><button class="btn" onclick="callSandeepErpAI('Analyze this tender document and extract Scope, Deviations, BG, Payment, Delivery, LD, Eligibility. Explain Conflict of Interest in simple Hindi.')"><i class="fas fa-magic"></i> Analyze PDF</button><div id="ai-response-analyzer" class="ai-chat-box" style="margin-top:15px; display:none;"></div>` },
-            finder: { title: 'Clause Finder', icon: 'fa-search', html: `<input type="text" id="clause-search" class="input-field" placeholder="Search Oil, Reactor, FAT, etc."><button class="btn" onclick="callSandeepErpAI('Find clauses related to: ' + document.getElementById('clause-search').value)"><i class="fas fa-search"></i> Search Document</button><div id="ai-response-finder" class="ai-chat-box" style="margin-top:15px; display:none;"></div>` },
+            finder: { title: 'Clause Finder', icon: 'fa-search', html: `<div style="display:flex; gap:5px;"><input type="text" id="clause-search" class="input-field" style="margin-bottom:0;" placeholder="Search Oil, Reactor, FAT, etc."><button class="btn" style="width:auto; padding:0 15px;" onclick="startVoiceRecognition('clause-search')"><i class="fas fa-microphone"></i></button></div><button class="btn" style="margin-top:5px;" onclick="callSandeepErpAI('Find clauses related to: ' + document.getElementById('clause-search').value)"><i class="fas fa-search"></i> Search Document</button><div id="ai-response-finder" class="ai-chat-box" style="margin-top:15px; display:none;"></div>` },
             compare: { title: 'Tender Comparison', icon: 'fa-balance-scale', html: `<p>Upload two tenders to compare.</p><input type="file" class="input-field" style="margin-bottom:5px;"><input type="file" class="input-field"><button class="btn" onclick="callSandeepErpAI('Compare these two tenders and highlight differences')"><i class="fas fa-compress-arrows-alt"></i> Compare</button><div id="ai-response-compare" class="ai-chat-box" style="margin-top:15px; display:none;"></div>` },
             email: { title: 'AI Email Generator', icon: 'fa-envelope-open-text', html: `<select id="email-type" class="input-field"><option>Customer follow-up</option><option>Document request</option><option>Inspection call</option><option>BG release</option><option>Payment reminder</option><option>Meeting MOM</option></select><textarea id="email-ctx" class="input-field" rows="3" placeholder="Context (e.g. met Sandeep yesterday for 220kV project)"></textarea><button class="btn" onclick="callSandeepErpAI('Write a professional email for: ' + document.getElementById('email-type').value + '. Context: ' + document.getElementById('email-ctx').value)"><i class="fas fa-pen"></i> Generate Email</button><div id="ai-response-email" class="ai-chat-box" style="margin-top:15px; display:none;"></div>` },
             calc: { title: 'Technical Calculator', icon: 'fa-calculator', html: `<select id="calc-type" class="input-field" onchange="updateCalcUI()"><option value="cap">Capacitor Bank Calculator</option><option value="rx">Reactor Rating Calculator</option><option value="tx">Transformer Loss Calculator</option><option value="pwr">Current/Power Calculator</option><option value="vd">Voltage Drop Calculator</option></select><div id="calc-inputs" style="margin:10px 0;"></div><button class="btn" onclick="calculateTech()"><i class="fas fa-equals"></i> Calculate</button><div id="calc-result" style="margin-top:15px; font-weight:bold; color:var(--accent-primary); font-size:1.2rem;"></div>` },
-            crm: { title: 'Customer CRM', icon: 'fa-users', html: `<p>Manage Meetings, Calls, and Follow-ups.</p><button class="btn" style="background:var(--success)"><i class="fas fa-plus"></i> Add Customer / Log Interaction</button><div style="margin-top:15px; color:var(--text-muted); font-size:0.85rem; text-align:center;">Integrated with main Contacts list. CRM UI coming soon.</div>` },
+            crm: { title: 'Customer CRM', icon: 'fa-users', html: `<p>Manage Meetings, Calls, and Follow-ups.</p><button class="btn" style="background:var(--success); margin-bottom:10px;"><i class="fas fa-plus"></i> Add Customer / Log Interaction</button><br><label style="font-size:0.85rem; color:#ccc;">Smart Business Card Scanner:</label><input type="file" accept="image/*" class="input-field" style="margin-top:5px;" onchange="callSandeepErpAI('Extract Name, Phone, Email, and Company from this business card image.')"><div id="ai-response-crm" class="ai-chat-box" style="margin-top:15px; display:none;"></div><div style="margin-top:15px; color:var(--text-muted); font-size:0.85rem; text-align:center;">Integrated with main Contacts list.</div>` },
             travel: { title: 'Travel Manager', icon: 'fa-plane', html: `<p>Manage Train/Flight, Hotel, TA/DA.</p><button class="btn" style="background:var(--warning)"><i class="fas fa-plus"></i> Add Travel Plan</button><div style="margin-top:15px; color:var(--text-muted); font-size:0.85rem; text-align:center;">Integrated with Expenses. Full travel UI coming soon.</div>` },
             vault: { title: 'Document Vault', icon: 'fa-folder-open', html: `<input type="text" class="input-field" placeholder="Search by Project Name, LOA, PO, BG..."><div style="display:flex; gap:10px; margin-top:10px;"><button class="btn" style="flex:1;"><i class="fas fa-upload"></i> Upload</button><button class="btn" style="flex:1; background:#444;"><i class="fas fa-search"></i> Search</button></div><div style="margin-top:15px; color:var(--text-muted); font-size:0.85rem; text-align:center;">Local vault storage initialized.</div>` },
-            chat: { title: 'AI Tender Chat', icon: 'fa-comments', html: `<div id="ai-chat-history" class="ai-chat-box"></div><div style="display:flex; gap:5px;"><input type="text" id="ai-chat-input" class="input-field" style="margin-bottom:0;" placeholder="e.g. BG kitna hai? Delivery kab hai?"><button class="btn" style="width:auto; padding:0 15px;" onclick="sendAiChat()"><i class="fas fa-paper-plane"></i></button></div>` },
-            dashboard: { title: 'Daily Dashboard', icon: 'fa-tachometer-alt', html: `<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;"><strong>Meetings Today</strong><br><span style="font-size:1.5rem; color:var(--accent-primary);">0</span></div><div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;"><strong>Pending Bids</strong><br><span style="font-size:1.5rem; color:var(--danger);">2</span></div></div><div style="margin-top:15px; color:var(--text-muted); font-size:0.85rem; text-align:center;">Live metrics sync initialized.</div>` },
+            chat: { title: 'AI Tender Chat', icon: 'fa-comments', html: `<div id="ai-chat-history" class="ai-chat-box"></div><div style="display:flex; gap:5px;"><input type="text" id="ai-chat-input" class="input-field" style="margin-bottom:0;" placeholder="e.g. BG kitna hai? Delivery kab hai?"><button class="btn" style="width:auto; padding:0 15px; background:#444;" onclick="startVoiceRecognition('ai-chat-input')"><i class="fas fa-microphone"></i></button><button class="btn" style="width:auto; padding:0 15px;" onclick="sendAiChat()"><i class="fas fa-paper-plane"></i></button></div>` },
+            dashboard: { title: 'Daily Dashboard', icon: 'fa-tachometer-alt', html: `<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;"><strong>Meetings Today</strong><br><span style="font-size:1.5rem; color:var(--accent-primary);">0</span></div><div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;"><strong>Pending Bids</strong><br><span style="font-size:1.5rem; color:var(--danger);">2</span></div></div><div style="margin-top:15px;"><canvas id="erpChart" style="max-height:200px;"></canvas></div><div style="margin-top:15px; color:var(--text-muted); font-size:0.85rem; text-align:center;">Live metrics sync initialized.</div>` },
             alerts: { title: 'Smart Alerts', icon: 'fa-bell', html: `<div style="background:rgba(255,0,0,0.1); border:1px solid var(--danger); padding:10px; border-radius:8px; margin-bottom:10px;"><i class="fas fa-exclamation-triangle" style="color:var(--danger)"></i> BG Expiry: Adani Project (2 days left)</div><div style="background:rgba(255,255,0,0.1); border:1px solid var(--warning); padding:10px; border-radius:8px;"><i class="fas fa-clock" style="color:var(--warning)"></i> Bid Submission: L&T Tender due today</div>` },
             ocr: { title: 'OCR + AI Summarizer', icon: 'fa-camera', html: `<p>Upload Tender Photo or Scanned PDF</p><input type="file" accept="image/*,application/pdf" class="input-field"><button class="btn" onclick="callSandeepErpAI('Perform OCR on this image and summarize the key points.')"><i class="fas fa-eye"></i> Scan & Summarize</button><div id="ai-response-ocr" class="ai-chat-box" style="margin-top:15px; display:none;"></div>` },
-            assistant: { title: 'AI Assistant', icon: 'fa-magic', html: `<textarea id="assist-prompt" class="input-field" rows="3" placeholder="Ask anything (e.g. Translate to Hindi, generate meeting minutes, make excel table...)"></textarea><button class="btn" onclick="callSandeepErpAI('Assistant Task: ' + document.getElementById('assist-prompt').value)"><i class="fas fa-bolt"></i> Execute</button><div id="ai-response-assistant" class="ai-chat-box" style="margin-top:15px; display:none;"></div>` }
+            assistant: { title: 'AI Assistant', icon: 'fa-magic', html: `<div style="position:relative;"><textarea id="assist-prompt" class="input-field" rows="3" placeholder="Ask anything (e.g. Translate to Hindi, generate meeting minutes, make excel table...)"></textarea><button style="position:absolute; right:10px; bottom:15px; background:none; border:none; color:var(--accent-primary); cursor:pointer; font-size:1.2rem;" onclick="startVoiceRecognition('assist-prompt')"><i class="fas fa-microphone"></i></button></div><button class="btn" onclick="callSandeepErpAI('Assistant Task: ' + document.getElementById('assist-prompt').value)"><i class="fas fa-bolt"></i> Execute</button><div id="ai-response-assistant" class="ai-chat-box" style="margin-top:15px; display:none;"></div>` }
         };
 
         function openErpModule(mod) {
@@ -872,6 +982,7 @@
                 ${data.html}
             `;
             if(mod === 'calc') updateCalcUI();
+            if(mod === 'dashboard') setTimeout(renderErpCharts, 100);
         }
 
         async function callSandeepErpAI(prompt) {
@@ -920,6 +1031,17 @@
                                 }
                             }
                         }
+                    }
+                    
+                    // Attach Action Buttons when streaming finishes
+                    if(msgDiv.innerText.length > 20) {
+                        msgDiv.innerHTML += `
+                            <div class="erp-actions" style="margin-top:10px; display:flex; gap:5px; flex-wrap:wrap;">
+                                <button class="btn" style="background:#dc3545; padding:5px 10px; font-size:0.8rem; width:auto;" onclick="exportToPDF('${id}')"><i class="fas fa-file-pdf"></i> PDF</button>
+                                <button class="btn" style="background:#25D366; padding:5px 10px; font-size:0.8rem; width:auto; color:#fff;" onclick="sendToWhatsApp('${id}')"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+                            </div>
+                        `;
+                        resBox.scrollTop = resBox.scrollHeight;
                     }
                 } catch(error) {
                     let msgDiv = document.getElementById(id);
