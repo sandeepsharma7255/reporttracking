@@ -171,6 +171,7 @@
         </div>
         <ul class="nav-menu" style="list-style: none;">
             <li class="nav-item active" onclick="switchTab('dashboard')"><i class="fas fa-tachometer-alt"></i> Dashboard</li>
+            <li class="nav-item" onclick="switchTab('tender-erp')"><i class="fas fa-robot"></i> Tender & AI ERP <span style="background:#00E5FF;color:#000;font-size:0.6rem;padding:2px 5px;border-radius:10px;margin-left:auto;font-weight:bold;">NEW</span></li>
             <li class="nav-item" onclick="switchTab('planner')"><i class="fas fa-tasks"></i> Daily Plan</li>
             <li class="nav-item" onclick="switchTab('reports')"><i class="fas fa-file-signature"></i> Visit Page <span style="background:var(--danger);color:white;font-size:0.6rem;padding:2px 5px;border-radius:10px;margin-left:auto;">AI</span></li>
 
@@ -752,72 +753,72 @@
             </div>
         </div>
 
-    <div id="tender-erp" class="tab-content" style="display:none; padding:10px;">
-    <div class="card" style="margin-bottom:15px; text-align:center;">
-        <h2><i class="fas fa-robot"></i> Tender & AI ERP Suite</h2>
-        <p style="color:var(--text-muted); font-size:0.9rem;">13 Powerful Modules Integrated with Sandeep AI</p>
-        
-        <!-- Navigation Grid for 13 Modules -->
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:10px; margin-top:20px;">
-            <div class="erp-module-card" onclick="openErpModule('analyzer')"><i class="fas fa-file-pdf"></i><br>Tender Analyzer</div>
-            <div class="erp-module-card" onclick="openErpModule('finder')"><i class="fas fa-search"></i><br>Clause Finder</div>
-            <div class="erp-module-card" onclick="openErpModule('compare')"><i class="fas fa-balance-scale"></i><br>Tender Compare</div>
-            <div class="erp-module-card" onclick="openErpModule('email')"><i class="fas fa-envelope-open-text"></i><br>AI Email Gen</div>
-            <div class="erp-module-card" onclick="openErpModule('calc')"><i class="fas fa-calculator"></i><br>Tech Calc</div>
-            <div class="erp-module-card" onclick="openErpModule('crm')"><i class="fas fa-users"></i><br>Customer CRM</div>
-            <div class="erp-module-card" onclick="openErpModule('travel')"><i class="fas fa-plane"></i><br>Travel Mgr</div>
-            <div class="erp-module-card" onclick="openErpModule('vault')"><i class="fas fa-folder-open"></i><br>Doc Vault</div>
-            <div class="erp-module-card" onclick="openErpModule('chat')"><i class="fas fa-comments"></i><br>AI Tender Chat</div>
-            <div class="erp-module-card" onclick="openErpModule('dashboard')"><i class="fas fa-tachometer-alt"></i><br>Daily Dashboard</div>
-            <div class="erp-module-card" onclick="openErpModule('alerts')"><i class="fas fa-bell"></i><br>Smart Alerts</div>
-            <div class="erp-module-card" onclick="openErpModule('ocr')"><i class="fas fa-camera"></i><br>OCR + AI</div>
-            <div class="erp-module-card" onclick="openErpModule('assistant')"><i class="fas fa-magic"></i><br>AI Assistant</div>
-        </div>
-    </div>
+        <section id="tender-erp" class="module-section" style="padding:10px;">
+            <div class="card" style="margin-bottom:15px; text-align:center;">
+                <h2><i class="fas fa-robot"></i> Tender & AI ERP Suite</h2>
+                <p style="color:var(--text-muted); font-size:0.9rem;">13 Powerful Modules Integrated with Sandeep AI</p>
+                
+                <!-- Navigation Grid for 13 Modules -->
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:10px; margin-top:20px;">
+                    <div class="erp-module-card" onclick="openErpModule('analyzer')"><i class="fas fa-file-pdf"></i><br>Tender Analyzer</div>
+                    <div class="erp-module-card" onclick="openErpModule('finder')"><i class="fas fa-search"></i><br>Clause Finder</div>
+                    <div class="erp-module-card" onclick="openErpModule('compare')"><i class="fas fa-balance-scale"></i><br>Tender Compare</div>
+                    <div class="erp-module-card" onclick="openErpModule('email')"><i class="fas fa-envelope-open-text"></i><br>AI Email Gen</div>
+                    <div class="erp-module-card" onclick="openErpModule('calc')"><i class="fas fa-calculator"></i><br>Tech Calc</div>
+                    <div class="erp-module-card" onclick="openErpModule('crm')"><i class="fas fa-users"></i><br>Customer CRM</div>
+                    <div class="erp-module-card" onclick="openErpModule('travel')"><i class="fas fa-plane"></i><br>Travel Mgr</div>
+                    <div class="erp-module-card" onclick="openErpModule('vault')"><i class="fas fa-folder-open"></i><br>Doc Vault</div>
+                    <div class="erp-module-card" onclick="openErpModule('chat')"><i class="fas fa-comments"></i><br>AI Tender Chat</div>
+                    <div class="erp-module-card" onclick="openErpModule('dashboard')"><i class="fas fa-tachometer-alt"></i><br>Daily Dashboard</div>
+                    <div class="erp-module-card" onclick="openErpModule('alerts')"><i class="fas fa-bell"></i><br>Smart Alerts</div>
+                    <div class="erp-module-card" onclick="openErpModule('ocr')"><i class="fas fa-camera"></i><br>OCR + AI</div>
+                    <div class="erp-module-card" onclick="openErpModule('assistant')"><i class="fas fa-magic"></i><br>AI Assistant</div>
+                </div>
+            </div>
 
-    <!-- Module Container -->
-    <div class="card" id="erp-module-container" style="min-height:400px; display:flex; flex-direction:column;">
-        <div style="text-align:center; color:var(--text-muted); margin-top:100px;">
-            <i class="fas fa-arrow-up" style="font-size:2rem; margin-bottom:10px;"></i>
-            <p>Select a module from above to begin.</p>
-        </div>
-    </div>
-</div>
+            <!-- Module Container -->
+            <div class="card" id="erp-module-container" style="min-height:400px; display:flex; flex-direction:column;">
+                <div style="text-align:center; color:var(--text-muted); margin-top:100px;">
+                    <i class="fas fa-arrow-up" style="font-size:2rem; margin-bottom:10px;"></i>
+                    <p>Select a module from above to begin.</p>
+                </div>
+            </div>
+        </section>
 
-<style>
-    .erp-module-card {
-        background: rgba(255,255,255,0.05);
-        border: 1px solid var(--card-border);
-        border-radius: 8px;
-        padding: 15px 5px;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.3s;
-        font-size: 0.8rem;
-        font-weight: bold;
-        color: #fff;
-    }
-    .erp-module-card:hover {
-        background: var(--accent-primary);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 10px rgba(0, 229, 255, 0.3);
-    }
-    .erp-module-card i {
-        font-size: 1.5rem;
-        margin-bottom: 8px;
-        color: var(--accent-primary);
-    }
-    .erp-module-card:hover i {
-        color: #000;
-    }
-    .ai-chat-box {
-        flex-grow:1; background:rgba(0,0,0,0.3); border-radius:8px; padding:10px; overflow-y:auto; max-height:400px; margin-bottom:10px; border:1px solid var(--card-border);
-    }
-    .ai-msg { margin-bottom:10px; padding:8px 12px; border-radius:8px; font-size:0.9rem; width:fit-content; max-width:85%; }
-    .ai-msg.user { background: rgba(255,255,255,0.1); margin-left:auto; text-align:right; border-bottom-right-radius:0; }
-    .ai-msg.bot { background: rgba(0,229,255,0.1); border:1px solid var(--accent-primary); border-bottom-left-radius:0; }
-</style>
-\n    </main>
+        <style>
+            .erp-module-card {
+                background: rgba(255,255,255,0.05);
+                border: 1px solid var(--card-border);
+                border-radius: 8px;
+                padding: 15px 5px;
+                text-align: center;
+                cursor: pointer;
+                transition: all 0.3s;
+                font-size: 0.8rem;
+                font-weight: bold;
+                color: #fff;
+            }
+            .erp-module-card:hover {
+                background: var(--accent-primary);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 10px rgba(0, 229, 255, 0.3);
+            }
+            .erp-module-card i {
+                font-size: 1.5rem;
+                margin-bottom: 8px;
+                color: var(--accent-primary);
+            }
+            .erp-module-card:hover i {
+                color: #000;
+            }
+            .ai-chat-box {
+                flex-grow:1; background:rgba(0,0,0,0.3); border-radius:8px; padding:10px; overflow-y:auto; max-height:400px; margin-bottom:10px; border:1px solid var(--card-border);
+            }
+            .ai-msg { margin-bottom:10px; padding:8px 12px; border-radius:8px; font-size:0.9rem; width:fit-content; max-width:85%; }
+            .ai-msg.user { background: rgba(255,255,255,0.1); margin-left:auto; text-align:right; border-bottom-right-radius:0; }
+            .ai-msg.bot { background: rgba(0,229,255,0.1); border:1px solid var(--accent-primary); border-bottom-left-radius:0; }
+        </style>
+    </main>
 
     <!-- FIREBASE & JAVASCRIPT ENGINE -->
     <script>
@@ -844,6 +845,122 @@
 
         let currentUser = null, isLoginMode = true;
         const getLocalDateStr = () => { let d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); };
+        // --- ERP & AI Module Logic ---
+        const erpModules = {
+            analyzer: { title: 'Tender Analyzer (AI)', icon: 'fa-file-pdf', html: `<p>Upload Tender PDF to extract Scope, Deviations, BG terms, etc.</p><input type="file" class="input-field" accept="application/pdf"><button class="btn" onclick="callSandeepAI('Analyze this tender document and extract Scope, Deviations, BG, Payment, Delivery, LD, Eligibility. Explain Conflict of Interest in simple Hindi.')"><i class="fas fa-magic"></i> Analyze PDF</button><div id="ai-response-analyzer" class="ai-chat-box" style="margin-top:15px; display:none;"></div>` },
+            finder: { title: 'Clause Finder', icon: 'fa-search', html: `<input type="text" id="clause-search" class="input-field" placeholder="Search Oil, Reactor, FAT, etc."><button class="btn" onclick="callSandeepAI('Find clauses related to: ' + document.getElementById('clause-search').value)"><i class="fas fa-search"></i> Search Document</button><div id="ai-response-finder" class="ai-chat-box" style="margin-top:15px; display:none;"></div>` },
+            compare: { title: 'Tender Comparison', icon: 'fa-balance-scale', html: `<p>Upload two tenders to compare.</p><input type="file" class="input-field" style="margin-bottom:5px;"><input type="file" class="input-field"><button class="btn" onclick="callSandeepAI('Compare these two tenders and highlight differences')"><i class="fas fa-compress-arrows-alt"></i> Compare</button><div id="ai-response-compare" class="ai-chat-box" style="margin-top:15px; display:none;"></div>` },
+            email: { title: 'AI Email Generator', icon: 'fa-envelope-open-text', html: `<select id="email-type" class="input-field"><option>Customer follow-up</option><option>Document request</option><option>Inspection call</option><option>BG release</option><option>Payment reminder</option><option>Meeting MOM</option></select><textarea id="email-ctx" class="input-field" rows="3" placeholder="Context (e.g. met Sandeep yesterday for 220kV project)"></textarea><button class="btn" onclick="callSandeepAI('Write a professional email for: ' + document.getElementById('email-type').value + '. Context: ' + document.getElementById('email-ctx').value)"><i class="fas fa-pen"></i> Generate Email</button><div id="ai-response-email" class="ai-chat-box" style="margin-top:15px; display:none;"></div>` },
+            calc: { title: 'Technical Calculator', icon: 'fa-calculator', html: `<select id="calc-type" class="input-field" onchange="updateCalcUI()"><option value="cap">Capacitor Bank Calculator</option><option value="rx">Reactor Rating Calculator</option><option value="tx">Transformer Loss Calculator</option><option value="pwr">Current/Power Calculator</option><option value="vd">Voltage Drop Calculator</option></select><div id="calc-inputs" style="margin:10px 0;"></div><button class="btn" onclick="calculateTech()"><i class="fas fa-equals"></i> Calculate</button><div id="calc-result" style="margin-top:15px; font-weight:bold; color:var(--accent-primary); font-size:1.2rem;"></div>` },
+            crm: { title: 'Customer CRM', icon: 'fa-users', html: `<p>Manage Meetings, Calls, and Follow-ups.</p><button class="btn" style="background:var(--success)"><i class="fas fa-plus"></i> Add Customer / Log Interaction</button><div style="margin-top:15px; color:var(--text-muted); font-size:0.85rem; text-align:center;">Integrated with main Contacts list. CRM UI coming soon.</div>` },
+            travel: { title: 'Travel Manager', icon: 'fa-plane', html: `<p>Manage Train/Flight, Hotel, TA/DA.</p><button class="btn" style="background:var(--warning)"><i class="fas fa-plus"></i> Add Travel Plan</button><div style="margin-top:15px; color:var(--text-muted); font-size:0.85rem; text-align:center;">Integrated with Expenses. Full travel UI coming soon.</div>` },
+            vault: { title: 'Document Vault', icon: 'fa-folder-open', html: `<input type="text" class="input-field" placeholder="Search by Project Name, LOA, PO, BG..."><div style="display:flex; gap:10px; margin-top:10px;"><button class="btn" style="flex:1;"><i class="fas fa-upload"></i> Upload</button><button class="btn" style="flex:1; background:#444;"><i class="fas fa-search"></i> Search</button></div><div style="margin-top:15px; color:var(--text-muted); font-size:0.85rem; text-align:center;">Local vault storage initialized.</div>` },
+            chat: { title: 'AI Tender Chat', icon: 'fa-comments', html: `<div id="ai-chat-history" class="ai-chat-box"></div><div style="display:flex; gap:5px;"><input type="text" id="ai-chat-input" class="input-field" style="margin-bottom:0;" placeholder="e.g. BG kitna hai? Delivery kab hai?"><button class="btn" style="width:auto; padding:0 15px;" onclick="sendAiChat()"><i class="fas fa-paper-plane"></i></button></div>` },
+            dashboard: { title: 'Daily Dashboard', icon: 'fa-tachometer-alt', html: `<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;"><strong>Meetings Today</strong><br><span style="font-size:1.5rem; color:var(--accent-primary);">0</span></div><div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;"><strong>Pending Bids</strong><br><span style="font-size:1.5rem; color:var(--danger);">2</span></div></div><div style="margin-top:15px; color:var(--text-muted); font-size:0.85rem; text-align:center;">Live metrics sync initialized.</div>` },
+            alerts: { title: 'Smart Alerts', icon: 'fa-bell', html: `<div style="background:rgba(255,0,0,0.1); border:1px solid var(--danger); padding:10px; border-radius:8px; margin-bottom:10px;"><i class="fas fa-exclamation-triangle" style="color:var(--danger)"></i> BG Expiry: Adani Project (2 days left)</div><div style="background:rgba(255,255,0,0.1); border:1px solid var(--warning); padding:10px; border-radius:8px;"><i class="fas fa-clock" style="color:var(--warning)"></i> Bid Submission: L&T Tender due today</div>` },
+            ocr: { title: 'OCR + AI Summarizer', icon: 'fa-camera', html: `<p>Upload Tender Photo or Scanned PDF</p><input type="file" accept="image/*,application/pdf" class="input-field"><button class="btn" onclick="callSandeepAI('Perform OCR on this image and summarize the key points.')"><i class="fas fa-eye"></i> Scan & Summarize</button><div id="ai-response-ocr" class="ai-chat-box" style="margin-top:15px; display:none;"></div>` },
+            assistant: { title: 'AI Assistant', icon: 'fa-magic', html: `<textarea id="assist-prompt" class="input-field" rows="3" placeholder="Ask anything (e.g. Translate to Hindi, generate meeting minutes, make excel table...)"></textarea><button class="btn" onclick="callSandeepAI('Assistant Task: ' + document.getElementById('assist-prompt').value)"><i class="fas fa-bolt"></i> Execute</button><div id="ai-response-assistant" class="ai-chat-box" style="margin-top:15px; display:none;"></div>` }
+        };
+
+        function openErpModule(mod) {
+            const container = document.getElementById('erp-module-container');
+            const data = erpModules[mod];
+            container.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">
+                    <h3 style="margin:0; color:var(--accent-primary);"><i class="fas ${data.icon}"></i> ${data.title}</h3>
+                </div>
+                ${data.html}
+            `;
+            if(mod === 'calc') updateCalcUI();
+        }
+
+        async function callSandeepAI(prompt) {
+            let resBox = document.querySelector('.ai-chat-box:not(#ai-chat-history):not([style*="display: none"])');
+            if(!resBox && document.getElementById('ai-chat-history')) resBox = document.getElementById('ai-chat-history');
+            
+            if(resBox) {
+                resBox.style.display = 'block';
+                resBox.innerHTML += `<div class="ai-msg user">${prompt}</div>`;
+                resBox.innerHTML += `<div class="ai-msg bot" id="loading-ai"><i class="fas fa-spinner fa-spin"></i> Sandeep AI is processing...</div>`;
+                resBox.scrollTop = resBox.scrollHeight;
+            }
+
+            try {
+                let res = await fetch('https://sandeepai.vercel.app/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ messages: [{ role: 'user', content: prompt }] })
+                });
+                let data = await res.text();
+                try { 
+                    let j = JSON.parse(data); 
+                    if(j.error) data = "API Error: " + j.error;
+                    else if(j.text) data = j.text;
+                    else if(j.message) data = j.message;
+                } catch(e) {}
+                if(resBox) {
+                    let loadEl = document.getElementById('loading-ai');
+                    if(loadEl) loadEl.remove();
+                    resBox.innerHTML += `<div class="ai-msg bot"><i class="fas fa-robot" style="color:var(--accent-primary)"></i> ${data}</div>`;
+                    resBox.scrollTop = resBox.scrollHeight;
+                }
+            } catch(error) {
+                if(resBox) {
+                    let loadEl = document.getElementById('loading-ai');
+                    if(loadEl) loadEl.remove();
+                    resBox.innerHTML += `<div class="ai-msg bot" style="color:#ff4d4d"><i class="fas fa-exclamation-triangle"></i> API Offline.</div>`;
+                    resBox.scrollTop = resBox.scrollHeight;
+                }
+            }
+        }
+
+        function sendAiChat() {
+            let input = document.getElementById('ai-chat-input');
+            if(!input.value.trim()) return;
+            callSandeepAI(input.value);
+            input.value = '';
+        }
+
+        function updateCalcUI() {
+            let type = document.getElementById('calc-type').value;
+            let div = document.getElementById('calc-inputs');
+            if(type === 'cap') div.innerHTML = '<input type="number" id="c-kvar" class="input-field" placeholder="Target kVAR"><input type="number" id="c-v" class="input-field" placeholder="Voltage (V)">';
+            else if(type === 'rx') div.innerHTML = '<input type="number" id="r-v" class="input-field" placeholder="System Voltage (kV)"><input type="number" id="r-sc" class="input-field" placeholder="Short Circuit MVA">';
+            else if(type === 'tx') div.innerHTML = '<input type="number" id="t-nl" class="input-field" placeholder="No Load Loss (W)"><input type="number" id="t-ll" class="input-field" placeholder="Load Loss (W)"><input type="number" id="t-ld" class="input-field" placeholder="Load % (0-100)">';
+            else if(type === 'pwr') div.innerHTML = '<input type="number" id="p-v" class="input-field" placeholder="Voltage (V)"><input type="number" id="p-i" class="input-field" placeholder="Current (A)"><input type="number" id="p-pf" class="input-field" placeholder="Power Factor (0-1)">';
+            else if(type === 'vd') div.innerHTML = '<input type="number" id="v-i" class="input-field" placeholder="Current (A)"><input type="number" id="v-r" class="input-field" placeholder="Resistance (Ohms)"><input type="number" id="v-l" class="input-field" placeholder="Length (m)">';
+        }
+
+        function calculateTech() {
+            let type = document.getElementById('calc-type').value;
+            let res = document.getElementById('calc-result');
+            try {
+                if(type === 'cap') {
+                    let kvar = parseFloat(document.getElementById('c-kvar').value);
+                    let v = parseFloat(document.getElementById('c-v').value);
+                    let c = (kvar * 1000) / (2 * Math.PI * 50 * v * v);
+                    res.innerText = 'Capacitance: ' + (c * 1000000).toFixed(2) + ' μF';
+                }
+                else if(type === 'tx') {
+                    let nl = parseFloat(document.getElementById('t-nl').value);
+                    let ll = parseFloat(document.getElementById('t-ll').value);
+                    let ld = parseFloat(document.getElementById('t-ld').value) / 100;
+                    let tot = nl + (ll * ld * ld);
+                    res.innerText = 'Total Loss at ' + (ld*100) + '% load: ' + tot.toFixed(2) + ' W';
+                }
+                else if(type === 'pwr') {
+                    let v = parseFloat(document.getElementById('p-v').value);
+                    let i = parseFloat(document.getElementById('p-i').value);
+                    let pf = parseFloat(document.getElementById('p-pf').value);
+                    let p = Math.sqrt(3) * v * i * pf / 1000;
+                    res.innerText = '3-Phase Power: ' + p.toFixed(2) + ' kW';
+                }
+                else {
+                    res.innerText = 'Formula processing...';
+                }
+            } catch(e) { res.innerText = 'Invalid Input'; }
+        }
+
         const todayStr = getLocalDateStr();
 
         let appData = { plans: [], reports: [], attendance: [], contacts: [], inquiries: [], userName: '', theme: 'gold', totalAppTime: 0, timerDate: todayStr, appPin: '' };
@@ -881,7 +998,7 @@
         }
         function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('active'); }
         function showToast(msg) { const t = document.getElementById('toast'); document.getElementById('toastMsg').innerText = msg; t.style.bottom = '30px'; setTimeout(() => t.style.bottom = '-60px', 3000); }
-        function switchTab(id) { document.querySelectorAll('.module-section, .nav-item').forEach(e => e.classList.remove('active')); document.getElementById(id).classList.add('active'); event.currentTarget.classList.add('active'); if(window.innerWidth <= 768) toggleSidebar(); }
+        function switchTab(id) { document.querySelectorAll('.module-section, .nav-item').forEach(e => e.classList.remove('active')); document.getElementById(id).classList.add('active'); event.currentTarget.classList.add('active'); if(id === 'tender-erp') { document.querySelector('.header h1').innerText = 'Tender & AI ERP Suite'; } else { document.querySelector('.header h1').innerText = 'DC Tracking'; } if(window.innerWidth <= 768) toggleSidebar(); }
         
         function copyTemplate(elemId, btn) {
             navigator.clipboard.writeText(document.getElementById(elemId).innerText);
