@@ -948,7 +948,7 @@
             useFetchStreams: false
         });
 
-        let currentUser = null, isLoginMode = true;
+        let currentUser = null, isLoginMode = true, isDataLoaded = false;
         const getLocalDateStr = () => { let d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); };
         // --- ERP & AI Module Logic ---
         
@@ -1565,7 +1565,7 @@
             localStorage.setItem('corpHub_offlineData_' + currentUser.uid, JSON.stringify(cleanData(appData)));
         }
         function pushToFirebase() {
-            if(!currentUser || !navigator.onLine) return;
+            if(!currentUser || !navigator.onLine || !isDataLoaded) return;
             document.getElementById('syncStatus').innerHTML = `🔄 Syncing...`;
             db.collection('corporateOperationsData').doc(currentUser.uid).set(cleanData(appData), {merge:true})
                 .then(() => { 
@@ -1587,7 +1587,9 @@
                     if (doc.exists) appData = cleanData({ ...appData, ...doc.data() }); else { appData = cleanData(appData); autoSave(); }
                     
                     if(appData.appPin && appData.appPin.toString().trim().length === 4) showPinScreen();
-                    document.getElementById('themeSelect').value = appData.theme; changeTheme(); document.getElementById('profileName').value = appData.userName; document.getElementById('pinInput').value = appData.appPin; document.getElementById('targetVisits').value = appData.targetVisits; document.getElementById('targetOrders').value = appData.targetOrders; updateUI();
+                    document.getElementById('themeSelect').value = appData.theme; changeTheme(); document.getElementById('profileName').value = appData.userName; document.getElementById('pinInput').value = appData.appPin; document.getElementById('targetVisits').value = appData.targetVisits; document.getElementById('targetOrders').value = appData.targetOrders; 
+                    isDataLoaded = true;
+                    updateUI();
                 }).catch(err => { 
                     console.error("Firebase Load Error:", err);
                     document.getElementById('syncStatus').innerHTML = `🔴 Cloud Load Error`;
@@ -1595,7 +1597,9 @@
             } else {
                 document.getElementById('syncStatus').innerHTML = `🔴 Offline Mode Active`;
                 if(appData.appPin && appData.appPin.toString().trim().length === 4) showPinScreen();
-                document.getElementById('themeSelect').value = appData.theme; changeTheme(); document.getElementById('profileName').value = appData.userName; document.getElementById('pinInput').value = appData.appPin; document.getElementById('targetVisits').value = appData.targetVisits; document.getElementById('targetOrders').value = appData.targetOrders; updateUI();
+                document.getElementById('themeSelect').value = appData.theme; changeTheme(); document.getElementById('profileName').value = appData.userName; document.getElementById('pinInput').value = appData.appPin; document.getElementById('targetVisits').value = appData.targetVisits; document.getElementById('targetOrders').value = appData.targetOrders; 
+                isDataLoaded = true;
+                updateUI();
             }
         }
         function autoSave() { 
