@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sandeep-erp-v1';
+const CACHE_NAME = 'sandeep-erp-v2';
 const urlsToCache = [
   './',
   './index.html',
