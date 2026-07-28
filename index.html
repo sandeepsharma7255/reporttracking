@@ -1176,7 +1176,7 @@
         }
         function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('active'); }
         function showToast(msg) { const t = document.getElementById('toast'); document.getElementById('toastMsg').innerText = msg; t.style.bottom = '30px'; setTimeout(() => t.style.bottom = '-60px', 3000); }
-        function switchTab(id) { document.querySelectorAll('.module-section, .nav-item').forEach(e => e.classList.remove('active')); document.getElementById(id).classList.add('active'); event.currentTarget.classList.add('active'); if(id === 'tender-erp') { document.querySelector('.header h1').innerText = 'Tender & AI ERP Suite'; } else { document.querySelector('.header h1').innerText = 'DC Tracking'; } if(window.innerWidth <= 768) toggleSidebar(); }
+        function switchTab(id) { document.querySelectorAll('.module-section, .nav-item').forEach(e => e.classList.remove('active')); document.getElementById(id).classList.add('active'); event.currentTarget.classList.add('active'); if(window.innerWidth <= 768) toggleSidebar(); }
         
         function copyTemplate(elemId, btn) {
             navigator.clipboard.writeText(document.getElementById(elemId).innerText);
