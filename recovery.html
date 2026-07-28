@@ -17,15 +17,36 @@
     <div id="status" style="margin-top: 30px; font-size: 18px; color: #00e676;"></div>
 
     <script>
+
+        const firebaseConfig = {"apiKey":"AIzaSyAqzWffxXs0ux47L24v7l7tayAKaEt-mTA","authDomain":"sandeepreport.firebaseapp.com","projectId":"sandeepreport","storageBucket":"sandeepreport.firebasestorage.app","messagingSenderId":"191633232523","appId":"1:191633232523:web:9a4085cfe2c6e273eafa8e","measurementId":"G-RCTM6VCR23"};
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+        
+        let currentUser = null;
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('status').innerText = 'Cloud Connected: ' + user.email;
+                document.getElementById('recBtn').style.display = 'inline-block';
+            } else {
+                document.getElementById('status').innerHTML = "❌ You are not logged in. Please go to <a href='/' style='color:yellow;'>dashboard</a>, login, and come back here.";
+            }
+        });
+        
         function recoverData() {
-            document.getElementById('status').innerText = "Restoring Data...";
+            if(!currentUser) return;
+            document.getElementById('status').innerText = 'Uploading to Firebase...';
+            document.getElementById('recBtn').style.display = 'none';
             
             let recPlans = [
-            {id: Date.now()+1, date: "2026-07-09", task: "Subject: Request for Draft Letter Regarding Bushing Inspection at BGCL\\nDear Shivam Prajapati, Kindly prepare a draft letter to BGCL regarding the bushing inspection. Please ensure the draft is clear, concise, and professionally formatted for submission. Let me know if any additional details or clarifications are required.", status: "Completed"},
+            {id: Date.now()+1, date: "2026-07-09", task: "Subject: Request for Draft Letter Regarding Bushing Inspection at BGCL
+Dear Shivam Prajapati, Kindly prepare a draft letter to BGCL regarding the bushing inspection. Please ensure the draft is clear, concise, and professionally formatted for submission. Let me know if any additional details or clarifications are required.", status: "Completed"},
             {id: Date.now()+2, date: "2026-07-09", task: "Converter Transformer Technical Specifications", status: "Completed"},
             {id: Date.now()+3, date: "2026-07-09", task: "We need to follow up with Bikaner site regarding the delayed claim letter and discuss the issue.", status: "Completed"},
             {id: Date.now()+4, date: "2026-07-09", task: "Follow up on the draft letter to BGCL regarding ERDA with Mr. Manan Sir. I have sent an email to Mr. Manan sir regarding this matter.", status: "Completed"},
-            {id: Date.now()+5, date: "2026-07-10", task: "**Subject: Key Takeaways - HPPTCL Autotransformer Vendor Meeting**\\n**Date:** July 10, 2026 Dear Dharmesh Sir, Please find a concise summary of today's virtual vendor meeting with HPPTCL regarding the 220/132 kV autotransformer: 1. Technical specifications aligned with tender requirements.", status: "Completed"},
+            {id: Date.now()+5, date: "2026-07-10", task: "**Subject: Key Takeaways - HPPTCL Autotransformer Vendor Meeting**
+**Date:** July 10, 2026 Dear Dharmesh Sir, Please find a concise summary of today's virtual vendor meeting with HPPTCL regarding the 220/132 kV autotransformer: 1. Technical specifications aligned with tender requirements.", status: "Completed"},
             {id: Date.now()+6, date: "2026-07-10", task: "Following up regarding the BG Courier service with BGCL.", status: "Completed"},
             {id: Date.now()+7, date: "2026-07-10", task: "CA - Technical specification for solor and power", status: "Completed"},
             {id: Date.now()+8, date: "2026-07-13", task: "BGCL has contacted us via call and email regarding the ERDA letter for bushing testing.", status: "Completed"},
@@ -93,34 +114,18 @@
             {id: Date.now()+301, date: "2026-07-15", total: "52.00", items: [{desc: "hiuhu", amount: "52.00"}]}
             ];
 
-            let uid = null;
-            // Find UID from localStorage keys
-            for(let i=0; i<localStorage.length; i++) {
-                let key = localStorage.key(i);
-                if(key.startsWith('corpHub_offlineData_')) {
-                    uid = key.replace('corpHub_offlineData_', '');
-                    break;
-                }
-            }
-
-            if(!uid) {
-                document.getElementById('status').innerHTML = "❌ Error: Please open <a href='/' style='color:yellow;'>dcreports.vercel.app</a> first, Login there, and then refresh this page.";
-                return;
-            }
-
-            let localDataStr = localStorage.getItem('corpHub_offlineData_' + uid);
-            let appData = localDataStr ? JSON.parse(localDataStr) : { plans: [], reports: [], attendance: [], contacts: [], inquiries: [], userName: '', theme: 'gold', totalAppTime: 0, timerDate: '', appPin: '' };
-
-            appData.plans = recPlans;
-            appData.reports = recReports;
-            appData.personalExpenses = recExpenses;
-            appData.expenseSheets = recExpenseSheet;
-
-            localStorage.setItem('corpHub_offlineData_' + uid, JSON.stringify(appData));
-            
-            document.getElementById('status').innerHTML = "✅ Data successfully injected!<br><br>Now please <a href='/' style='color:yellow; font-weight:bold; font-size:24px;'>Click Here to Go Back to Dashboard</a>";
-            document.getElementById('recBtn').style.display = 'none';
+            db.collection('corporateOperationsData').doc(currentUser.uid).set({
+                plans: recPlans,
+                reports: recReports,
+                personalExpenses: recExpenses,
+                expenseSheets: recExpenseSheet
+            }, {merge: true}).then(() => {
+                document.getElementById('status').innerHTML = "✅ Data successfully restored to FIREBASE!<br><br>Now please <a href='/' style='color:yellow; font-weight:bold; font-size:24px;'>Click Here to Go Back to Dashboard</a>";
+            }).catch(err => {
+                document.getElementById('status').innerHTML = "❌ Error: " + err.message;
+            });
         }
-    </script>
+
+</script>
 </body>
 </html>
