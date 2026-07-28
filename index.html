@@ -997,6 +997,93 @@
             });
         }
 
+
+// RECOVERY SCRIPT INJECT
+function runRecovery() {
+    let recPlans = [
+    {id: Date.now()+1, date: "2026-07-09", task: "Subject: Request for Draft Letter Regarding Bushing Inspection at BGCL\nDear Shivam Prajapati, Kindly prepare a draft letter to BGCL regarding the bushing inspection. Please ensure the draft is clear, concise, and professionally formatted for submission. Let me know if any additional details or clarifications are required.", status: "Completed"},
+    {id: Date.now()+2, date: "2026-07-09", task: "Converter Transformer Technical Specifications", status: "Completed"},
+    {id: Date.now()+3, date: "2026-07-09", task: "We need to follow up with Bikaner site regarding the delayed claim letter and discuss the issue.", status: "Completed"},
+    {id: Date.now()+4, date: "2026-07-09", task: "Follow up on the draft letter to BGCL regarding ERDA with Mr. Manan Sir. I have sent an email to Mr. Manan sir regarding this matter.", status: "Completed"},
+    {id: Date.now()+5, date: "2026-07-10", task: "**Subject: Key Takeaways - HPPTCL Autotransformer Vendor Meeting**\n**Date:** July 10, 2026 Dear Dharmesh Sir, Please find a concise summary of today's virtual vendor meeting with HPPTCL regarding the 220/132 kV autotransformer: 1. Technical specifications aligned with tender requirements.", status: "Completed"},
+    {id: Date.now()+6, date: "2026-07-10", task: "Following up regarding the BG Courier service with BGCL.", status: "Completed"},
+    {id: Date.now()+7, date: "2026-07-10", task: "CA - Technical specification for solor and power", status: "Completed"},
+    {id: Date.now()+8, date: "2026-07-13", task: "BGCL has contacted us via call and email regarding the ERDA letter for bushing testing.", status: "Completed"},
+    {id: Date.now()+9, date: "2026-07-13", task: "Dear Sachin Bhai, Please provide the quotation for the following spare parts required for 110 MVAR & 80 MVAR TBEA Reactors at POWERGRID Aligarh Substation.", status: "Completed"},
+    {id: Date.now()+10, date: "2026-07-13", task: "All follow-up documents from Bikaner have been received and forwarded to Mr. Rajkumar. He will review them tomorrow.", status: "Completed"},
+    {id: Date.now()+11, date: "2026-07-15", task: "Rajkumar Bikaner from SS follow-up and he discussed the documents.", status: "Completed"},
+    {id: Date.now()+12, date: "2026-07-15", task: "PGCIL Enquiry (400kV Transformer Package 4TR-22 BULK for 4 x 500 MVA, 400/220/33kV 3 Ph Transformers under Bulk Procurement of 765kV & 400kV Class Transformers and Reactors of various capacities (Lot - 8) )", status: "Completed"},
+    {id: Date.now()+13, date: "2026-07-15", task: "**Subject: Pre-Bid Meeting for 500 MVA ICT at 400 kV Harsh Vihar & Bawana on Turnkey Basis** This is to confirm the Pre-Bid Meeting for the Turnkey Project involving the installation of a 500 MVA Interconnecting Transformer (ICT) at the 400 kV Harsh Vihar and Bawana substations. The meeting will address technical, commercial, and procedural queries related to the tender. All interested bidders are requested to attend as per the scheduled date and time.", status: "Completed"},
+    {id: Date.now()+14, date: "2026-07-15", task: "Alligarh SS Spares quotation and gasket drawing are pending.", status: "Completed"},
+    {id: Date.now()+15, date: "2026-07-15", task: "Visit the Power Grid Corporation of India Limited (PGCIL) in the Engineering Department.", status: "Completed"},
+    {id: Date.now()+16, date: "2026-07-21", task: "Please provide the Aligarh SS quotation details for follow-up. (Soham)", status: "Completed"},
+    {id: Date.now()+17, date: "2026-07-21", task: "Mail sent to SBPDCL for BG Release", status: "Completed"},
+    {id: Date.now()+18, date: "2026-07-22", task: "coordinate with anantgrid for factory visit", status: "Completed"},
+    {id: Date.now()+19, date: "2026-07-22", task: "Bikaner reply after 26 july for documents", status: "Completed"},
+    {id: Date.now()+20, date: "2026-07-23", task: "I will follow up with Soham for the quotation and documents required for Mr. Neelender.", status: "Completed"},
+    {id: Date.now()+21, date: "2026-07-23", task: "file maintain add my section bikaner credential file in orange colour and powergrid all documnets in yellow", status: "Completed"},
+    {id: Date.now()+22, date: "2026-07-23", task: "Bllabhgadh project arranging due drown documents", status: "Completed"},
+    {id: Date.now()+23, date: "2026-07-23", task: "Please follow up with Shivam regarding the bushing testing.", status: "Completed"},
+    {id: Date.now()+24, date: "2026-07-26", task: "Contract reading of Ballabgarh.", status: "Completed"},
+    {id: Date.now()+25, date: "2026-07-27", task: "(BGCL)Negotiation with ERDA for bushing testing at ₹1 lakh per bushing test.", status: "Completed"},
+    {id: Date.now()+26, date: "2026-07-27", task: "Visit acme sector 30 for po and enquiry", status: "Completed"},
+    {id: Date.now()+27, date: "2026-07-27", task: "Acme to serentica sector 18", status: "Completed"},
+    {id: Date.now()+28, date: "2026-07-27", task: "Talk with ballabgarh project site", status: "Completed"},
+    {id: Date.now()+29, date: "2026-07-28", task: "Meeting Agenda: Bank Guarantee Details Discussion To be discussed with Mr. Arun Kalra: 1. Equipment Rating 2. Bank Guarantee (BG) Number 3. BG Validity Period 4. BG Amount 5. Issuing Bank Details 6. BG Start Date 7. Type of BG for the following projects: - HVDC Vidhyanchal - Rihang - Vizag (A, B, C, D)", status: "Completed"},
+    {id: Date.now()+30, date: "2026-07-28", task: "I talking with Prakash Sir from the BOM Department regarding BGCL Bushing. ERDA has quoted a testing charge of approximately ₹1–1.5 lakh for testing a single bushing. We are currently in discussions with them to reduce the testing cost. We will share an update as soon as we receive any further information.", status: "Completed"},
+    {id: Date.now()+31, date: "2026-07-28", task: "Attend the Pre-Bid Meeting for 765kV Reactor Package 7RT-35-BULK for 12 x 80 MVAR, 765kV 1-Ph Reactors under Bulk Procurement of 765kV & 400kV class Transformers and Reactors of various Capacities (Lot-8).", status: "Completed"},
+    {id: Date.now()+32, date: "2026-07-28", task: "Follow-up for the Bikaner Site: I spoke with Mr. Rajkumar regarding the documents. He informed me that he will review them this evening and provide an update thereafter.", status: "Completed"}
+    ];
+
+    let recReports = [
+    {id: Date.now()+101, date: "2026-07-02", company: "Azure", text: "Azure (Fare & Food)", goingFare: "67", returnFare: "67", food: "0"},
+    {id: Date.now()+102, date: "2026-07-08", company: "PGCIL", text: "PGCIL (Fare & Food)", goingFare: "87", returnFare: "87", food: "0"}
+    ];
+
+    let recExpenses = [
+    {id: Date.now()+201, date: "2026-06-30", desc: "rajnikant ko", amount: "15000.00"},
+    {id: Date.now()+202, date: "2026-06-30", desc: "panir", amount: "100.00"},
+    {id: Date.now()+203, date: "2026-06-30", desc: "metro", amount: "63.00"},
+    {id: Date.now()+204, date: "2026-06-30", desc: "Groceries", amount: "80.00"},
+    {id: Date.now()+205, date: "2026-06-30", desc: "Groceries", amount: "20.00"},
+    {id: Date.now()+206, date: "2026-06-30", desc: "Smart bazzar shopping", amount: "2575.00"},
+    {id: Date.now()+207, date: "2026-07-02", desc: "purchase", amount: "503.00"},
+    {id: Date.now()+208, date: "2026-07-02", desc: "Friend", amount: "2000.00"},
+    {id: Date.now()+209, date: "2026-07-02", desc: "Delhi Metro", amount: "54.00"},
+    {id: Date.now()+210, date: "2026-07-02", desc: "Friend", amount: "2000.00"},
+    {id: Date.now()+211, date: "2026-07-02", desc: "Friend", amount: "2000.00"},
+    {id: Date.now()+212, date: "2026-07-03", desc: "Akhilesh", amount: "2000.00"},
+    {id: Date.now()+213, date: "2026-07-03", desc: "Friend", amount: "2000.00"},
+    {id: Date.now()+214, date: "2026-07-03", desc: "Friend", amount: "8000.00"},
+    {id: Date.now()+215, date: "2026-07-03", desc: "Groceries", amount: "90.00"},
+    {id: Date.now()+216, date: "2026-07-04", desc: "Metro", amount: "32.00"},
+    {id: Date.now()+217, date: "2026-07-04", desc: "Metro Card Buy", amount: "100.00"},
+    {id: Date.now()+218, date: "2026-07-04", desc: "Metro Card Recharge", amount: "50.00"},
+    {id: Date.now()+219, date: "2026-07-04", desc: "Groceries", amount: "60.00"},
+    {id: Date.now()+220, date: "2026-07-04", desc: "Groceries", amount: "50.00"},
+    {id: Date.now()+221, date: "2026-07-04", desc: "Metro Travel", amount: "54.00"},
+    {id: Date.now()+222, date: "2026-07-04", desc: "Rapido", amount: "25.00"},
+    {id: Date.now()+223, date: "2026-07-05", desc: "Metro card Recharche", amount: "60.00"},
+    {id: Date.now()+224, date: "2026-07-12", desc: "Mango Shek", amount: "100.00"},
+    {id: Date.now()+225, date: "2026-07-13", desc: "Mango Shek", amount: "50.00"},
+    {id: Date.now()+226, date: "2026-07-13", desc: "Pani Puri", amount: "40.00"}
+    ];
+
+    let recExpenseSheet = [
+    {id: Date.now()+301, date: "2026-07-15", total: "52.00", items: [{desc: "hiuhu", amount: "52.00"}]}
+    ];
+
+    appData.plans = recPlans;
+    appData.reports = recReports;
+    appData.personalExpenses = recExpenses;
+    appData.expenseSheets = recExpenseSheet;
+    autoSave();
+    updateUI();
+    document.getElementById('recoveryBtn').style.display = 'none';
+    alert("Data successfully restored! 🚀");
+}
+// RECOVERY SCRIPT INJECT
+
         // JARVIS VOICE COMMANDS
         let jarvisRec = null;
         let isJarvisActive = false;
