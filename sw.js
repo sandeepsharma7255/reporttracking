@@ -1,9 +1,9 @@
-const CACHE_NAME = 'sandeep-erp-v2';
+const CACHE_NAME = 'sandeep-erp-v3';
 const urlsToCache = [
   './',
   './index.html',
   './manifest.json',
-  './dr.jpg'
+  './logo.png'
 ];
 
 self.addEventListener('install', event => {
