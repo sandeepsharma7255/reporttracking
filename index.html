@@ -2493,8 +2493,16 @@ Update: ${r.text}
                 html2canvas:  { scale: 2 },
                 jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
             };
-            html2pdf().set(opt).from(element).save();
+            
             showToast("Generating PDF...");
+            if (window.AndroidApp) {
+                html2pdf().set(opt).from(element).outputPdf('datauristring').then(function(pdfStr) {
+                    const base64 = pdfStr.split(',')[1];
+                    window.AndroidApp.downloadBase64PDF(base64, opt.filename);
+                });
+            } else {
+                html2pdf().set(opt).from(element).save();
+            }
         }
 
         function exportMasterExcel() {
