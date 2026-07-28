@@ -2062,10 +2062,22 @@
             const fDate = new Date(fromDateStr);
             const tDate = new Date(toDateStr);
             const diffDays = Math.round((tDate - fDate) / (1000 * 60 * 60 * 24));
+            
+            let checkedCount = [incVisits, incPersonalExp, incTasks, incInquiries, incContacts, incAttendance].filter(Boolean).length;
             let reportType = "Consolidated Report";
-            if(diffDays === 0) reportType = "Daily Report";
-            else if(diffDays > 0 && diffDays <= 7) reportType = "Weekly Report";
-            else if(diffDays > 7 && diffDays <= 31) reportType = "Monthly Report";
+            
+            if(checkedCount === 1) {
+                if(incVisits) reportType = "Field Visit Report";
+                else if(incPersonalExp) reportType = "Expense Report";
+                else if(incTasks) reportType = "Action Plan Report";
+                else if(incInquiries) reportType = "Inquiry Report";
+                else if(incContacts) reportType = "Contacts Report";
+                else if(incAttendance) reportType = "Attendance Report";
+            } else {
+                if(diffDays === 0) reportType = "Daily Report";
+                else if(diffDays > 0 && diffDays <= 7) reportType = "Weekly Report";
+                else reportType = "Monthly Report";
+            }
             
             const title = `${reportType} (${fromDateStr} ${diffDays > 0 ? 'to ' + toDateStr : ''})`;
 
@@ -2226,10 +2238,29 @@ Update: ${r.text}
             const fDate = new Date(fromDateStr);
             const tDate = new Date(toDateStr);
             const diffDays = Math.round((tDate - fDate) / (1000 * 60 * 60 * 24));
+            
+            const incVisits = document.getElementById('chkVisits').checked;
+            const incPersonalExp = document.getElementById('chkPersonalExp').checked;
+            const incTasks = document.getElementById('chkTasks').checked;
+            const incInquiries = document.getElementById('chkInquiries').checked;
+            const incContacts = document.getElementById('chkContacts').checked;
+            const incAttendance = document.getElementById('chkAttendance').checked;
+            
+            let checkedCount = [incVisits, incPersonalExp, incTasks, incInquiries, incContacts, incAttendance].filter(Boolean).length;
             let reportType = "Consolidated_Report";
-            if(diffDays === 0) reportType = "Daily_Report";
-            else if(diffDays > 0 && diffDays <= 7) reportType = "Weekly_Report";
-            else if(diffDays > 7 && diffDays <= 31) reportType = "Monthly_Report";
+            
+            if(checkedCount === 1) {
+                if(incVisits) reportType = "Field_Visit_Report";
+                else if(incPersonalExp) reportType = "Expense_Report";
+                else if(incTasks) reportType = "Action_Plan_Report";
+                else if(incInquiries) reportType = "Inquiry_Report";
+                else if(incContacts) reportType = "Contacts_Report";
+                else if(incAttendance) reportType = "Attendance_Report";
+            } else {
+                if(diffDays === 0) reportType = "Daily_Report";
+                else if(diffDays > 0 && diffDays <= 7) reportType = "Weekly_Report";
+                else reportType = "Monthly_Report";
+            }
             
             const sanitizedName = (appData.userName || 'Sandeep_Kumar').replace(/\s+/g, '_');
             
