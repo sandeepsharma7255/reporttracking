@@ -1,0 +1,21 @@
+{
+  "name": "Sandeep ERP Suite",
+  "short_name": "SandeepERP",
+  "description": "Enterprise Resource Planning for Corporate Hub",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#00E5FF",
+  "icons": [
+    {
+      "src": "./dr.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "./dr.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}

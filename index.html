@@ -1518,6 +1518,17 @@
             document.getElementById('syncStatus').innerHTML = `🔴 You are Offline`; 
             showToast("Internet disconnected. Offline Mode active.");
         });
+
+        // REGISTER SERVICE WORKER (PWA OFFLINE CACHE)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').then(registration => {
+                    console.log('SW registered: ', registration.scope);
+                }).catch(err => {
+                    console.log('SW registration failed: ', err);
+                });
+            });
+        }
         function saveSettings() { appData.userName = document.getElementById('profileName').value; appData.targetVisits = parseInt(document.getElementById('targetVisits').value) || 0; appData.targetOrders = parseInt(document.getElementById('targetOrders').value) || 0; autoSave(); showToast('Settings Saved!'); }
         function exportBackup() { let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2)); let dlAnchorElem = document.createElement('a'); dlAnchorElem.setAttribute("href", dataStr); dlAnchorElem.setAttribute("download", `CorporateHub_Backup_${todayStr}.json`); dlAnchorElem.click(); showToast("Backup Downloaded Securely!"); }
 
