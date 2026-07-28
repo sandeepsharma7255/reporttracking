@@ -2058,25 +2058,32 @@
             const incAttendance = document.getElementById('chkAttendance').checked;
             
             const data = getFilteredData(fromDateStr, toDateStr);
-            const title = `Master Report (${fromDateStr} to ${toDateStr})`;
-            const dateStr = new Date().toLocaleDateString();
+            
+            const fDate = new Date(fromDateStr);
+            const tDate = new Date(toDateStr);
+            const diffDays = Math.round((tDate - fDate) / (1000 * 60 * 60 * 24));
+            let reportType = "Consolidated Report";
+            if(diffDays === 0) reportType = "Daily Report";
+            else if(diffDays > 0 && diffDays <= 7) reportType = "Weekly Report";
+            else if(diffDays > 7 && diffDays <= 31) reportType = "Monthly Report";
+            
+            const title = `${reportType} (${fromDateStr} ${diffDays > 0 ? 'to ' + toDateStr : ''})`;
 
             let html = `
-                <div style="font-family: 'Arial', sans-serif; color: #000; font-size: 12px; line-height: 1.4;">
-                    <div style="text-align:center; border-bottom: 2px solid #333; margin-bottom: 15px; padding-bottom:5px;">
-                        <h2 style="color: #333; margin:0;">${appData.userName || 'Corporate Hub'}</h2>
-                        <h3 style="margin:5px 0; color: #555;">${title}</h3>
-                        <p style="font-size:10px; color:#666; margin:0;">Generated on: ${dateStr}</p>
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #000; font-size: 12px; line-height: 1.4;">
+                    <div style="text-align:center; border-bottom: 3px solid #0056b3; margin-bottom: 20px; padding-bottom:10px;">
+                        <h1 style="color: #000; margin:0; font-size: 24px; text-transform: uppercase; letter-spacing: 1px;">${appData.userName || 'Sandeep Kumar'}</h1>
+                        <h2 style="margin:8px 0 0 0; color: #0056b3; font-size: 16px;">${title}</h2>
                     </div>
             `;
-            let text = `${title}
-Generated on: ${dateStr}
+            let text = `${appData.userName || 'Sandeep Kumar'}
+${title}
 
 `;
 
-            const tableStyle = 'width:100%; border-collapse:collapse; margin-bottom:15px; table-layout: fixed; word-wrap: break-word;';
-            const thStyle = 'background:#eee; padding:6px; text-align:left; border:1px solid #aaa; font-weight:bold;';
-            const tdStyle = 'padding:6px; border:1px solid #aaa; vertical-align: top; white-space: pre-wrap; word-wrap: break-word;';
+            const tableStyle = 'width:100%; border-collapse:collapse; margin-bottom:25px; table-layout: fixed; word-wrap: break-word; box-shadow: 0 1px 3px rgba(0,0,0,0.1);';
+            const thStyle = 'background:#0056b3; color:#ffffff; padding:10px 12px; text-align:left; border:1px solid #004494; font-weight:bold; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;';
+            const tdStyle = 'padding:10px 12px; border:1px solid #ddd; vertical-align: top; white-space: pre-wrap; word-wrap: break-word; font-size: 12px; color: #333; background: #fff;';
 
             if(incAttendance && data.attendance.length > 0) {
                 html += `<h4 style="color:#d9534f; margin:10px 0 5px 0;">1. Attendance & Operations</h4>`;
@@ -2215,9 +2222,20 @@ Update: ${r.text}
             if(!element.innerHTML.trim()) return alert("Please generate a report first!");
             const fromDateStr = document.getElementById('masterDateFrom').value;
             const toDateStr = document.getElementById('masterDateTo').value;
+            
+            const fDate = new Date(fromDateStr);
+            const tDate = new Date(toDateStr);
+            const diffDays = Math.round((tDate - fDate) / (1000 * 60 * 60 * 24));
+            let reportType = "Consolidated_Report";
+            if(diffDays === 0) reportType = "Daily_Report";
+            else if(diffDays > 0 && diffDays <= 7) reportType = "Weekly_Report";
+            else if(diffDays > 7 && diffDays <= 31) reportType = "Monthly_Report";
+            
+            const sanitizedName = (appData.userName || 'Sandeep_Kumar').replace(/\s+/g, '_');
+            
             const opt = {
                 margin:       0.4,
-                filename:     `Master_Report_${fromDateStr}_to_${toDateStr}.pdf`,
+                filename:     `${sanitizedName}_${reportType}_${fromDateStr}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2 },
                 jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
