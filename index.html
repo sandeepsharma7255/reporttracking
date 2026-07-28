@@ -6,7 +6,7 @@
     <title>💼 AI ERP Suite</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -312,6 +312,22 @@
                 </div>
             </div>
 
+            <h3 style="color:var(--accent-primary); margin:20px 0 10px 0;"><i class="fas fa-chart-pie"></i> Advanced Expense Analytics</h3>
+            <div class="grid-2">
+                <div class="card">
+                    <div class="stat-header"><span>Expense Breakdown (All Time)</span><i class="fas fa-chart-pie"></i></div>
+                    <div style="height:250px; width:100%; position:relative;">
+                        <canvas id="expensePieChart"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="stat-header"><span>Daily Expenses (Last 7 Days)</span><i class="fas fa-chart-bar"></i></div>
+                    <div style="height:250px; width:100%; position:relative;">
+                        <canvas id="expenseBarChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
             
             
             <div class="grid-2">
@@ -377,13 +393,14 @@
                         <div id="pdfExportArea" style="background:#fff; color:#000; padding:20px; font-size:0.85rem; font-family: Arial, sans-serif;">
                             <!-- PDF HTML Content Will Be Rendered Here -->
                         </div>
-                    </div>
-                    <div style="display:flex; gap:10px; margin-top:15px; flex-wrap:wrap;">
                         <button class="btn" style="font-size:0.8rem; padding:8px; flex:1;" onclick="copyMasterReport()"><i class="fas fa-copy"></i> Copy Text</button>
+                        <button class="btn" style="font-size:0.8rem; padding:8px; background:#25D366; color:#fff; border:none; flex:1;" onclick="sendToWhatsApp()"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+                    </div>
+                    <div style="display:flex; gap:10px; margin-top:10px;">
                         <button class="btn" style="font-size:0.8rem; padding:8px; background:#4caf50; color:#fff; border:none; flex:1;" onclick="exportMasterExcel()"><i class="fas fa-file-excel"></i> Excel</button>
                         <button class="btn" style="font-size:0.8rem; padding:8px; background:#ff4d4d; color:#fff; border:none; flex:1;" onclick="exportMasterPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
                         <button class="btn" style="font-size:0.8rem; padding:8px; background:#107c41; color:#fff; border:none; flex:1;" onclick="exportMasterExcel()"><i class="fas fa-file-excel"></i> Excel</button>
-                    </div>
+                    </div>           </div>
                 </div>
             </div>
         </section>
@@ -396,7 +413,11 @@
                     <button type="button" onclick="openPlanHistory()" class="btn" style="width:auto; padding:5px 10px; font-size:0.8rem; background:transparent; border:1px solid var(--accent-primary); color:var(--accent-primary); margin:0;"><i class="fas fa-history"></i> History</button>
                 </div>
                 <form id="planForm" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 20px;">
-                    <input type="text" id="planTask" class="input-field" placeholder="What needs to be done today?" style="flex:1; margin-bottom:0;" required>
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <input type="text" id="planTask" class="input-field" placeholder="What needs to be done today?" style="flex:1; margin-bottom:0;" required>
+                        <button type="button" class="btn" style="width:auto; padding:0 15px; background:var(--accent-primary); color:#000;" onclick="translateToEnglish('planTask')" title="Translate Hindi to Professional English"><i class="fas fa-language"></i> AI</button>
+                        <button class="btn" style="width:auto; padding:0 15px;" onclick="addPlan()"><i class="fas fa-plus"></i></button>
+                    </div>
                     <button type="submit" id="planSubmitBtn" class="btn" style="width:auto; margin-top:0;">Add Task</button>
                     <button type="button" id="planAIBtn" class="btn" style="width:auto; margin-top:0; background: linear-gradient(45deg, #00E5FF, #00BFFF); color: black;" onclick="enhanceTextWithAI('planTask', 'planAIBtn')"><i class="fas fa-magic"></i> ✨ AI Enhance</button>
                     <button type="button" id="btnMeetingRecorder" class="btn" style="width:auto; background: linear-gradient(45deg, #FF5252, #FF1744); margin-top:0;" onclick="toggleMeetingRecorder()"><i class="fas fa-microphone"></i> Record MOM</button>
@@ -442,15 +463,11 @@
                             <div style="flex:1; min-width:80px;"><label>Return Fare (jane ka) ₹</label><input type="number" id="repReturn" class="input-field" value="0"></div>
                             <div style="flex:1; min-width:80px;"><label>Food (₹)</label><input type="number" id="repFood" class="input-field" value="0"></div>
                         </div>
-                        <label>Key Update / Remarks</label>
+                        <label>Visit Summary / Notes</label>
                         <div class="ai-textarea-wrapper">
                             <textarea id="repText" placeholder="Start typing or tap mic for dictation..." required></textarea>
-                            <div class="ai-tools">
-                                <button type="button" class="icon-btn" title="AI Enhance (Grammar & Summary)" onclick="enhanceTextWithAI('repText', this)"><i class="fas fa-magic"></i></button>
-                                <button type="button" class="icon-btn" title="Translate to English" onclick="magicRewrite('en')">EN</button>
-                                <button type="button" class="icon-btn" title="Translate to Hindi" onclick="magicRewrite('hi')">HI</button>
-                                <button type="button" class="icon-btn" id="micReportBtn" title="Speak" onclick="startReportVoice()"><i class="fas fa-microphone"></i></button>
-                            </div>
+                            <button type="button" class="btn" style="position:absolute; right:50px; bottom:20px; width:auto; padding:5px 10px; background:var(--accent-primary); color:#000; font-size:0.8rem;" onclick="translateToEnglish('repText')" title="Translate Hindi to Professional English"><i class="fas fa-language"></i> AI Magic</button>
+                            <div class="mic-btn" onclick="startVoiceRecognition('repText')"><i class="fas fa-microphone"></i></div>
                         </div>
                         <button type="submit" class="btn">Log Daily Report</button>
                     </form>
@@ -1862,7 +1879,9 @@ function runRecovery() {
             if(dfList) dfList.innerHTML = fuHtml;
 
             renderPlans(); renderReportsList(); renderAttendance(); renderContacts(); renderInquiries(); renderCalendar();
+            updateAnalyticsChart();
             updateCharts();
+            setTimeout(renderAdvancedAnalytics, 300);
         }
 
         // CRM CONTACTS & INQUIRIES
@@ -3338,6 +3357,115 @@ Update: ${r.text}
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
+        // --- ADVANCED PREMIUM FEATURES --- //
+
+        function sendToWhatsApp() {
+            if(!currentMasterText) {
+                alert("Please generate the report first!");
+                return;
+            }
+            let encodedText = encodeURIComponent(currentMasterText);
+            window.open(`https://wa.me/?text=${encodedText}`, '_blank');
+        }
+
+        async function translateToEnglish(inputId) {
+            const inputEl = document.getElementById(inputId);
+            let text = inputEl.value.trim();
+            if(!text) { alert("Please enter some text first!"); return; }
+            
+            showToast("✨ AI Translating...");
+            try {
+                let res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=hi|en`);
+                let data = await res.json();
+                if(data && data.responseData && data.responseData.translatedText) {
+                    inputEl.value = data.responseData.translatedText;
+                    showToast("✅ Translated to Professional English!");
+                } else {
+                    alert("AI Translation failed. Please try again.");
+                }
+            } catch(e) {
+                alert("Error connecting to AI Translator.");
+            }
+        }
+
+        let expPieChart = null;
+        let expBarChart = null;
+
+        function renderAdvancedAnalytics() {
+            if(typeof Chart === 'undefined') return;
+
+            let legacyExp = Array.isArray(appData.personalExpenses) ? appData.personalExpenses : Object.values(appData.personalExpenses || {});
+            let sheetsExp = Array.isArray(appData.expenseSheets) ? appData.expenseSheets : Object.values(appData.expenseSheets || {});
+            let reports = Array.isArray(appData.reports) ? appData.reports : Object.values(appData.reports || {});
+
+            let travelFood = 0;
+            let otherExp = 0;
+
+            reports.forEach(r => {
+                travelFood += (parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0);
+            });
+            legacyExp.forEach(e => {
+                otherExp += parseFloat(e.amount)||0;
+            });
+            sheetsExp.forEach(s => {
+                s.items.forEach(i => otherExp += parseFloat(i.amount)||0);
+            });
+
+            const pieCtx = document.getElementById('expensePieChart');
+            if(pieCtx) {
+                if(expPieChart) expPieChart.destroy();
+                expPieChart = new Chart(pieCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Visits (Travel+Food)', 'Other / Logged Expenses'],
+                        datasets: [{
+                            data: [travelFood, otherExp],
+                            backgroundColor: ['#28a745', '#ff4d4d'],
+                            borderColor: '#1e1e1e', borderWidth: 2
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#8b9bb4' } } } }
+                });
+            }
+
+            const labels = [];
+            const dataCounts = [];
+            const today = new Date();
+            for(let i=6; i>=0; i--) {
+                const d = new Date(today); d.setDate(d.getDate() - i);
+                const dStr = d.toISOString().split('T')[0];
+                labels.push(d.toLocaleDateString('en-GB', {day:'numeric', month:'short'}));
+                
+                let dayTot = 0;
+                reports.filter(r => r.date === dStr).forEach(r => dayTot += (parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0));
+                legacyExp.filter(e => e.date === dStr).forEach(e => dayTot += parseFloat(e.amount)||0);
+                sheetsExp.filter(s => s.date === dStr).forEach(s => s.items.forEach(it => dayTot += parseFloat(it.amount)||0));
+                
+                dataCounts.push(dayTot);
+            }
+
+            const barCtx = document.getElementById('expenseBarChart');
+            if(barCtx) {
+                if(expBarChart) expBarChart.destroy();
+                expBarChart = new Chart(barCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Daily Expenses (₹)', data: dataCounts,
+                            backgroundColor: '#ffd700', borderRadius: 4
+                        }]
+                    },
+                    options: { 
+                        responsive: true, maintainAspectRatio: false, 
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#8b9bb4' } },
+                            x: { grid: { display: false }, ticks: { color: '#8b9bb4' } }
+                        }
+                    }
+                });
+            }
         }
     </script>
 
