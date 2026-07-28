@@ -382,6 +382,7 @@
                         <button class="btn" style="font-size:0.8rem; padding:8px; flex:1;" onclick="copyMasterReport()"><i class="fas fa-copy"></i> Copy Text</button>
                         <button class="btn" style="font-size:0.8rem; padding:8px; background:#4caf50; color:#fff; border:none; flex:1;" onclick="exportMasterExcel()"><i class="fas fa-file-excel"></i> Excel</button>
                         <button class="btn" style="font-size:0.8rem; padding:8px; background:#ff4d4d; color:#fff; border:none; flex:1;" onclick="exportMasterPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+                        <button class="btn" style="font-size:0.8rem; padding:8px; background:#107c41; color:#fff; border:none; flex:1;" onclick="exportMasterExcel()"><i class="fas fa-file-excel"></i> Excel</button>
                     </div>
                 </div>
             </div>
@@ -502,7 +503,10 @@
                 <div class="card">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
                         <h2 style="margin-bottom: 0;"><i class="fas fa-history"></i> Expense History</h2>
-                        <button class="btn" style="width:auto; padding:5px 10px; font-size:0.8rem; background:#ff4d4d;" onclick="generateExpensePDF()"><i class="fas fa-file-pdf"></i> Generate PDF</button>
+                        <div style="display:flex; gap:10px;">
+                            <button class="btn" style="flex:1; padding:5px 10px; font-size:0.8rem; background:#ff4d4d;" onclick="generateExpensePDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+                            <button class="btn" style="flex:1; padding:5px 10px; font-size:0.8rem; background:#107c41;" onclick="generateExpenseExcel()"><i class="fas fa-file-excel"></i> Excel</button>
+                        </div>
                     </div>
                     <div id="expenseHistoryList" style="max-height:600px; overflow-y:auto; padding-right:5px;"></div>
                 </div>
@@ -3195,20 +3199,145 @@ Update: ${r.text}
             const wrapper = document.createElement('div');
             wrapper.innerHTML = html;
             
+            const fromDateStr = document.getElementById('masterDateFrom')?.value || new Date().toISOString().split('T')[0];
+            const toDateStr = document.getElementById('masterDateTo')?.value || new Date().toISOString().split('T')[0];
+            const fDate = new Date(fromDateStr);
+            const tDate = new Date(toDateStr);
+            const diffDays = Math.round((tDate - fDate) / (1000 * 60 * 60 * 24));
+            
+            let reportType = "Consolidated_Report";
+            if(diffDays === 0) reportType = "Daily_Report";
+            else if(diffDays > 0 && diffDays <= 7) reportType = "Weekly_Report";
+            else if(diffDays > 7 && diffDays <= 31) reportType = "Monthly_Report";
+
             const opt = {
-                margin:       0.5,
-                filename:     `Complete_Expense_Report_${todayStr}.pdf`,
+                margin:       0.3,
+                filename:     `${reportType}_${fromDateStr}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2 },
                 jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
             };
             
-            showToast("Generating Expense PDF...");
+            showToast("Generating PDF...");
             if (typeof html2pdf !== 'undefined') {
-                html2pdf().set(opt).from(wrapper).save();
+                html2pdf().set(opt).from(wrapper.firstElementChild).save();
             } else {
                 alert("PDF engine not loaded yet. Please try again.");
             }
+        }
+
+        function exportMasterExcel() {
+            const fromDateStr = document.getElementById('masterDateFrom')?.value || new Date().toISOString().split('T')[0];
+            const toDateStr = document.getElementById('masterDateTo')?.value || new Date().toISOString().split('T')[0];
+            
+            // Re-generate content for Excel format
+            let allSheets = Array.isArray(appData.expenseSheets) ? appData.expenseSheets : Object.values(appData.expenseSheets || {});
+            let legacyExpenses = Array.isArray(appData.personalExpenses) ? appData.personalExpenses : Object.values(appData.personalExpenses || {});
+            let reports = Array.isArray(appData.reports) ? appData.reports : Object.values(appData.reports || {});
+            let reportsWithExp = reports.filter(r => (parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0) > 0);
+            
+            let htmlContent = `
+            <html xmlns:x="urn:schemas-microsoft-com:office:excel">
+            <head><meta charset="utf-8"></head>
+            <body>
+            <table border="1">
+                <tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th></tr>
+            `;
+
+            [...reportsWithExp].sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(r => {
+                let tot = (parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0);
+                htmlContent += `<tr><td>${r.date}</td><td>Field Visit</td><td>${r.company || 'Visit'}</td><td>${tot}</td></tr>`;
+            });
+            [...legacyExpenses].sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(e => {
+                htmlContent += `<tr><td>${e.date}</td><td>Legacy</td><td>${e.desc}</td><td>${e.amount}</td></tr>`;
+            });
+            [...allSheets].sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(s => {
+                s.items.forEach(i => {
+                    htmlContent += `<tr><td>${s.date}</td><td>Sheet</td><td>${i.desc}</td><td>${i.amount}</td></tr>`;
+                });
+            });
+
+            htmlContent += `</table></body></html>`;
+
+            let blob = new Blob([htmlContent], { type: 'application/vnd.ms-excel' });
+            let url = URL.createObjectURL(blob);
+            let a = document.createElement('a');
+            a.href = url;
+            a.download = `Report_${fromDateStr}.xls`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        function generateExpenseExcel() {
+            let allSheets = Array.isArray(appData.expenseSheets) ? appData.expenseSheets : Object.values(appData.expenseSheets || {});
+            let legacyExpenses = Array.isArray(appData.personalExpenses) ? appData.personalExpenses : Object.values(appData.personalExpenses || {});
+            let reports = Array.isArray(appData.reports) ? appData.reports : Object.values(appData.reports || {});
+            let reportsWithExp = reports.filter(r => (parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0) > 0);
+            
+            if(allSheets.length === 0 && legacyExpenses.length === 0 && reportsWithExp.length === 0) {
+                return alert("No expenses to generate.");
+            }
+
+            let html = `<html xmlns:x="urn:schemas-microsoft-com:office:excel">
+            <head>
+                <meta charset="utf-8">
+                <style>
+                    table { border-collapse: collapse; font-family: Arial, sans-serif; }
+                    th { background-color: #ffd700; color: #000; font-weight: bold; border: 1px solid #000; padding: 10px; text-align: left; }
+                    td { border: 1px solid #000; padding: 8px; }
+                    .header { font-size: 24px; font-weight: bold; color: #333; text-align: center; }
+                    .sub { font-weight: bold; color: #666; text-align: center; }
+                    .visit { color: green; font-weight: bold; }
+                    .legacy { color: red; font-weight: bold; }
+                    .sheet { color: blue; font-weight: bold; }
+                    .grand { background-color: #ffd700; font-weight: bold; font-size: 16px; }
+                </style>
+            </head>
+            <body>
+                <table>
+                    <tr><td colspan="4" class="header">Complete Expense Report</td></tr>
+                    <tr><td colspan="4" class="sub">Employee/Agent: ${appData.userName || 'Agent'} | Generated: ${new Date().toLocaleString()}</td></tr>
+                    <tr><td colspan="4"></td></tr>
+                    <tr>
+                        <th>Date</th>
+                        <th>Category</th>
+                        <th>Description</th>
+                        <th>Amount (Rs.)</th>
+                    </tr>`;
+
+            let grandTotal = 0;
+            [...reportsWithExp].sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(r => {
+                let tot = (parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0);
+                grandTotal += tot;
+                html += `<tr><td>${r.date}</td><td class="visit">Field Visit</td><td>${r.company || 'Visit'} (Fare & Food)</td><td>${tot.toFixed(2)}</td></tr>`;
+            });
+            [...legacyExpenses].sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(e => {
+                let amt = parseFloat(e.amount)||0;
+                grandTotal += amt;
+                html += `<tr><td>${e.date}</td><td class="legacy">Legacy Log</td><td>${e.desc}</td><td>${amt.toFixed(2)}</td></tr>`;
+            });
+            [...allSheets].sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(s => {
+                s.items.forEach(i => {
+                    let amt = parseFloat(i.amount)||0;
+                    grandTotal += amt;
+                    html += `<tr><td>${s.date}</td><td class="sheet">Expense Sheet</td><td>${i.desc}</td><td>${amt.toFixed(2)}</td></tr>`;
+                });
+            });
+
+            html += `<tr><td colspan="3" class="grand" style="text-align: right;">Grand Total:</td><td class="grand">Rs.${grandTotal.toLocaleString()}</td></tr>
+                </table>
+            </body>
+            </html>`;
+
+            let blob = new Blob([html], { type: 'application/vnd.ms-excel' });
+            let url = URL.createObjectURL(blob);
+            let a = document.createElement('a');
+            a.href = url;
+            a.download = `Expense_Report_${todayStr}.xls`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
         }
     </script>
 
