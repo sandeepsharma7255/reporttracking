@@ -48,14 +48,14 @@
             --bg-main: #000000; --bg-secondary: #080808;
             --accent-primary: #00ffcc; --accent-secondary: #00e5b8;
             --text-main: #e0e0e0; --text-muted: #666666;
-            --card-bg: rgba(0, 255, 204, 0.02); --card-border: rgba(0, 255, 204, 0.2);
+            --card-bg: rgba(0, 255, 204, 0.05); --card-border: rgba(0, 255, 204, 0.15);
             --glow: 0 0 15px rgba(0, 255, 204, 0.3);
         }
         :root {
             --bg-main: #0a0e17; --bg-secondary: #12182b; 
             --accent-primary: #FFD700; --accent-secondary: #FFC107;
             --text-main: #FFFFFF; --text-muted: #8b9bb4; 
-            --card-bg: rgba(255, 215, 0, 0.03); --card-border: rgba(255, 215, 0, 0.2);
+            --card-bg: rgba(255, 215, 0, 0.05); --card-border: rgba(255, 215, 0, 0.15);
             --glow: 0 0 15px rgba(255, 215, 0, 0.3);
             --danger: #ff4d4d; --success: #00e676; --warning: #ffea00;
             --transition: all 0.3s ease;
@@ -101,7 +101,7 @@
         /* GRIDS & CARDS */
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
-        .card { background: var(--card-bg); backdrop-filter: blur(10px); border: 1px solid var(--card-border); border-radius: 12px; padding: 20px; margin-bottom: 20px; width: 100%; transition: var(--transition); }
+        .card { background: var(--card-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--card-border); border-radius: 16px; padding: 20px; margin-bottom: 20px; width: 100%; transition: var(--transition); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); border-top: 1px solid rgba(255,255,255,0.1); border-left: 1px solid rgba(255,255,255,0.05); }
         .stat-header { display: flex; justify-content: space-between; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 10px; font-weight: 600; }
         .stat-value { font-size: 2rem; font-weight: 800; color: var(--text-main); }
 
@@ -177,6 +177,17 @@
             </p>
         </div>
     </div>
+
+    
+    <!-- BIOMETRIC SCANNER OVERLAY -->
+    <div id="biometricOverlay" class="overlay-screen" style="display: none; background: rgba(0,0,0,0.9); z-index: 30000; flex-direction: column;">
+        <i class="fas fa-fingerprint" style="font-size: 5rem; color: var(--accent-primary); animation: pulseMic 0.8s infinite alternate; text-shadow: var(--glow);"></i>
+        <div style="width:200px; height:4px; background:rgba(255,255,255,0.1); margin-top:20px; border-radius:5px; position:relative; overflow:hidden;">
+            <div style="width:50%; height:100%; background:var(--accent-primary); position:absolute; left:0; animation: scanMove 1.5s infinite linear;"></div>
+        </div>
+        <h3 style="margin-top:15px; color:var(--accent-primary); font-family:monospace; letter-spacing:2px;" id="bioStatus">ANALYZING BIOMETRICS...</h3>
+    </div>
+    <style>@keyframes scanMove { 0% { left:-50%; } 100% { left:100%; } }</style>
 
     <!-- SECURITY PIN PAD OVERLAY -->
     <div id="pinOverlay" class="overlay-screen" style="display: none; background: #000; z-index: 20000;">
@@ -259,6 +270,13 @@
                 <div class="card"><div class="stat-header"><span>Saved Contacts</span><i class="fas fa-address-book"></i></div><div class="stat-value" id="dashContacts" style="color: #00E5FF;">0</div></div>
             </div>
             
+            <div class="card" style="margin-top:20px;">
+                <div class="stat-header"><span>Visits Analytics (Last 7 Days)</span><i class="fas fa-chart-area"></i></div>
+                <div style="height:200px; width:100%; position:relative;">
+                    <canvas id="visitsChart"></canvas>
+                </div>
+            </div>
+
             <h3 style="color:var(--accent-primary); margin:20px 0 10px 0;"><i class="fas fa-industry"></i> Sales Inquiries</h3>
             <div class="grid-3">
                 <div class="card"><div class="stat-header"><span>Total Inquiries</span><i class="fas fa-industry"></i></div><div class="stat-value" id="dashInqTotal" style="color: #fff;">0</div></div>
@@ -934,6 +952,92 @@
         // --- ERP & AI Module Logic ---
         
         // --- ADVANCED ERP FEATURES --- //
+                let visitsChartInstance = null;
+        function updateAnalyticsChart() {
+            const ctx = document.getElementById('visitsChart');
+            if(!ctx) return;
+            
+            const labels = [];
+            const dataCounts = [];
+            const today = new Date();
+            for(let i=6; i>=0; i--) {
+                const d = new Date(today);
+                d.setDate(d.getDate() - i);
+                const dStr = d.toISOString().split('T')[0];
+                labels.push(d.toLocaleDateString('en-GB', {day:'numeric', month:'short'}));
+                const c = appData.reports.filter(r => r.date === dStr).length;
+                dataCounts.push(c);
+            }
+            
+            if(visitsChartInstance) visitsChartInstance.destroy();
+            const isDark = document.body.style.backgroundColor !== "rgb(255, 255, 255)";
+            const color = isDark ? "#FFD700" : "#00E5FF"; // Simplified fallback
+            
+            visitsChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Visits', data: dataCounts,
+                        borderColor: color, backgroundColor: color + '22',
+                        borderWidth: 3, tension: 0.4, fill: true,
+                        pointBackgroundColor: '#fff', pointBorderColor: color, pointRadius: 4,
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#8b9bb4', stepSize: 1 } },
+                        x: { grid: { display: false }, ticks: { color: '#8b9bb4' } }
+                    },
+                    animation: { duration: 1500, easing: 'easeOutQuart' }
+                }
+            });
+        }
+
+        // JARVIS VOICE COMMANDS
+        let jarvisRec = null;
+        let isJarvisActive = false;
+        function toggleJarvis() {
+            if(!jarvisRec) {
+                const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if(!SpeechRec) return alert("JARVIS not supported in this browser.");
+                jarvisRec = new SpeechRec();
+                jarvisRec.continuous = false;
+                jarvisRec.interimResults = false;
+                jarvisRec.onstart = () => {
+                    document.getElementById('jarvisOrb').style.transform = "scale(1.2)";
+                    document.getElementById('jarvisStatus').style.display = "block";
+                    document.getElementById('jarvisStatus').innerText = "JARVIS listening...";
+                };
+                jarvisRec.onend = () => {
+                    document.getElementById('jarvisOrb').style.transform = "scale(1)";
+                    setTimeout(() => document.getElementById('jarvisStatus').style.display = "none", 2000);
+                    isJarvisActive = false;
+                };
+                jarvisRec.onresult = (e) => {
+                    let cmd = e.results[0][0].transcript.toLowerCase();
+                    document.getElementById('jarvisStatus').innerText = "Command: " + cmd;
+                    
+                    if(cmd.includes("dashboard") || cmd.includes("home")) switchTab('dashboard');
+                    else if(cmd.includes("expense")) switchTab('expenses');
+                    else if(cmd.includes("visit") || cmd.includes("report")) switchTab('reports');
+                    else if(cmd.includes("master")) switchTab('master-reports');
+                    else if(cmd.includes("plan") || cmd.includes("task")) switchTab('planner');
+                    else if(cmd.includes("attend")) switchTab('attendance');
+                    else if(cmd.includes("contact")) switchTab('contacts');
+                    else if(cmd.includes("inquir")) switchTab('inquiries');
+                    else if(cmd.includes("quot")) switchTab('quotation');
+                    else if(cmd.includes("tender") || cmd.includes("ai")) switchTab('tender-erp');
+                    else if(cmd.includes("theme") || cmd.includes("dark mode")) toggleTheme();
+                    else if(cmd.includes("logout")) logout();
+                    else document.getElementById('jarvisStatus').innerText = "Unrecognized.";
+                };
+            }
+            if(isJarvisActive) { jarvisRec.stop(); } else { jarvisRec.start(); isJarvisActive = true; }
+        }
+
         // AI MEETING RECORDER (MOM)
         let momRecognition = null;
         let isRecordingMOM = false;
@@ -3007,5 +3111,14 @@ Update: ${r.text}
             }
         }
     </script>
+
+    <!-- JARVIS FLOATING ORB -->
+    <div id="jarvisOrb" onclick="toggleJarvis()" style="position:fixed; bottom:30px; right:30px; width:60px; height:60px; border-radius:50%; background:radial-gradient(circle, var(--accent-secondary), var(--accent-primary)); box-shadow: 0 0 20px var(--accent-primary); display:flex; justify-content:center; align-items:center; z-index:9000; cursor:pointer; transition:0.3s;">
+        <i class="fas fa-microphone" style="color:#000; font-size:1.5rem;"></i>
+    </div>
+    <div id="jarvisStatus" style="position:fixed; bottom:100px; right:30px; background:rgba(0,0,0,0.8); border:1px solid var(--accent-primary); padding:10px 15px; border-radius:10px; color:var(--accent-primary); font-size:0.85rem; font-weight:bold; display:none; z-index:9000; backdrop-filter:blur(10px);">
+        Listening...
+    </div>
+
 </body>
 </html>
