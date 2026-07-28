@@ -296,7 +296,8 @@
                     </div>
                     <div style="flex:100%; display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px; background:rgba(255,255,255,0.05); padding:10px; border-radius:5px;">
                         <label style="font-size:0.8rem; font-weight:bold; width:100%; color:var(--accent-primary);">Include in Report:</label>
-                        <label style="font-size:0.85rem; cursor:pointer; color:#fff;"><input type="checkbox" id="chkVisits" checked> Visits & Expenses</label>
+                        <label style="font-size:0.85rem; cursor:pointer; color:#fff;"><input type="checkbox" id="chkVisits" checked> Field Visits</label>
+                        <label style="font-size:0.85rem; cursor:pointer; color:#fff;"><input type="checkbox" id="chkPersonalExp" checked> Personal & Travel Exp</label>
                         <label style="font-size:0.85rem; cursor:pointer; color:#fff;"><input type="checkbox" id="chkTasks" checked> Action Plans</label>
                         <label style="font-size:0.85rem; cursor:pointer; color:#fff;"><input type="checkbox" id="chkInquiries" checked> Inquiries</label>
                         <label style="font-size:0.85rem; cursor:pointer; color:#fff;"><input type="checkbox" id="chkContacts" checked> Contacts</label>
@@ -1958,6 +1959,7 @@
             if(!fromDateStr || !toDateStr) return alert("Please select both From and To dates.");
             
             const incVisits = document.getElementById('chkVisits').checked;
+            const incPersonalExp = document.getElementById('chkPersonalExp').checked;
             const incTasks = document.getElementById('chkTasks').checked;
             const incInquiries = document.getElementById('chkInquiries').checked;
             const incContacts = document.getElementById('chkContacts').checked;
@@ -2042,6 +2044,7 @@ Update: ${r.text}
                     html += `</table>`;
                 }
 
+                if(incPersonalExp) {
                 let totalPersonalExpMaster = 0;
                 fPersonalExp.forEach(e => totalPersonalExpMaster += parseFloat(e.amount)||0);
                 fSheets.forEach(s => totalPersonalExpMaster += parseFloat(s.total)||0);
@@ -2069,6 +2072,7 @@ Update: ${r.text}
                     });
                     html += `</table>`;
                 }
+            }
             }
 
             if(incInquiries && data.inquiries.length > 0) {
@@ -2136,6 +2140,7 @@ Update: ${r.text}
             if(!fromDateStr || !toDateStr) return alert("Please select both From and To dates.");
             
             const incVisits = document.getElementById('chkVisits').checked;
+            const incPersonalExp = document.getElementById('chkPersonalExp').checked;
             const incTasks = document.getElementById('chkTasks').checked;
             const incInquiries = document.getElementById('chkInquiries').checked;
             const incContacts = document.getElementById('chkContacts').checked;
@@ -2165,6 +2170,8 @@ Update: ${r.text}
                     const totExp = (parseFloat(r.goingFare)||0)+(parseFloat(r.returnFare)||0)+(parseFloat(r.food)||0);
                     allLogs.push({ date: r.date, type: "Field Visit", details: `${r.company||'Visit'} | ${r.text}`, amount: totExp });
                 });
+            }
+            if(incPersonalExp) {
                 let fPersonalExp = (appData.personalExpenses || []).filter(e => e.date >= fromDateStr && e.date <= toDateStr);
                 fPersonalExp.forEach(e => {
                     allLogs.push({ date: e.date, type: "Personal Expense", details: e.desc, amount: parseFloat(e.amount)||0 });
