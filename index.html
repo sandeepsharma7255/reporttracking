@@ -1610,8 +1610,7 @@ function runRecovery() {
                 const name = document.getElementById('regName').value.trim(), phone = document.getElementById('regPhone').value.trim(), email = document.getElementById('regEmail').value.trim(), pwd = document.getElementById('regPwd').value;
                 if (!name || !email || !phone || pwd.length < 6) return alert("Fill all details."), btn.innerText = "Create Profile";
                 try {
-                    const doc = await db.collection('corpPhoneLookup').doc(phone).get(); if(doc.exists) return alert("⚠️ Mobile Number already registered! Go to Login."), btn.innerText = "Create Profile";
-                    const u = await auth.createUserWithEmailAndPassword(email, pwd); await db.collection('corpPhoneLookup').doc(phone).set({ email: email }); await u.user.updateProfile({ displayName: name }); appData.userName = name; setupUserEnv(u.user);
+                    const u = await auth.createUserWithEmailAndPassword(email, pwd); await u.user.updateProfile({ displayName: name }); appData.userName = name; setupUserEnv(u.user);
                 } catch (e) { alert("Error: " + e.message); btn.innerText = "Create Profile"; }
             }
         }
