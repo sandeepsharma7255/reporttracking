@@ -250,6 +250,7 @@
 
         <!-- MODULE 1: DASHBOARD -->
         <section id="dashboard" class="module-section active">
+            <div id="smartAlertsContainer" style="margin-bottom: 20px;"></div>
             <h3 style="color:var(--accent-primary); margin:0 0 10px 0;"><i class="fas fa-chart-line"></i> Corporate Summary</h3>
             <div class="grid-3">
                 <div class="card"><div class="stat-header"><span>Days Logged</span><i class="fas fa-calendar-check"></i></div><div class="stat-value" id="dashDuty" style="color: var(--accent-primary);">0</div></div>
@@ -376,7 +377,11 @@
                     <input type="text" id="planTask" class="input-field" placeholder="What needs to be done today?" style="flex:1; margin-bottom:0;" required>
                     <button type="submit" id="planSubmitBtn" class="btn" style="width:auto; margin-top:0;">Add Task</button>
                     <button type="button" id="planAIBtn" class="btn" style="width:auto; margin-top:0; background: linear-gradient(45deg, #00E5FF, #00BFFF); color: black;" onclick="enhanceTextWithAI('planTask', 'planAIBtn')"><i class="fas fa-magic"></i> ✨ AI Enhance</button>
+                    <button type="button" id="btnMeetingRecorder" class="btn" style="width:auto; background: linear-gradient(45deg, #FF5252, #FF1744); margin-top:0;" onclick="toggleMeetingRecorder()"><i class="fas fa-microphone"></i> Record MOM</button>
                 </form>
+                <div id="recordingStatus" style="font-size:0.8rem; color:#ff5252; display:none; align-items:center; gap:5px; margin-bottom:15px;">
+                    <i class="fas fa-circle" style="animation: pulse 1s infinite;"></i> Listening to Meeting... Tap again to stop & generate MOM.
+                </div>
                 <div id="planListDiv" style="display:flex; flex-direction:column; gap:10px; max-height: 400px; overflow-y: auto;"></div>
             </div>
         </section>
@@ -928,6 +933,95 @@
         // --- ERP & AI Module Logic ---
         
         // --- ADVANCED ERP FEATURES --- //
+        // AI MEETING RECORDER (MOM)
+        let momRecognition = null;
+        let isRecordingMOM = false;
+        let momTranscript = "";
+
+        async function fetchRawAI(prompt) {
+            try {
+                const response = await fetch("https://sandeepai.vercel.app/api/chat", {
+                    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ prompt: prompt })
+                });
+                if (!response.ok) throw new Error("API failed");
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder("utf-8");
+                let fullText = "";
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    fullText += decoder.decode(value, { stream: true });
+                }
+                return fullText;
+            } catch(e) { return null; }
+        }
+
+        function toggleMeetingRecorder() {
+            if(!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                return alert("Voice recording is not supported in this browser. Please use Chrome.");
+            }
+            
+            if(!momRecognition) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                momRecognition = new SpeechRecognition();
+                momRecognition.continuous = true;
+                momRecognition.interimResults = true;
+                momRecognition.lang = 'en-IN';
+                
+                momRecognition.onresult = (event) => {
+                    let final = "";
+                    for (let i = event.resultIndex; i < event.results.length; ++i) {
+                        if (event.results[i].isFinal) final += event.results[i][0].transcript;
+                    }
+                    momTranscript += final;
+                };
+                
+                momRecognition.onend = () => {
+                    if(isRecordingMOM) momRecognition.start(); 
+                };
+            }
+            
+            const btn = document.getElementById('btnMeetingRecorder');
+            const status = document.getElementById('recordingStatus');
+            
+            if(!isRecordingMOM) {
+                isRecordingMOM = true;
+                momTranscript = "";
+                momRecognition.start();
+                btn.innerHTML = `<i class="fas fa-stop"></i> Stop MOM`;
+                status.style.display = 'flex';
+            } else {
+                isRecordingMOM = false;
+                momRecognition.stop();
+                btn.innerHTML = `<i class="fas fa-microphone"></i> Record MOM`;
+                status.style.display = 'none';
+                
+                if(momTranscript.trim().length > 10) {
+                    showToast("Analyzing Conversation & Generating MOM...");
+                    btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Generating...`;
+                    fetchRawAI(`Analyze this raw meeting transcript and output ONLY the professional 'Minutes of Meeting (MOM)' along with clear bulleted Action Points. Transcript: ${momTranscript}`)
+                        .then(res => {
+                            btn.innerHTML = `<i class="fas fa-microphone"></i> Record MOM`;
+                            if(res) {
+                                const pt = document.getElementById('planTask');
+                                pt.value = `Meeting MOM & Action Points:\n${res.replace(/\n/g, '\n')}`;
+                                showToast("MOM Generated Successfully!");
+                            } else {
+                                alert("Failed to generate MOM.");
+                            }
+                        });
+                } else {
+                    showToast("Recording too short or silent.");
+                }
+            }
+        }
+
+        function isCanvasBlank(canvas) {
+            const blank = document.createElement('canvas');
+            blank.width = canvas.width; blank.height = canvas.height;
+            return canvas.toDataURL() === blank.toDataURL();
+        }
+
         function toggleTheme() {
             document.body.classList.toggle('premium-black');
             const icon = document.getElementById('themeIcon');
@@ -1360,31 +1454,70 @@
 
             return { geminiApiKey: data.geminiApiKey || "", userName: data.userName || currentUser.displayName || "", theme: data.theme || "gold", appPin: data.appPin || "", targetVisits: data.targetVisits || 50, targetOrders: data.targetOrders || 10, totalAppTime: tTime, timerDate: tDate, plans: Array.isArray(data.plans) ? data.plans : [], reports: Array.isArray(data.reports) ? data.reports : [], attendance: Array.isArray(data.attendance) ? data.attendance : [], contacts: migratedContacts, inquiries: Array.isArray(data.inquiries) ? data.inquiries : [], personalExpenses: Array.isArray(data.personalExpenses) ? data.personalExpenses : [], expenseSheets: Array.isArray(data.expenseSheets) ? data.expenseSheets : [] }; 
         }
+        // OFFLINE & AUTO-SYNC ENGINE
+        function saveLocally() {
+            localStorage.setItem('corpHub_offlineData_' + currentUser.uid, JSON.stringify(cleanData(appData)));
+        }
+        function pushToFirebase() {
+            if(!currentUser || !navigator.onLine) return;
+            document.getElementById('syncStatus').innerHTML = `🔄 Syncing...`;
+            db.collection('corporateOperationsData').doc(currentUser.uid).set(cleanData(appData), {merge:true})
+                .then(() => { 
+                    document.getElementById('syncStatus').innerHTML = `🟢 Cloud Secured`; 
+                })
+                .catch(err => {
+                    console.error("Firebase Sync Error:", err);
+                    document.getElementById('syncStatus').innerHTML = `🔴 Sync Failed: ` + err.message; 
+                });
+        }
         function loadDataForUser() {
             if (!currentUser) return;
-            db.collection('corporateOperationsData').doc(currentUser.uid).get().then((doc) => {
-                if (doc.exists) appData = cleanData({ ...appData, ...doc.data() }); else { appData = cleanData(appData); autoSave(); }
+            const localDataStr = localStorage.getItem('corpHub_offlineData_' + currentUser.uid);
+            if(localDataStr) {
+                try { appData = cleanData({ ...appData, ...JSON.parse(localDataStr) }); } catch(e){}
+            }
+            if(navigator.onLine) {
+                db.collection('corporateOperationsData').doc(currentUser.uid).get().then((doc) => {
+                    if (doc.exists) appData = cleanData({ ...appData, ...doc.data() }); else { appData = cleanData(appData); autoSave(); }
+                    
+                    if(appData.appPin && appData.appPin.toString().trim().length === 4) showPinScreen();
+                    document.getElementById('themeSelect').value = appData.theme; changeTheme(); document.getElementById('profileName').value = appData.userName; document.getElementById('pinInput').value = appData.appPin; document.getElementById('targetVisits').value = appData.targetVisits; document.getElementById('targetOrders').value = appData.targetOrders; updateUI();
+                }).catch(err => { 
+                    console.error("Firebase Load Error:", err);
+                    document.getElementById('syncStatus').innerHTML = `🔴 Cloud Load Error`;
+                });
+            } else {
+                document.getElementById('syncStatus').innerHTML = `🔴 Offline Mode Active`;
                 if(appData.appPin && appData.appPin.toString().trim().length === 4) showPinScreen();
                 document.getElementById('themeSelect').value = appData.theme; changeTheme(); document.getElementById('profileName').value = appData.userName; document.getElementById('pinInput').value = appData.appPin; document.getElementById('targetVisits').value = appData.targetVisits; document.getElementById('targetOrders').value = appData.targetOrders; updateUI();
-            }).catch(err => { 
-                console.error("Firebase Load Error:", err);
-                alert("Database Load Error: " + err.message + "\n\n(If it says 'Missing or insufficient permissions', please go to Firebase Console -> Firestore Database -> Rules, and set them to allow read/write.)"); 
-            });
+            }
         }
         function autoSave() { 
-            if(!currentUser) return; 
-            appData = cleanData(appData); 
-            db.collection('corporateOperationsData').doc(currentUser.uid).set(appData, {merge: true}).then(() => { 
-                document.getElementById('syncStatus').innerHTML = `🟢 Cloud Secured`; 
-                showToast('Data Synced! ☁️'); 
-            }).catch(err => { 
-                console.error("Firebase Sync Error:", err);
-                document.getElementById('syncStatus').innerHTML = `🔴 Sync Failed: ` + err.message; 
-                alert("Sync Error: " + err.message);
-            }); 
+            if(!currentUser) return;
+            appData = cleanData(appData);
+            saveLocally();
+            if(navigator.onLine) { pushToFirebase(); showToast('Data Synced! ☁️'); }
+            else { document.getElementById('syncStatus').innerHTML = `🔴 Saved Offline (Waiting for Internet)`; showToast('Saved Locally. Will sync when online.'); }
             updateUI(); 
         }
-        function silentSave() { if(currentUser) db.collection('corporateOperationsData').doc(currentUser.uid).set(cleanData(appData), {merge:true}); }
+        function silentSave() { 
+            if(!currentUser) return;
+            appData = cleanData(appData);
+            saveLocally();
+            if(navigator.onLine) pushToFirebase();
+        }
+
+        window.addEventListener('online', () => {
+            if(currentUser) {
+                document.getElementById('syncStatus').innerHTML = `🟢 Back Online, Syncing...`; 
+                pushToFirebase();
+                showToast("Internet connected! Syncing...");
+            }
+        });
+        window.addEventListener('offline', () => {
+            document.getElementById('syncStatus').innerHTML = `🔴 You are Offline`; 
+            showToast("Internet disconnected. Offline Mode active.");
+        });
         function saveSettings() { appData.userName = document.getElementById('profileName').value; appData.targetVisits = parseInt(document.getElementById('targetVisits').value) || 0; appData.targetOrders = parseInt(document.getElementById('targetOrders').value) || 0; autoSave(); showToast('Settings Saved!'); }
         function exportBackup() { let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2)); let dlAnchorElem = document.createElement('a'); dlAnchorElem.setAttribute("href", dataStr); dlAnchorElem.setAttribute("download", `CorporateHub_Backup_${todayStr}.json`); dlAnchorElem.click(); showToast("Backup Downloaded Securely!"); }
 
@@ -2135,7 +2268,8 @@ ${title}
                         else if(r.metName) pNames = r.metName;
                         const totExp = (parseFloat(r.goingFare)||0)+(parseFloat(r.returnFare)||0)+(parseFloat(r.food)||0);
                         totalVisitsExpMaster += totExp;
-                        html += `<tr><td style="${tdStyle}">${r.date}</td><td style="${tdStyle}">${r.company || 'Visit'}</td><td style="${tdStyle}">${pNames || 'N/A'}</td><td style="${tdStyle}">${r.text}</td><td style="${tdStyle}">₹${totExp}</td></tr>`;
+                        let sigHtml = r.signature ? `<br><img src="${r.signature}" style="width:100px; height:auto; margin-top:5px; border:1px solid #ddd;">` : '';
+                        html += `<tr><td style="${tdStyle}">${r.date}</td><td style="${tdStyle}">${r.company || 'Visit'}</td><td style="${tdStyle}">${pNames || 'N/A'}</td><td style="${tdStyle}">${r.text}${sigHtml}</td><td style="${tdStyle}">₹${totExp}</td></tr>`;
                         text += `[${r.date}] ${r.company ? r.company : 'Visit'} | Met: ${pNames || 'N/A'} (Exp: Rs.${totExp})
 Update: ${r.text}
 
