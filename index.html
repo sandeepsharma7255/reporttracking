@@ -17,12 +17,12 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
 
     <style>
-        body.light-mode {
-            --bg-main: #f0f2f5; --bg-secondary: #ffffff;
-            --accent-primary: #0056b3; --accent-secondary: #007BFF;
-            --text-main: #212529; --text-muted: #6c757d;
-            --card-bg: rgba(0, 0, 0, 0.02); --card-border: rgba(0, 0, 0, 0.1);
-            --glow: 0 0 10px rgba(0, 86, 179, 0.2);
+        body.premium-black {
+            --bg-main: #000000; --bg-secondary: #080808;
+            --accent-primary: #00ffcc; --accent-secondary: #00e5b8;
+            --text-main: #e0e0e0; --text-muted: #666666;
+            --card-bg: rgba(0, 255, 204, 0.02); --card-border: rgba(0, 255, 204, 0.2);
+            --glow: 0 0 15px rgba(0, 255, 204, 0.3);
         }
         :root {
             --bg-main: #0a0e17; --bg-secondary: #12182b; 
@@ -199,13 +199,13 @@
         <header class="header">
             <i class="fas fa-bars menu-toggle" onclick="toggleSidebar()"></i>
             <div>
-                <h1 id="welcomeText">Welcome, Agent</h1>
+                <h1 id="welcomeText">Sandeep Kumar</h1>
                 <p style="color: var(--text-muted); margin-top: 5px;" id="syncStatus">🔴 Checking Sync...</p>
             </div>
             
             <div style="display:flex; align-items:center; gap:15px;">
                 <button class="btn" style="width:auto; padding:8px 15px; font-size:1rem; background: transparent; border: none; color: var(--accent-primary); margin-top:0;" onclick="toggleTheme()" title="Toggle Theme">
-                    <i class="fas fa-sun" id="themeIcon"></i>
+                    <i class="fas fa-moon" id="themeIcon"></i>
                 </button>
                 <div class="live-timer" title="Current Time">
                     <i class="fas fa-clock"></i> <span id="appTimerDisplay">00:00:00</span>
@@ -868,23 +868,23 @@
         
         // --- ADVANCED ERP FEATURES --- //
         function toggleTheme() {
-            document.body.classList.toggle('light-mode');
+            document.body.classList.toggle('premium-black');
             const icon = document.getElementById('themeIcon');
-            if(document.body.classList.contains('light-mode')) {
-                icon.className = 'fas fa-moon';
-                localStorage.setItem('theme', 'light');
+            if(document.body.classList.contains('premium-black')) {
+                icon.className = 'fas fa-gem';
+                localStorage.setItem('theme', 'premium');
             } else {
-                icon.className = 'fas fa-sun';
-                localStorage.setItem('theme', 'dark');
+                icon.className = 'fas fa-moon';
+                localStorage.setItem('theme', 'default');
             }
         }
         
         // Auto-load theme
-        if(localStorage.getItem('theme') === 'light') {
-            document.body.classList.add('light-mode');
+        if(localStorage.getItem('theme') === 'premium') {
+            document.body.classList.add('premium-black');
             setTimeout(() => {
                 const icon = document.getElementById('themeIcon');
-                if(icon) icon.className = 'fas fa-moon';
+                if(icon) icon.className = 'fas fa-gem';
             }, 500);
         }
 
@@ -1387,7 +1387,7 @@
             document.getElementById('chkPlan').innerHTML = appData.plans.some(p => p.date === todayStr) ? '<span style="color:var(--success)">YES</span>' : '<span style="color:var(--danger)">NO</span>';
             document.getElementById('chkReport').innerHTML = appData.reports.some(r => r.date === todayStr) ? '<span style="color:var(--success)">YES</span>' : '<span style="color:var(--danger)">NO</span>';
             document.getElementById('chkAttend').innerHTML = appData.attendance.some(a => a.date === todayStr) ? '<span style="color:var(--success)">YES</span>' : '<span style="color:var(--danger)">NO</span>';
-            document.getElementById('welcomeText').innerHTML = `${appData.userName || 'Agent'}`;
+            document.getElementById('welcomeText').innerHTML = `${appData.userName || 'Sandeep Kumar'}`;
 
             // Phase 2: Analytics & Goals calculations
             const currentMonth = todayStr.slice(0,7); // YYYY-MM
