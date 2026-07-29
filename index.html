@@ -15,6 +15,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCnnsqwjRsfvFX9ZCvHUPRwi9EqP-Lqx50&libraries=places&callback=initGoogleAutocomplete" async defer></script>
 
     <style>
 
@@ -985,22 +986,89 @@
                 <div class="card">
                     <h3><i class="fas fa-subway" style="color:#00E5FF"></i> Metro Fare & Route Calculator</h3>
                     <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">Get exact route, travel time, and fare for Delhi NCR Metro.</p>
-                    <select id="metroOrigin" class="input-field">
-                        <option value="">Select Origin Station</option>
-                        <option value="Rajiv Chowk">Rajiv Chowk</option>
-                        <option value="Noida Sector 15">Noida Sector 15</option>
-                        <option value="Hauz Khas">Hauz Khas</option>
-                        <option value="Kashmere Gate">Kashmere Gate</option>
-                        <option value="New Delhi">New Delhi</option>
-                    </select>
-                    <select id="metroDest" class="input-field">
-                        <option value="">Select Destination Station</option>
-                        <option value="Rajiv Chowk">Rajiv Chowk</option>
-                        <option value="Noida Sector 15">Noida Sector 15</option>
-                        <option value="Hauz Khas">Hauz Khas</option>
-                        <option value="Kashmere Gate">Kashmere Gate</option>
-                        <option value="New Delhi">New Delhi</option>
-                    </select>
+                    <input list="metroStationsList" id="metroOrigin" class="input-field" placeholder="Type Origin Station (e.g. Rajiv Chowk)">
+                    <input list="metroStationsList" id="metroDest" class="input-field" placeholder="Type Destination Station (e.g. Noida Sector 15)">
+                    
+                    <datalist id="metroStationsList">
+                        <option value="Adarsh Nagar">
+                        <option value="AIIMS">
+                        <option value="Akshardham">
+                        <option value="Anand Vihar ISBT">
+                        <option value="Azadpur">
+                        <option value="Badarpur Border">
+                        <option value="Barakhamba Road">
+                        <option value="Botanical Garden">
+                        <option value="Central Secretariat">
+                        <option value="Chandni Chowk">
+                        <option value="Chawri Bazar">
+                        <option value="Connaught Place (Rajiv Chowk)">
+                        <option value="Delhi Aerocity">
+                        <option value="Delhi Cantt">
+                        <option value="Dwarka Sector 21">
+                        <option value="Golf Course">
+                        <option value="Green Park">
+                        <option value="GTB Nagar">
+                        <option value="Hauz Khas">
+                        <option value="HUDA City Centre (Millennium City Centre)">
+                        <option value="INA">
+                        <option value="Inderlok">
+                        <option value="Indraprastha">
+                        <option value="ITO">
+                        <option value="Janakpuri West">
+                        <option value="Jangpura">
+                        <option value="JLN Stadium">
+                        <option value="Kalkaji Mandir">
+                        <option value="Karol Bagh">
+                        <option value="Kashmere Gate">
+                        <option value="Kirti Nagar">
+                        <option value="Lajpat Nagar">
+                        <option value="Laxmi Nagar">
+                        <option value="Mandi House">
+                        <option value="Mayur Vihar-I">
+                        <option value="Model Town">
+                        <option value="Moolchand">
+                        <option value="Nawada">
+                        <option value="Netaji Subhash Place">
+                        <option value="New Ashok Nagar">
+                        <option value="New Delhi">
+                        <option value="Nirmaan Vihar">
+                        <option value="Noida City Centre">
+                        <option value="Noida Electronic City">
+                        <option value="Noida Sector 15">
+                        <option value="Noida Sector 16">
+                        <option value="Noida Sector 18">
+                        <option value="Noida Sector 52">
+                        <option value="Noida Sector 62">
+                        <option value="Okhla">
+                        <option value="Panchsheel Park">
+                        <option value="Patel Chowk">
+                        <option value="Pitampura">
+                        <option value="Preet Vihar">
+                        <option value="Punjabi Bagh">
+                        <option value="Qutab Minar">
+                        <option value="Rajendra Place">
+                        <option value="Rajiv Chowk">
+                        <option value="Rajouri Garden">
+                        <option value="Ramakrishna Ashram Marg">
+                        <option value="Rithala">
+                        <option value="Rohini East">
+                        <option value="Rohini West">
+                        <option value="Saket">
+                        <option value="Seelampur">
+                        <option value="Shadipur">
+                        <option value="Shahdara">
+                        <option value="Shivaji Stadium">
+                        <option value="Sikandarpur">
+                        <option value="Subhash Nagar">
+                        <option value="Tilak Nagar">
+                        <option value="Uttam Nagar East">
+                        <option value="Uttam Nagar West">
+                        <option value="Vasant Vihar">
+                        <option value="Vidhan Sabha">
+                        <option value="Vishwa Vidyalaya">
+                        <option value="Welcome">
+                        <option value="Yamuna Bank">
+                    </datalist>
                     <button class="btn" style="background:#00E5FF; color:#000;" onclick="calculateMetro()"><i class="fas fa-train"></i> Get Route & Fare</button>
                     <div id="metroResult" style="margin-top:15px; font-weight:bold; color:#00E5FF; font-size:0.9rem;"></div>
                 </div>
@@ -1608,6 +1676,15 @@ function runRecovery() {
                 appData.erpAlerts.splice(idx, 1);
                 silentSave();
                 renderErpAlerts();
+            }
+        }
+
+        function initGoogleAutocomplete() {
+            if (typeof google === 'object' && typeof google.maps === 'object') {
+                const originInput = document.getElementById('mapOrigin');
+                const destInput = document.getElementById('mapDest');
+                if (originInput) new google.maps.places.Autocomplete(originInput, { componentRestrictions: { country: 'in' } });
+                if (destInput) new google.maps.places.Autocomplete(destInput, { componentRestrictions: { country: 'in' } });
             }
         }
 
