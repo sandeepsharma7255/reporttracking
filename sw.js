@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sandeep-erp-v4';
+const CACHE_NAME = 'sandeep-erp-v5';
 const urlsToCache = [
   './',
   './index.html',
@@ -31,32 +31,27 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
+  if (event.request.method !== 'GET') return;
   event.respondWith(
-    caches.match(event.request)
+    fetch(event.request)
       .then(response => {
-        if (response) {
-          return response;
-        }
-        var fetchRequest = event.request.clone();
-        return fetch(fetchRequest).then(
-          function(response) {
-            if(!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
-            var responseToCache = response.clone();
-            caches.open(CACHE_NAME)
-              .then(function(cache) {
-                if(event.request.url.startsWith(self.location.origin)) {
-                    cache.put(event.request, responseToCache);
-                }
-              });
-            return response;
+        const responseClone = response.clone();
+        caches.open(CACHE_NAME).then(cache => {
+          if (event.request.url.startsWith(self.location.origin)) {
+            cache.put(event.request, responseClone);
           }
-        );
-      }).catch(() => {
+        });
+        return response;
+      })
+      .catch(() => {
+        return caches.match(event.request).then(cachedResponse => {
+          if (cachedResponse) {
+            return cachedResponse;
+          }
           if (event.request.mode === 'navigate') {
-              return caches.match('./index.html');
+            return caches.match('./index.html');
           }
+        });
       })
   );
 });

@@ -270,6 +270,7 @@
 
             <div style="color:var(--text-muted); font-size:0.75rem; text-transform:uppercase; letter-spacing:1px; margin: 15px 0 5px 15px; font-weight:800;">More Tools</div>
             <li class="nav-item" onclick="switchTab('tender-erp')"><i class="fas fa-robot"></i> Tender & AI ERP <span style="background:#00E5FF;color:#000;font-size:0.6rem;padding:2px 5px;border-radius:10px;margin-left:auto;font-weight:bold;">NEW</span></li>
+            <li class="nav-item" onclick="switchTab('archives')"><i class="fas fa-archive"></i> Past Archives</li>
             <li class="nav-item" onclick="switchTab('settings')"><i class="fas fa-cog"></i> Settings</li>
         </ul>
         <div style="margin-top: auto; text-align: center; font-size: 0.8rem; color: var(--accent-primary); font-weight: 800;">
@@ -378,9 +379,24 @@
                 </div>
             </div>
 
-            
-            
-            <div class="grid-2">
+            <h3 style="margin:20px 0 10px 0;" class="animated-gradient-text"><i class="fas fa-calendar-alt"></i> Activity Calendar</h3>
+            <div class="card" id="dashboardCalendarCard">
+                <div id="calendarHeader" style="display:flex; justify-content:center; align-items:center; margin-bottom:15px;">
+                    <h4 id="calendarMonthLabel" style="margin:0; font-size:1.2rem;">Month Year</h4>
+                </div>
+                <div style="display:grid; grid-template-columns:repeat(7, 1fr); gap:5px; text-align:center; font-weight:bold; margin-bottom:10px; color:var(--accent-primary);">
+                    <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+                </div>
+                <div id="calendarGrid" style="display:grid; grid-template-columns:repeat(7, 1fr); gap:5px; text-align:center;">
+                    <!-- days will be injected via JS -->
+                </div>
+                <div style="margin-top:15px; font-size:0.8rem; color:var(--text-muted); display:flex; gap:10px; justify-content:center;">
+                    <span><i class="fas fa-circle" style="color:var(--success);"></i> Visited</span>
+                    <span><i class="fas fa-circle" style="color:var(--accent-primary);"></i> Attendance</span>
+                </div>
+            </div>
+
+            <div class="grid-2" style="margin-top:20px;">
                 <div class="card">
                     <h3><i class="fas fa-clipboard-check"></i> Daily Operations Checklist</h3>
                     <div class="list-item"><span>Today's Plan Created?</span><strong id="chkPlan" style="color:var(--danger)">NO</strong></div>
@@ -850,6 +866,28 @@
                     </div>
                     <div id="quotePreviewArea" style="border:1px solid #ccc; padding:20px; font-size:12px; font-family:Arial, sans-serif; overflow-x:auto;">
                         <div style="text-align:center; color:#999; margin-top:50px; font-size:14px;">Add items and click Generate PDF to view quotation preview.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="archives" class="module-section">
+            <h2 style="color: var(--accent-primary);"><i class="fas fa-archive"></i> Past Archives</h2>
+            <div class="card">
+                <p style="color:var(--text-muted); font-size:0.9rem;">Select a past month to view your historical records. Data is automatically archived at the start of every new month.</p>
+                <div style="display:flex; gap:10px; margin-top:20px;">
+                    <select id="archiveMonthSelect" class="input-field" style="flex:1;" onchange="loadArchiveData()">
+                        <option value="">Select a Month...</option>
+                    </select>
+                    <button class="btn" onclick="exportArchiveExcel()"><i class="fas fa-file-excel"></i> Export Excel</button>
+                </div>
+                
+                <div id="archiveStatsArea" style="display:none; margin-top:30px;">
+                    <h3 style="color:var(--accent-primary); border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">Archive Summary</h3>
+                    <div class="grid-3" style="margin-top:20px;">
+                        <div class="card"><div class="stat-header"><span>Days Logged</span><i class="fas fa-calendar-check"></i></div><div class="stat-value neon-text" id="arcDuty">0</div></div>
+                        <div class="card"><div class="stat-header"><span>Total Visits</span><i class="fas fa-building"></i></div><div class="stat-value neon-text" id="arcVisits">0</div></div>
+                        <div class="card"><div class="stat-header"><span>Total Expenses</span><i class="fas fa-wallet"></i></div><div class="stat-value neon-text" id="arcExpense" style="color:#ff5252;">₹0</div></div>
                     </div>
                 </div>
             </div>
@@ -1701,6 +1739,40 @@ function runRecovery() {
         function cleanData(data) { 
             let tDate = data.timerDate || getLocalDateStr(); let tTime = data.totalAppTime || 0; if(tDate !== getLocalDateStr()) { tTime = 0; tDate = getLocalDateStr(); }
             
+            // Auto-Archive Logic
+            const currentMonthStr = new Date().toISOString().substring(0, 7); // e.g., "2026-07"
+            let activeMonth = data.activeMonth || currentMonthStr;
+            let archive = data.archive || {};
+            
+            let plans = Array.isArray(data.plans) ? data.plans : [];
+            let reports = Array.isArray(data.reports) ? data.reports : [];
+            let attendance = Array.isArray(data.attendance) ? data.attendance : [];
+            let inquiries = Array.isArray(data.inquiries) ? data.inquiries : [];
+            let personalExpenses = Array.isArray(data.personalExpenses) ? data.personalExpenses : [];
+            let expenseSheets = Array.isArray(data.expenseSheets) ? data.expenseSheets : [];
+            
+            if (activeMonth !== currentMonthStr) {
+                // Month changed! Move current arrays to archive
+                archive[activeMonth] = {
+                    plans: plans,
+                    reports: reports,
+                    attendance: attendance,
+                    inquiries: inquiries,
+                    personalExpenses: personalExpenses,
+                    expenseSheets: expenseSheets
+                };
+                
+                // Reset active arrays for the new month
+                plans = [];
+                reports = [];
+                attendance = [];
+                inquiries = [];
+                personalExpenses = [];
+                expenseSheets = [];
+                
+                activeMonth = currentMonthStr;
+            }
+            
             // Contacts Migration Logic (Flattened to Grouped)
             let migratedContacts = [];
             let oldContacts = Array.isArray(data.contacts) ? data.contacts : [];
@@ -1723,7 +1795,25 @@ function runRecovery() {
                 }
             });
 
-            return { geminiApiKey: data.geminiApiKey || "", userName: data.userName || currentUser.displayName || "", theme: data.theme || "gold", appPin: data.appPin || "", targetVisits: data.targetVisits || 50, targetOrders: data.targetOrders || 10, totalAppTime: tTime, timerDate: tDate, plans: Array.isArray(data.plans) ? data.plans : [], reports: Array.isArray(data.reports) ? data.reports : [], attendance: Array.isArray(data.attendance) ? data.attendance : [], contacts: migratedContacts, inquiries: Array.isArray(data.inquiries) ? data.inquiries : [], personalExpenses: Array.isArray(data.personalExpenses) ? data.personalExpenses : [], expenseSheets: Array.isArray(data.expenseSheets) ? data.expenseSheets : [] }; 
+            return { 
+                archive: archive, 
+                activeMonth: activeMonth,
+                geminiApiKey: data.geminiApiKey || "", 
+                userName: data.userName || (typeof currentUser !== 'undefined' && currentUser ? currentUser.displayName : ""), 
+                theme: data.theme || "gold", 
+                appPin: data.appPin || "", 
+                targetVisits: data.targetVisits || 50, 
+                targetOrders: data.targetOrders || 10, 
+                totalAppTime: tTime, 
+                timerDate: tDate, 
+                plans: plans, 
+                reports: reports, 
+                attendance: attendance, 
+                contacts: migratedContacts, 
+                inquiries: inquiries, 
+                personalExpenses: personalExpenses, 
+                expenseSheets: expenseSheets 
+            }; 
         }
         // OFFLINE & AUTO-SYNC ENGINE
         function saveLocally() {
@@ -1775,6 +1865,132 @@ function runRecovery() {
             else { document.getElementById('syncStatus').innerHTML = `🔴 Saved Offline (Waiting for Internet)`; showToast('Saved Locally. Will sync when online.'); }
             updateUI(); 
         }
+
+        function renderDashboardCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            const monthLabel = document.getElementById('calendarMonthLabel');
+            if(!grid || !monthLabel) return;
+            
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = today.getMonth();
+            
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            monthLabel.innerText = `${monthNames[month]} ${year}`;
+            
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            
+            grid.innerHTML = '';
+            
+            for(let i=0; i<firstDay; i++) {
+                grid.innerHTML += `<div></div>`;
+            }
+            
+            let attendanceDates = appData.attendance.map(a => a.date);
+            let visitDates = appData.reports.map(r => r.date);
+            
+            for(let d=1; d<=daysInMonth; d++) {
+                const dateStr = `${year}-${(month+1).toString().padStart(2, '0')}-${d.toString().padStart(2, '0')}`;
+                
+                let isVisited = visitDates.includes(dateStr);
+                let isAttended = attendanceDates.includes(dateStr);
+                let isToday = (d === today.getDate());
+                
+                let style = "padding:5px; border-radius:5px; border:1px solid rgba(255,255,255,0.05); position:relative;";
+                if(isToday) style += " border-color:var(--accent-primary); box-shadow:0 0 10px var(--accent-primary); font-weight:bold;";
+                
+                let markers = "";
+                if(isVisited) markers += `<div style="width:6px; height:6px; background:var(--success); border-radius:50%; position:absolute; bottom:2px; left:30%;"></div>`;
+                if(isAttended) markers += `<div style="width:6px; height:6px; background:var(--accent-primary); border-radius:50%; position:absolute; bottom:2px; right:30%;"></div>`;
+                
+                grid.innerHTML += `<div style="${style}">${d}${markers}</div>`;
+            }
+        }
+        
+        function initArchives() {
+            const sel = document.getElementById('archiveMonthSelect');
+            if(!sel) return;
+            sel.innerHTML = '<option value="">Select a Month...</option>';
+            if(appData.archive) {
+                Object.keys(appData.archive).sort().reverse().forEach(m => {
+                    sel.innerHTML += `<option value="${m}">${m}</option>`;
+                });
+            }
+        }
+
+        function loadArchiveData() {
+            const sel = document.getElementById('archiveMonthSelect').value;
+            const area = document.getElementById('archiveStatsArea');
+            if(!sel || !appData.archive || !appData.archive[sel]) {
+                area.style.display = 'none';
+                return;
+            }
+            const data = appData.archive[sel];
+            
+            let expTotal = 0;
+            if(data.personalExpenses) data.personalExpenses.forEach(e => expTotal += parseFloat(e.amount)||0);
+            if(data.expenseSheets) data.expenseSheets.forEach(s => s.items.forEach(i => expTotal += parseFloat(i.amount)||0));
+            if(data.reports) data.reports.forEach(r => expTotal += (parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0));
+
+            document.getElementById('arcDuty').innerText = data.attendance ? data.attendance.length : 0;
+            document.getElementById('arcVisits').innerText = data.reports ? data.reports.length : 0;
+            document.getElementById('arcExpense').innerText = '₹' + expTotal.toLocaleString();
+            
+            area.style.display = 'block';
+        }
+        
+        function exportArchiveExcel() {
+            const sel = document.getElementById('archiveMonthSelect').value;
+            if(!sel || !appData.archive || !appData.archive[sel]) return alert("Please select a valid archive month.");
+            
+            const data = appData.archive[sel];
+            let reportsWithExp = (data.reports||[]).filter(r => (parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0) > 0);
+            
+            let htmlContent = `
+            <html xmlns:x="urn:schemas-microsoft-com:office:excel">
+            <head><meta charset="utf-8"></head>
+            <body>
+            <table border="1">
+                <tr><th colspan="4" style="background:#00b4d8; color:#000; font-size:18px;">Archive Report - ${sel}</th></tr>
+                <tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th></tr>
+            `;
+
+            let grandTotal = 0;
+            [...reportsWithExp].sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(r => {
+                let tot = (parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0);
+                grandTotal += tot;
+                htmlContent += `<tr><td>${r.date}</td><td>Field Visit</td><td>${r.company || 'Visit'}</td><td>${tot}</td></tr>`;
+            });
+            if(data.personalExpenses) {
+                [...data.personalExpenses].sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(e => {
+                    let amt = parseFloat(e.amount)||0;
+                    grandTotal += amt;
+                    htmlContent += `<tr><td>${e.date}</td><td>Legacy Log</td><td>${e.desc}</td><td>${amt}</td></tr>`;
+                });
+            }
+            if(data.expenseSheets) {
+                [...data.expenseSheets].sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(s => {
+                    s.items.forEach(i => {
+                        let amt = parseFloat(i.amount)||0;
+                        grandTotal += amt;
+                        htmlContent += `<tr><td>${s.date}</td><td>Sheet</td><td>${i.desc}</td><td>${amt}</td></tr>`;
+                    });
+                });
+            }
+
+            htmlContent += `<tr><td colspan="3" style="font-weight:bold; background:#ffd700;">Grand Total</td><td style="font-weight:bold; background:#ffd700;">${grandTotal}</td></tr></table></body></html>`;
+
+            let blob = new Blob([htmlContent], { type: 'application/vnd.ms-excel' });
+            let url = URL.createObjectURL(blob);
+            let a = document.createElement('a');
+            a.href = url;
+            a.download = `Archive_${sel}.xls`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
         function silentSave() { 
             if(!currentUser) return;
             appData = cleanData(appData);
@@ -1858,6 +2074,8 @@ function runRecovery() {
         }
 
         function updateUI() {
+            renderDashboardCalendar();
+            initArchives();
             let hr = new Date().getHours();
             let greeting = hr < 12 ? "Good Morning" : (hr < 17 ? "Good Afternoon" : "Good Evening");
             let bannerEl = document.getElementById('bannerGreeting');
