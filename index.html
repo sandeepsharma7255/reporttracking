@@ -2362,10 +2362,20 @@ function runRecovery() {
             
             let html = '';
             for(let key in coeffs) {
-                html += `<div style="background:rgba(0,0,0,0.3); padding:5px 10px; border-radius:5px;"><strong>${key}:</strong> ${(coeffs[key]*100).toFixed(0)}%</div>`;
+                if(std === 'pgcil') {
+                    let val = (coeffs[key]*100).toFixed(0);
+                    let readOnly = key === 'Fixed' ? 'readonly' : '';
+                    let bg = key === 'Fixed' ? '#333' : '#111';
+                    html += `<div style="background:rgba(0,0,0,0.3); padding:5px; border-radius:5px; display:flex; align-items:center; gap:5px;">
+                                <strong>${key}:</strong> 
+                                <input type="number" id="coeff-${key}" value="${val}" ${readOnly} style="width:45px; background:${bg}; color:var(--success); border:1px solid #555; padding:2px; text-align:center; font-weight:bold;">%
+                             </div>`;
+                } else {
+                    html += `<div style="background:rgba(0,0,0,0.3); padding:5px 10px; border-radius:5px;"><strong>${key}:</strong> ${(coeffs[key]*100).toFixed(0)}%</div>`;
+                }
             }
             cDiv.innerHTML = html;
-            document.getElementById('pv-coeff-title').innerText = (std==='pgcil' ? "POWERGRID Coefficients (Sum = 100%)" : "IEEMA Coefficients (Sum = 100%)");
+            document.getElementById('pv-coeff-title').innerText = (std==='pgcil' ? "POWERGRID Coefficients (Editable, Sum must be 100%)" : "IEEMA Coefficients (Fixed, Sum = 100%)");
         };
 
         window.calculatePV = function() {
@@ -2375,6 +2385,21 @@ function runRecovery() {
             if(isNaN(p0)) return alert("Please enter Base Price (P0).");
             
             let c = window.currentPvCoeffs;
+            
+            if(std === 'pgcil') {
+                 c.Fixed = parseFloat(document.getElementById('coeff-Fixed').value) / 100;
+                 c.Copper = parseFloat(document.getElementById('coeff-Copper').value) / 100;
+                 c.CRGO = parseFloat(document.getElementById('coeff-CRGO').value) / 100;
+                 c.Steel = parseFloat(document.getElementById('coeff-Steel').value) / 100;
+                 c.Insulation = parseFloat(document.getElementById('coeff-Insulation').value) / 100;
+                 c.Labour = parseFloat(document.getElementById('coeff-Labour').value) / 100;
+                 
+                 let sum = c.Fixed + c.Copper + c.CRGO + c.Steel + c.Insulation + c.Labour;
+                 if (Math.abs(sum - 1.0) > 0.001) {
+                     return alert("Error: The sum of POWERGRID coefficients must be exactly 100%. Current sum: " + (sum*100).toFixed(1) + "%");
+                 }
+                 window.currentPvCoeffs = c;
+            }
             
             let a0 = parseFloat(document.getElementById('pv-cu0').value);
             let b0 = parseFloat(document.getElementById('pv-crgo0').value);
