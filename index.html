@@ -1141,6 +1141,10 @@
                     <div class="erp-module-card" onclick="openErpModule('compare')"><i class="fas fa-balance-scale"></i><br>Tender Compare</div>
                     <div class="erp-module-card" onclick="openErpModule('email')"><i class="fas fa-envelope-open-text"></i><br>AI Email Gen</div>
                     <div class="erp-module-card" onclick="openErpModule('ultimate')" style="border:2px solid var(--accent-primary); box-shadow: 0 0 15px rgba(0,229,255,0.3);"><i class="fas fa-rocket" style="color:var(--accent-primary); font-size:2rem;"></i><br><b style="font-size:1rem;">Ultimate Calculator</b></div>
+                    <div class="erp-module-card" onclick="openErpModule('whiteboard')" style="border:1px solid #fff;"><i class="fas fa-chalkboard" style="color:#fff;"></i><br>Whiteboard</div>
+                    <div class="erp-module-card" onclick="openErpModule('schematic')" style="border:1px solid #f1c40f;"><i class="fas fa-project-diagram" style="color:#f1c40f;"></i><br>AI Schematic</div>
+                    <div class="erp-module-card" onclick="openErpModule('gantt')" style="border:1px solid #2ecc71;"><i class="fas fa-stream" style="color:#2ecc71;"></i><br>Gantt Chart</div>
+
                     <div class="erp-module-card" onclick="openErpModule('crm')"><i class="fas fa-users"></i><br>Customer CRM</div>
                     <div class="erp-module-card" onclick="openErpModule('travel')"><i class="fas fa-plane"></i><br>Travel Mgr</div>
                     <div class="erp-module-card" onclick="openErpModule('vault')"><i class="fas fa-folder-open"></i><br>Doc Vault</div>
@@ -1651,6 +1655,51 @@ function runRecovery() {
             dashboard: { title: 'Daily Dashboard', icon: 'fa-tachometer-alt', html: `<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;"><strong>Meetings Today</strong><br><span style="font-size:1.5rem; color:var(--accent-primary);">0</span></div><div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;"><strong>Pending Bids</strong><br><span style="font-size:1.5rem; color:var(--danger);">2</span></div></div><div style="margin-top:15px;"><canvas id="erpChart" style="max-height:200px;"></canvas></div><div style="margin-top:15px; color:var(--text-muted); font-size:0.85rem; text-align:center;">Live metrics sync initialized.</div>` },
             alerts: { title: 'Smart Alerts', icon: 'fa-bell', html: `<div id="erpAlertsContainer"></div><button class="btn" style="background:var(--accent-primary); margin-top:15px;" onclick="addErpAlert()"><i class="fas fa-plus"></i> Add New Alert</button>` },
             ocr: { title: 'OCR + AI Summarizer', icon: 'fa-camera', html: `<p>Upload Tender Photo or Scanned PDF</p><input type="file" accept="image/*,application/pdf" class="input-field"><button class="btn" onclick="callSandeepErpAI('Perform OCR on this image and summarize the key points.')"><i class="fas fa-eye"></i> Scan & Summarize</button><div id="ai-response-ocr" class="ai-chat-box" style="margin-top:15px; display:none;"></div>` },
+                        whiteboard: { title: 'Engineering Whiteboard', icon: 'fa-chalkboard', html: `
+                <style>
+                    .wb-btn { background:#333; border:none; padding:8px 12px; color:#fff; cursor:pointer; border-radius:4px; font-size:0.9rem; }
+                    .wb-btn:hover { background:var(--accent-primary); color:#000; }
+                    .wb-color { width:25px; height:25px; border-radius:50%; border:2px solid #fff; cursor:pointer; display:inline-block; }
+                </style>
+                <div style="display:flex; gap:10px; margin-bottom:10px; align-items:center; flex-wrap:wrap;">
+                    <button class="wb-btn" onclick="wbClear()"><i class="fas fa-trash"></i> Clear</button>
+                    <button class="wb-btn" onclick="wbDownload()"><i class="fas fa-download"></i> Save</button>
+                    <div class="wb-color" style="background:#00E5FF;" onclick="wbSetColor('#00E5FF')"></div>
+                    <div class="wb-color" style="background:#e74c3c;" onclick="wbSetColor('#e74c3c')"></div>
+                    <div class="wb-color" style="background:#2ecc71;" onclick="wbSetColor('#2ecc71')"></div>
+                    <div class="wb-color" style="background:#f1c40f;" onclick="wbSetColor('#f1c40f')"></div>
+                    <div class="wb-color" style="background:#ffffff;" onclick="wbSetColor('#ffffff')"></div>
+                    <input type="range" id="wb-size" min="1" max="20" value="3" onchange="wbSetSize(this.value)">
+                </div>
+                <div style="width:100%; overflow:auto; background:#1a1a1a; border:2px dashed #444; border-radius:8px;">
+                    <canvas id="wb-canvas" width="800" height="600" style="background:#1a1a1a; touch-action:none;"></canvas>
+                </div>
+            ` },
+            schematic: { title: 'AI Schematic Builder', icon: 'fa-project-diagram', html: `
+                <p style="font-size:0.85rem; color:#aaa; margin-bottom:15px;">Auto-generate Single Line Diagrams (SLD). Try: "220kV to 33kV substation with 2 transformers"</p>
+                <div style="display:flex; gap:5px;">
+                    <input type="text" id="sch-prompt" class="input-field" style="margin-bottom:0;" placeholder="e.g. 132kV substation 2 TX">
+                    <button class="btn" style="width:auto; padding:0 15px; background:var(--accent-primary);" onclick="startVoiceRecognition('sch-prompt')"><i class="fas fa-microphone"></i></button>
+                </div>
+                <button class="btn" style="margin-top:10px; background:var(--success);" onclick="generateSchematic()"><i class="fas fa-magic"></i> Generate SLD</button>
+                <div id="sch-canvas" style="margin-top:20px; background:#e8f0fe; padding:20px; border-radius:8px; min-height:200px; display:none; color:#000; overflow-x:auto;"></div>
+            ` },
+            gantt: { title: 'Interactive Gantt Chart', icon: 'fa-stream', html: `
+                <style>
+                    .g-task-row { display:flex; margin-bottom:5px; align-items:center; }
+                    .g-task-name { flex:0 0 100px; font-size:0.8rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+                    .g-track { flex:1; background:rgba(255,255,255,0.05); height:30px; position:relative; border-radius:4px; overflow:hidden; }
+                    .g-bar { position:absolute; height:100%; background:var(--accent-primary); border-radius:4px; cursor:ew-resize; display:flex; align-items:center; justify-content:center; color:#000; font-size:0.7rem; font-weight:bold; }
+                </style>
+                <p style="font-size:0.85rem; color:#aaa; margin-bottom:15px;">Drag bars to shift timelines. Drag edges to resize. (Simulated functionality)</p>
+                <div id="gantt-container" style="display:flex; flex-direction:column; gap:10px;">
+                    <div class="g-task-row"><div class="g-task-name">Engineering</div><div class="g-track"><div class="g-bar" style="left:0%; width:20%; background:#00E5FF;">Week 1-2</div></div></div>
+                    <div class="g-task-row"><div class="g-task-name">Procurement</div><div class="g-track"><div class="g-bar" style="left:20%; width:30%; background:#f1c40f;">Week 3-5</div></div></div>
+                    <div class="g-task-row"><div class="g-task-name">Manufacturing</div><div class="g-track"><div class="g-bar" style="left:40%; width:40%; background:#e74c3c;">Week 5-8</div></div></div>
+                    <div class="g-task-row"><div class="g-task-name">Testing (FAT)</div><div class="g-track"><div class="g-bar" style="left:80%; width:10%; background:#2ecc71;">Week 9</div></div></div>
+                    <div class="g-task-row"><div class="g-task-name">Dispatch</div><div class="g-track"><div class="g-bar" style="left:90%; width:10%; background:#9b59b6;">Week 10</div></div></div>
+                </div>
+            ` },
             assistant: { title: 'AI Assistant', icon: 'fa-magic', html: `<div style="position:relative;"><textarea id="assist-prompt" class="input-field" rows="3" placeholder="Ask anything (e.g. Translate to Hindi, generate meeting minutes, make excel table...)"></textarea><button style="position:absolute; right:10px; bottom:15px; background:none; border:none; color:var(--accent-primary); cursor:pointer; font-size:1.2rem;" onclick="startVoiceRecognition('assist-prompt')"><i class="fas fa-microphone"></i></button></div><button class="btn" onclick="callSandeepErpAI('Assistant Task: ' + document.getElementById('assist-prompt').value)"><i class="fas fa-bolt"></i> Execute</button><div id="ai-response-assistant" class="ai-chat-box" style="margin-top:15px; display:none;"></div>` },
             ultimate: { title: 'Ultimate Calculator', icon: 'fa-rocket', html: `
                 <div style="margin-bottom:15px;">
@@ -1960,6 +2009,7 @@ function runRecovery() {
                 switchUltimateTool();
             }
             if(mod === 'dashboard') setTimeout(renderErpCharts, 100);
+            if(mod === 'whiteboard') setTimeout(initWhiteboard, 200);
             if(mod === 'alerts') renderErpAlerts();
             if(mod === 'scicalc') {
                 setTimeout(() => {
@@ -2786,6 +2836,207 @@ function runRecovery() {
             `;
         };
 
+        
+        // --- JARVIS LOGIC ---
+        window.startJarvis = function() {
+            if(!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                return alert("Voice control not supported in this browser. Please use Chrome.");
+            }
+            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const rec = new SpeechRec();
+            rec.lang = 'en-IN';
+            rec.interimResults = false;
+            
+            const jStatus = document.getElementById('jarvis-status');
+            jStatus.style.display = 'block';
+            jStatus.innerText = "Listening...";
+            
+            rec.onresult = function(e) {
+                let cmd = e.results[0][0].transcript.toLowerCase();
+                jStatus.innerText = "Command: " + cmd;
+                setTimeout(() => { jStatus.style.display = 'none'; }, 3000);
+                
+                if(cmd.includes('calculator') || cmd.includes('pv') || cmd.includes('price')) {
+                    openErpModule('ultimate');
+                    if(cmd.includes('pv') || cmd.includes('price')) document.getElementById('ultimate-selector').value = 'pvcalc';
+                    switchUltimateTool();
+                } else if(cmd.includes('dashboard') || cmd.includes('home')) {
+                    closeErpModal();
+                } else if(cmd.includes('whiteboard') || cmd.includes('draw')) {
+                    openErpModule('whiteboard');
+                } else if(cmd.includes('schematic') || cmd.includes('diagram')) {
+                    openErpModule('schematic');
+                } else if(cmd.includes('chart') || cmd.includes('timeline')) {
+                    openErpModule('gantt');
+                } else if(cmd.includes('attendance') || cmd.includes('present')) {
+                    openErpModule('attendance');
+                } else {
+                    alert("Jarvis: I didn't understand the command '" + cmd + "'. Try 'Open Whiteboard' or 'Calculate PV'.");
+                }
+            };
+            rec.onerror = function() { jStatus.style.display = 'none'; };
+            rec.onend = function() { setTimeout(() => { jStatus.style.display = 'none'; }, 1000); };
+            rec.start();
+        };
+
+        // --- WHITEBOARD LOGIC ---
+        let wbCtx, wbPainting = false, wbColor = '#00E5FF', wbSize = 3;
+        window.initWhiteboard = function() {
+            const canvas = document.getElementById('wb-canvas');
+            if(!canvas) return;
+            wbCtx = canvas.getContext('2d');
+            // Background is dark by default, handled by CSS, but let's fill it so save works properly
+            wbCtx.fillStyle = '#1a1a1a';
+            wbCtx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const startPos = (e) => { wbPainting = true; draw(e); };
+            const endPos = () => { wbPainting = false; wbCtx.beginPath(); };
+            const draw = (e) => {
+                if(!wbPainting) return;
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.clientX || e.touches[0].clientX) - rect.left;
+                const y = (e.clientY || e.touches[0].clientY) - rect.top;
+                
+                wbCtx.lineWidth = wbSize;
+                wbCtx.lineCap = 'round';
+                wbCtx.strokeStyle = wbColor;
+                
+                wbCtx.lineTo(x, y);
+                wbCtx.stroke();
+                wbCtx.beginPath();
+                wbCtx.moveTo(x, y);
+            };
+            
+            canvas.addEventListener('mousedown', startPos);
+            canvas.addEventListener('mouseup', endPos);
+            canvas.addEventListener('mousemove', draw);
+            
+            canvas.addEventListener('touchstart', startPos);
+            canvas.addEventListener('touchend', endPos);
+            canvas.addEventListener('touchmove', draw);
+        };
+        
+        window.wbSetColor = function(c) { wbColor = c; };
+        window.wbSetSize = function(s) { wbSize = s; };
+        window.wbClear = function() { 
+            if(wbCtx) {
+                const canvas = document.getElementById('wb-canvas');
+                wbCtx.fillStyle = '#1a1a1a';
+                wbCtx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+        };
+        window.wbDownload = function() {
+            const canvas = document.getElementById('wb-canvas');
+            if(canvas) {
+                const link = document.createElement('a');
+                link.download = 'whiteboard.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            }
+        };
+
+        // --- AI SCHEMATIC LOGIC ---
+        window.generateSchematic = function() {
+            let prompt = document.getElementById('sch-prompt').value.toLowerCase();
+            let canvas = document.getElementById('sch-canvas');
+            if(!prompt) return alert("Please enter a description!");
+            
+            canvas.style.display = 'flex';
+            canvas.style.flexDirection = 'column';
+            canvas.style.alignItems = 'center';
+            canvas.style.gap = '20px';
+            
+            let html = '<h3 style="margin-bottom:0;">Auto-Generated SLD</h3>';
+            html += '<div style="font-size:0.8rem; color:#666; margin-bottom:10px;">Based on: ' + prompt + '</div>';
+            
+            // Simple keyword parsing for demonstration
+            let kvMatch = prompt.match(/(\d+)\s*kv/g);
+            let kvText = kvMatch ? kvMatch.join(' / ') : "Substation";
+            
+            let txCount = 1;
+            if(prompt.includes('2 tx') || prompt.includes('2 trans') || prompt.includes('two')) txCount = 2;
+            if(prompt.includes('3 tx') || prompt.includes('3 trans') || prompt.includes('three')) txCount = 3;
+            
+            let boxStyle = "padding:10px 20px; border:2px solid #333; font-weight:bold; background:#fff; text-align:center; border-radius:4px;";
+            let lineStyle = "width:2px; height:30px; background:#333;";
+            let horLineStyle = "height:2px; background:#333; width:100%; min-width:200px;";
+            
+            // INCOMING
+            html += `<div style="${boxStyle} border-color:#e74c3c;">Incoming Line<br><span style="color:#e74c3c;">${kvMatch ? kvMatch[0] : 'High Voltage'}</span></div>`;
+            html += `<div style="${lineStyle}"></div>`;
+            
+            // BUS
+            html += `<div style="${horLineStyle}"></div>`;
+            html += `<div style="font-size:0.8rem; font-weight:bold;">MAIN BUS</div>`;
+            
+            html += `<div style="display:flex; gap:40px; margin-top:20px;">`;
+            
+            for(let i=1; i<=txCount; i++) {
+                html += `<div style="display:flex; flex-direction:column; alignItems:center;">
+                    <div style="${lineStyle} margin: 0 auto;"></div>
+                    <div style="${boxStyle} border-radius:50%; width:60px; height:60px; display:flex; align-items:center; justify-content:center; border-color:#2980b9;">CB</div>
+                    <div style="${lineStyle} margin: 0 auto;"></div>
+                    <div style="${boxStyle} border-radius:50%; width:80px; height:80px; display:flex; align-items:center; justify-content:center; flex-direction:column; border-color:var(--accent-primary);">
+                        <i class="fas fa-bolt" style="color:#f1c40f;"></i> TR-${i}
+                    </div>
+                    <div style="${lineStyle} margin: 0 auto;"></div>
+                    <div style="${boxStyle} border-color:#27ae60;">Outgoing Line<br><span style="color:#27ae60;">${kvMatch && kvMatch.length > 1 ? kvMatch[1] : 'Low Voltage'}</span></div>
+                </div>`;
+            }
+            html += `</div>`;
+            
+            canvas.innerHTML = html;
+        };
+
+        
+        // --- GANTT LOGIC ---
+        let draggedBar = null, startX, startLeft, startWidth, isResizing = false;
+        
+        document.addEventListener('mousedown', function(e) {
+            if(e.target.classList.contains('g-bar')) {
+                draggedBar = e.target;
+                startX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+                startLeft = parseFloat(draggedBar.style.left) || 0;
+                startWidth = parseFloat(draggedBar.style.width) || 0;
+                
+                let rect = draggedBar.getBoundingClientRect();
+                isResizing = (e.clientX > rect.right - 10);
+            }
+        });
+        
+        document.addEventListener('mousemove', function(e) {
+            if(!draggedBar) return;
+            let currentX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+            let dx = currentX - startX;
+            let trackWidth = draggedBar.parentElement.getBoundingClientRect().width;
+            let dxPercent = (dx / trackWidth) * 100;
+            
+            if(isResizing) {
+                let newWidth = startWidth + dxPercent;
+                if(newWidth > 5) draggedBar.style.width = newWidth + '%';
+            } else {
+                let newLeft = startLeft + dxPercent;
+                if(newLeft >= 0 && newLeft + startWidth <= 100) {
+                    draggedBar.style.left = newLeft + '%';
+                }
+            }
+        });
+        
+        document.addEventListener('mouseup', function() {
+            draggedBar = null;
+            isResizing = false;
+        });
+        
+        window.addGanttTask = function() {
+            let name = prompt("Enter task name:");
+            if(!name) return;
+            let container = document.getElementById('gantt-container');
+            let div = document.createElement('div');
+            div.className = 'g-task-row';
+            div.innerHTML = `<div class="g-task-name">${name}</div><div class="g-track"><div class="g-bar" style="left:0%; width:20%; background:#2ecc71;">New Task</div></div>`;
+            container.appendChild(div);
+        };
+
         const todayStr = getLocalDateStr();
 
         let appData = { plans: [], reports: [], attendance: [], contacts: [], inquiries: [], userName: '', theme: 'gold', totalAppTime: 0, timerDate: todayStr, appPin: '' };
@@ -3309,7 +3560,14 @@ function runRecovery() {
                 });
             }
 
-            htmlContent += `<tr><td colspan="3" style="font-weight:bold; background:#ffd700;">Grand Total</td><td style="font-weight:bold; background:#ffd700;">${grandTotal}</td></tr></table></body></html>`;
+            htmlContent += `<tr><td colspan="3" style="font-weight:bold; background:#ffd700;">Grand Total</td><td style="font-weight:bold; background:#ffd700;">${grandTotal}</td></tr></table>
+    <!-- JARVIS VOICE BUTTON -->
+    <div id="jarvis-btn" onclick="startJarvis()" style="position:fixed; bottom:30px; right:30px; width:60px; height:60px; background:var(--accent-primary); border-radius:50%; box-shadow:0 0 20px var(--accent-primary); display:flex; justify-content:center; align-items:center; cursor:pointer; z-index:9999; animation: pulse 2s infinite;">
+        <i class="fas fa-microphone" style="color:#000; font-size:1.8rem;"></i>
+    </div>
+    <div id="jarvis-status" style="position:fixed; bottom:100px; right:30px; background:rgba(0,0,0,0.8); color:#00E5FF; padding:10px 15px; border-radius:8px; display:none; z-index:9999; font-weight:bold; border:1px solid #00E5FF;">Listening...</div>
+
+</body></html>`;
 
             let blob = new Blob([htmlContent], { type: 'application/vnd.ms-excel' });
             let url = URL.createObjectURL(blob);
@@ -4885,7 +5143,14 @@ Update: ${r.text}
                 });
             });
 
-            htmlContent += `</table></body></html>`;
+            htmlContent += `</table>
+    <!-- JARVIS VOICE BUTTON -->
+    <div id="jarvis-btn" onclick="startJarvis()" style="position:fixed; bottom:30px; right:30px; width:60px; height:60px; background:var(--accent-primary); border-radius:50%; box-shadow:0 0 20px var(--accent-primary); display:flex; justify-content:center; align-items:center; cursor:pointer; z-index:9999; animation: pulse 2s infinite;">
+        <i class="fas fa-microphone" style="color:#000; font-size:1.8rem;"></i>
+    </div>
+    <div id="jarvis-status" style="position:fixed; bottom:100px; right:30px; background:rgba(0,0,0,0.8); color:#00E5FF; padding:10px 15px; border-radius:8px; display:none; z-index:9999; font-weight:bold; border:1px solid #00E5FF;">Listening...</div>
+
+</body></html>`;
 
             let blob = new Blob([htmlContent], { type: 'application/vnd.ms-excel' });
             let url = URL.createObjectURL(blob);
@@ -4955,7 +5220,14 @@ Update: ${r.text}
 
             html += `<tr><td colspan="3" class="grand" style="text-align: right;">Grand Total:</td><td class="grand">Rs.${grandTotal.toLocaleString()}</td></tr>
                 </table>
-            </body>
+            
+    <!-- JARVIS VOICE BUTTON -->
+    <div id="jarvis-btn" onclick="startJarvis()" style="position:fixed; bottom:30px; right:30px; width:60px; height:60px; background:var(--accent-primary); border-radius:50%; box-shadow:0 0 20px var(--accent-primary); display:flex; justify-content:center; align-items:center; cursor:pointer; z-index:9999; animation: pulse 2s infinite;">
+        <i class="fas fa-microphone" style="color:#000; font-size:1.8rem;"></i>
+    </div>
+    <div id="jarvis-status" style="position:fixed; bottom:100px; right:30px; background:rgba(0,0,0,0.8); color:#00E5FF; padding:10px 15px; border-radius:8px; display:none; z-index:9999; font-weight:bold; border:1px solid #00E5FF;">Listening...</div>
+
+</body>
             </html>`;
 
             let blob = new Blob([html], { type: 'application/vnd.ms-excel' });
@@ -5115,6 +5387,13 @@ Update: ${r.text}
     <div id="jarvisStatus" style="position:fixed; bottom:100px; right:30px; background:rgba(0,0,0,0.8); border:1px solid var(--accent-primary); padding:10px 15px; border-radius:10px; color:var(--accent-primary); font-size:0.85rem; font-weight:bold; display:none; z-index:9000; backdrop-filter:blur(10px);">
         Listening...
     </div>
+
+
+    <!-- JARVIS VOICE BUTTON -->
+    <div id="jarvis-btn" onclick="startJarvis()" style="position:fixed; bottom:30px; right:30px; width:60px; height:60px; background:var(--accent-primary); border-radius:50%; box-shadow:0 0 20px var(--accent-primary); display:flex; justify-content:center; align-items:center; cursor:pointer; z-index:9999; animation: pulse 2s infinite;">
+        <i class="fas fa-microphone" style="color:#000; font-size:1.8rem;"></i>
+    </div>
+    <div id="jarvis-status" style="position:fixed; bottom:100px; right:30px; background:rgba(0,0,0,0.8); color:#00E5FF; padding:10px 15px; border-radius:8px; display:none; z-index:9999; font-weight:bold; border:1px solid #00E5FF;">Listening...</div>
 
 </body>
 </html>
