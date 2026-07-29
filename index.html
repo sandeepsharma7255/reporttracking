@@ -181,6 +181,33 @@
 
         @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
         @media (max-width: 768px) { body { flex-direction: column; } .main-content { padding: 1rem; } .header { flex-wrap: wrap; gap:10px; } .dashboard-banner { flex-direction: column; text-align: center; } .dashboard-banner .banner-icon { display: none; } }
+        /* Google Places Autocomplete Z-Index */
+        .pac-container {
+            z-index: 999999 !important;
+            background-color: #1e1e1e !important;
+            color: #fff !important;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+            font-family: 'Inter', sans-serif;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .pac-item {
+            color: #ccc !important;
+            border-top: 1px solid rgba(255,255,255,0.05) !important;
+            padding: 8px 10px !important;
+            cursor: pointer;
+        }
+        .pac-item:hover {
+            background-color: rgba(255,255,255,0.05) !important;
+        }
+        .pac-item-query {
+            font-size: 14px;
+            color: #fff !important;
+        }
+        .pac-matched {
+            color: var(--accent-primary) !important;
+        }
     </style>
 </head>
 <body>
@@ -1679,12 +1706,49 @@ function runRecovery() {
             }
         }
 
+        let googleMapInstance = null;
+        let directionsRenderer = null;
+
         function initGoogleAutocomplete() {
             if (typeof google === 'object' && typeof google.maps === 'object') {
                 const originInput = document.getElementById('mapOrigin');
                 const destInput = document.getElementById('mapDest');
-                if (originInput) new google.maps.places.Autocomplete(originInput, { componentRestrictions: { country: 'in' } });
-                if (destInput) new google.maps.places.Autocomplete(destInput, { componentRestrictions: { country: 'in' } });
+                const preview = document.getElementById('mapPreview');
+                
+                if (preview && !googleMapInstance) {
+                    preview.innerHTML = '';
+                    googleMapInstance = new google.maps.Map(preview, {
+                        zoom: 10,
+                        center: { lat: 28.6139, lng: 77.2090 },
+                        disableDefaultUI: true
+                    });
+                    directionsRenderer = new google.maps.DirectionsRenderer();
+                    directionsRenderer.setMap(googleMapInstance);
+                }
+
+                if (originInput) {
+                    const originAuto = new google.maps.places.Autocomplete(originInput, { componentRestrictions: { country: 'in' } });
+                    originAuto.addListener('place_changed', () => {
+                        const place = originAuto.getPlace();
+                        if (place.geometry && googleMapInstance) {
+                            googleMapInstance.panTo(place.geometry.location);
+                            googleMapInstance.setZoom(15);
+                            new google.maps.Marker({ position: place.geometry.location, map: googleMapInstance });
+                        }
+                    });
+                }
+                
+                if (destInput) {
+                    const destAuto = new google.maps.places.Autocomplete(destInput, { componentRestrictions: { country: 'in' } });
+                    destAuto.addListener('place_changed', () => {
+                        const place = destAuto.getPlace();
+                        if (place.geometry && googleMapInstance) {
+                            googleMapInstance.panTo(place.geometry.location);
+                            googleMapInstance.setZoom(15);
+                            new google.maps.Marker({ position: place.geometry.location, map: googleMapInstance });
+                        }
+                    });
+                }
             }
         }
 
@@ -1694,25 +1758,14 @@ function runRecovery() {
             if(!origin || !dest) return alert("Please enter both origin and destination!");
             
             const res = document.getElementById('mapResult');
-            const preview = document.getElementById('mapPreview');
             
-            if (typeof google !== 'object' || typeof google.maps !== 'object') {
+            if (typeof google !== 'object' || typeof google.maps !== 'object' || !directionsRenderer) {
                 res.innerHTML = `<span style="color:var(--danger)">Google Maps API not loaded. Check internet connection.</span>`;
                 return;
             }
 
             res.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Calculating exact route using Google Maps...`;
-            
             const directionsService = new google.maps.DirectionsService();
-            const directionsRenderer = new google.maps.DirectionsRenderer();
-            
-            preview.innerHTML = '';
-            const map = new google.maps.Map(preview, {
-                zoom: 10,
-                center: { lat: 28.6139, lng: 77.2090 }, // Default to New Delhi
-                disableDefaultUI: true
-            });
-            directionsRenderer.setMap(map);
 
             const request = {
                 origin: origin,
