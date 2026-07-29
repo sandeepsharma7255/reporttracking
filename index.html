@@ -382,8 +382,10 @@
 
             <h3 style="margin:20px 0 10px 0;" class="animated-gradient-text"><i class="fas fa-calendar-alt"></i> Activity Calendar</h3>
             <div class="card" id="dashboardCalendarCard">
-                <div id="calendarHeader" style="display:flex; justify-content:center; align-items:center; margin-bottom:15px;">
+                <div id="calendarHeader" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <button class="btn" style="width:auto; padding:5px 10px; background:rgba(255,255,255,0.1); border:none; color:var(--accent-primary);" onclick="changeCalMonth(-1)"><i class="fas fa-chevron-left"></i></button>
                     <h4 id="calendarMonthLabel" style="margin:0; font-size:1.2rem;">Month Year</h4>
+                    <button class="btn" style="width:auto; padding:5px 10px; background:rgba(255,255,255,0.1); border:none; color:var(--accent-primary);" onclick="changeCalMonth(1)"><i class="fas fa-chevron-right"></i></button>
                 </div>
                 <div style="display:grid; grid-template-columns:repeat(7, 1fr); gap:5px; text-align:center; font-weight:bold; margin-bottom:10px; color:var(--accent-primary);">
                     <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
@@ -1867,14 +1869,38 @@ function runRecovery() {
             updateUI(); 
         }
 
+        let currentCalMonth = new Date().getMonth();
+        let currentCalYear = new Date().getFullYear();
+
+        const indianFestivals = {
+            "01-14": { name: "Makar Sankranti", icon: "🪁" },
+            "01-26": { name: "Republic Day", icon: "🇮🇳" },
+            "03-03": { name: "Holi (2026)", icon: "🎨" },
+            "08-15": { name: "Independence Day", icon: "🇮🇳" },
+            "08-26": { name: "Raksha Bandhan", icon: "🧿" },
+            "09-04": { name: "Janmashtami", icon: "🪈" },
+            "09-15": { name: "Ganesh Chaturthi", icon: "🐘" },
+            "10-02": { name: "Gandhi Jayanti", icon: "🕊️" },
+            "10-18": { name: "Dussehra", icon: "🏹" },
+            "11-08": { name: "Diwali (2026)", icon: "🪔" },
+            "12-25": { name: "Christmas", icon: "🎄" }
+        };
+
+        function changeCalMonth(offset) {
+            currentCalMonth += offset;
+            if(currentCalMonth > 11) { currentCalMonth = 0; currentCalYear++; }
+            if(currentCalMonth < 0) { currentCalMonth = 11; currentCalYear--; }
+            renderDashboardCalendar();
+        }
+
         function renderDashboardCalendar() {
             const grid = document.getElementById('calendarGrid');
             const monthLabel = document.getElementById('calendarMonthLabel');
             if(!grid || !monthLabel) return;
             
             const today = new Date();
-            const year = today.getFullYear();
-            const month = today.getMonth();
+            const year = currentCalYear;
+            const month = currentCalMonth;
             
             const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
             monthLabel.innerText = `${monthNames[month]} ${year}`;
@@ -1888,24 +1914,42 @@ function runRecovery() {
                 grid.innerHTML += `<div></div>`;
             }
             
-            let attendanceDates = appData.attendance.map(a => a.date);
-            let visitDates = appData.reports.map(r => r.date);
+            let attendanceDates = [];
+            let visitDates = [];
+            
+            // Collect data from current active and archives if looking at past months
+            const currentMonthStr = `${year}-${(month+1).toString().padStart(2, '0')}`;
+            const sysCurrentMonth = new Date().toISOString().substring(0,7);
+            
+            if(currentMonthStr === sysCurrentMonth) {
+                attendanceDates = appData.attendance.map(a => a.date);
+                visitDates = appData.reports.map(r => r.date);
+            } else if (appData.archive && appData.archive[currentMonthStr]) {
+                attendanceDates = appData.archive[currentMonthStr].attendance ? appData.archive[currentMonthStr].attendance.map(a => a.date) : [];
+                visitDates = appData.archive[currentMonthStr].reports ? appData.archive[currentMonthStr].reports.map(r => r.date) : [];
+            }
             
             for(let d=1; d<=daysInMonth; d++) {
                 const dateStr = `${year}-${(month+1).toString().padStart(2, '0')}-${d.toString().padStart(2, '0')}`;
+                const mmdd = `${(month+1).toString().padStart(2, '0')}-${d.toString().padStart(2, '0')}`;
                 
                 let isVisited = visitDates.includes(dateStr);
                 let isAttended = attendanceDates.includes(dateStr);
-                let isToday = (d === today.getDate());
+                let isToday = (d === today.getDate() && month === today.getMonth() && year === today.getFullYear());
                 
-                let style = "padding:5px; border-radius:5px; border:1px solid rgba(255,255,255,0.05); position:relative;";
+                let style = "padding:5px; border-radius:5px; border:1px solid rgba(255,255,255,0.05); position:relative; min-height:40px; display:flex; flex-direction:column; justify-content:flex-start; align-items:center; font-size:1rem;";
                 if(isToday) style += " border-color:var(--accent-primary); box-shadow:0 0 10px var(--accent-primary); font-weight:bold;";
                 
                 let markers = "";
-                if(isVisited) markers += `<div style="width:6px; height:6px; background:var(--success); border-radius:50%; position:absolute; bottom:2px; left:30%;"></div>`;
-                if(isAttended) markers += `<div style="width:6px; height:6px; background:var(--accent-primary); border-radius:50%; position:absolute; bottom:2px; right:30%;"></div>`;
+                if(isVisited) markers += `<div style="width:6px; height:6px; background:var(--success); border-radius:50%; position:absolute; bottom:4px; left:25%;"></div>`;
+                if(isAttended) markers += `<div style="width:6px; height:6px; background:var(--accent-primary); border-radius:50%; position:absolute; bottom:4px; right:25%;"></div>`;
                 
-                grid.innerHTML += `<div style="${style}">${d}${markers}</div>`;
+                let festivalHtml = "";
+                if(indianFestivals[mmdd]) {
+                    festivalHtml = `<div style="font-size:0.6rem; color:var(--warning); line-height:1; margin-top:2px;" title="${indianFestivals[mmdd].name}">${indianFestivals[mmdd].icon}</div>`;
+                }
+
+                grid.innerHTML += `<div style="${style}"><span>${d}</span>${festivalHtml}${markers}</div>`;
             }
         }
         
