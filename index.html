@@ -1117,15 +1117,16 @@
         <section id="tender-erp" class="module-section" style="padding:10px;">
             <div class="card" style="margin-bottom:15px; text-align:center;">
                 <h2><i class="fas fa-robot"></i> Tender & AI ERP Suite</h2>
-                <p style="color:var(--text-muted); font-size:0.9rem;">13 Powerful Modules Integrated with Sandeep AI</p>
+                <p style="color:var(--text-muted); font-size:0.9rem;">14 Powerful Modules Integrated with Sandeep AI</p>
                 
-                <!-- Navigation Grid for 13 Modules -->
+                <!-- Navigation Grid for 14 Modules -->
                 <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:10px; margin-top:20px;">
                     <div class="erp-module-card" onclick="openErpModule('analyzer')"><i class="fas fa-file-pdf"></i><br>Tender Analyzer</div>
                     <div class="erp-module-card" onclick="openErpModule('finder')"><i class="fas fa-search"></i><br>Clause Finder</div>
                     <div class="erp-module-card" onclick="openErpModule('compare')"><i class="fas fa-balance-scale"></i><br>Tender Compare</div>
                     <div class="erp-module-card" onclick="openErpModule('email')"><i class="fas fa-envelope-open-text"></i><br>AI Email Gen</div>
                     <div class="erp-module-card" onclick="openErpModule('calc')"><i class="fas fa-calculator"></i><br>Tech Calc</div>
+                    <div class="erp-module-card" onclick="openErpModule('scicalc')"><i class="fas fa-square-root-alt"></i><br>Sci Calc</div>
                     <div class="erp-module-card" onclick="openErpModule('crm')"><i class="fas fa-users"></i><br>Customer CRM</div>
                     <div class="erp-module-card" onclick="openErpModule('travel')"><i class="fas fa-plane"></i><br>Travel Mgr</div>
                     <div class="erp-module-card" onclick="openErpModule('vault')"><i class="fas fa-folder-open"></i><br>Doc Vault</div>
@@ -1633,7 +1634,81 @@ function runRecovery() {
             dashboard: { title: 'Daily Dashboard', icon: 'fa-tachometer-alt', html: `<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;"><strong>Meetings Today</strong><br><span style="font-size:1.5rem; color:var(--accent-primary);">0</span></div><div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;"><strong>Pending Bids</strong><br><span style="font-size:1.5rem; color:var(--danger);">2</span></div></div><div style="margin-top:15px;"><canvas id="erpChart" style="max-height:200px;"></canvas></div><div style="margin-top:15px; color:var(--text-muted); font-size:0.85rem; text-align:center;">Live metrics sync initialized.</div>` },
             alerts: { title: 'Smart Alerts', icon: 'fa-bell', html: `<div id="erpAlertsContainer"></div><button class="btn" style="background:var(--accent-primary); margin-top:15px;" onclick="addErpAlert()"><i class="fas fa-plus"></i> Add New Alert</button>` },
             ocr: { title: 'OCR + AI Summarizer', icon: 'fa-camera', html: `<p>Upload Tender Photo or Scanned PDF</p><input type="file" accept="image/*,application/pdf" class="input-field"><button class="btn" onclick="callSandeepErpAI('Perform OCR on this image and summarize the key points.')"><i class="fas fa-eye"></i> Scan & Summarize</button><div id="ai-response-ocr" class="ai-chat-box" style="margin-top:15px; display:none;"></div>` },
-            assistant: { title: 'AI Assistant', icon: 'fa-magic', html: `<div style="position:relative;"><textarea id="assist-prompt" class="input-field" rows="3" placeholder="Ask anything (e.g. Translate to Hindi, generate meeting minutes, make excel table...)"></textarea><button style="position:absolute; right:10px; bottom:15px; background:none; border:none; color:var(--accent-primary); cursor:pointer; font-size:1.2rem;" onclick="startVoiceRecognition('assist-prompt')"><i class="fas fa-microphone"></i></button></div><button class="btn" onclick="callSandeepErpAI('Assistant Task: ' + document.getElementById('assist-prompt').value)"><i class="fas fa-bolt"></i> Execute</button><div id="ai-response-assistant" class="ai-chat-box" style="margin-top:15px; display:none;"></div>` }
+            assistant: { title: 'AI Assistant', icon: 'fa-magic', html: `<div style="position:relative;"><textarea id="assist-prompt" class="input-field" rows="3" placeholder="Ask anything (e.g. Translate to Hindi, generate meeting minutes, make excel table...)"></textarea><button style="position:absolute; right:10px; bottom:15px; background:none; border:none; color:var(--accent-primary); cursor:pointer; font-size:1.2rem;" onclick="startVoiceRecognition('assist-prompt')"><i class="fas fa-microphone"></i></button></div><button class="btn" onclick="callSandeepErpAI('Assistant Task: ' + document.getElementById('assist-prompt').value)"><i class="fas fa-bolt"></i> Execute</button><div id="ai-response-assistant" class="ai-chat-box" style="margin-top:15px; display:none;"></div>` },
+            scicalc: { title: 'Advanced Scientific Calculator', icon: 'fa-square-root-alt', html: `
+                <style>
+                .sci-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 15px; }
+                .sci-btn { background: #333; border: 1px solid #444; color: white; padding: 15px; font-size: 1.2rem; border-radius: 5px; cursor: pointer; transition: 0.2s; }
+                .sci-btn:hover { background: #444; }
+                .sci-btn.op { background: var(--accent-primary); color: #000; font-weight: bold; }
+                .sci-btn.func { background: #555; }
+                .sci-display { width: 100%; padding: 15px; font-size: 1.5rem; background: #111; color: #00E5FF; border: 1px solid #333; border-radius: 5px; text-align: right; margin-bottom: 10px; font-family: monospace; }
+                </style>
+                <input type="text" id="sci-display" class="sci-display" placeholder="0" readonly>
+                <div class="sci-grid">
+                    <button class="sci-btn func" onclick="sciInput('sin(')">sin</button>
+                    <button class="sci-btn func" onclick="sciInput('cos(')">cos</button>
+                    <button class="sci-btn func" onclick="sciInput('tan(')">tan</button>
+                    <button class="sci-btn op" onclick="sciClear()">C</button>
+                    
+                    <button class="sci-btn func" onclick="sciInput('sqrt(')">√</button>
+                    <button class="sci-btn func" onclick="sciInput('^')">xʸ</button>
+                    <button class="sci-btn func" onclick="sciInput('log(')">log</button>
+                    <button class="sci-btn op" onclick="sciDel()">⌫</button>
+                    
+                    <button class="sci-btn" onclick="sciInput('7')">7</button>
+                    <button class="sci-btn" onclick="sciInput('8')">8</button>
+                    <button class="sci-btn" onclick="sciInput('9')">9</button>
+                    <button class="sci-btn op" onclick="sciInput('/')">÷</button>
+                    
+                    <button class="sci-btn" onclick="sciInput('4')">4</button>
+                    <button class="sci-btn" onclick="sciInput('5')">5</button>
+                    <button class="sci-btn" onclick="sciInput('6')">6</button>
+                    <button class="sci-btn op" onclick="sciInput('*')">×</button>
+                    
+                    <button class="sci-btn" onclick="sciInput('1')">1</button>
+                    <button class="sci-btn" onclick="sciInput('2')">2</button>
+                    <button class="sci-btn" onclick="sciInput('3')">3</button>
+                    <button class="sci-btn op" onclick="sciInput('-')">-</button>
+                    
+                    <button class="sci-btn" onclick="sciInput('.')">.</button>
+                    <button class="sci-btn" onclick="sciInput('0')">0</button>
+                    <button class="sci-btn func" onclick="sciInput(')')">)</button>
+                    <button class="sci-btn op" onclick="sciEval()">=</button>
+                </div>
+            ` }
+        };
+
+        window.sciInput = function(val) {
+            let d = document.getElementById('sci-display');
+            if(d.value === 'Error' || d.value === 'Infinity') d.value = '';
+            d.value += val;
+        };
+        window.sciClear = function() {
+            document.getElementById('sci-display').value = '';
+        };
+        window.sciDel = function() {
+            let d = document.getElementById('sci-display');
+            if(d.value === 'Error' || d.value === 'Infinity') d.value = '';
+            d.value = d.value.slice(0, -1);
+        };
+        window.sciEval = function() {
+            let d = document.getElementById('sci-display');
+            try {
+                let expr = d.value;
+                expr = expr.replace(/sin\(/g, 'Math.sin((Math.PI/180)*')
+                           .replace(/cos\(/g, 'Math.cos((Math.PI/180)*')
+                           .replace(/tan\(/g, 'Math.tan((Math.PI/180)*')
+                           .replace(/log\(/g, 'Math.log10(')
+                           .replace(/sqrt\(/g, 'Math.sqrt(')
+                           .replace(/\^/g, '**');
+                let res = eval(expr);
+                if (res !== undefined) {
+                    d.value = Number.isInteger(res) ? res : Number(res.toFixed(8)).toString();
+                }
+            } catch(e) {
+                d.value = 'Error';
+            }
         };
 
         function openErpModule(mod) {
