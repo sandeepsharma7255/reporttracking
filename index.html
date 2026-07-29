@@ -1745,7 +1745,33 @@ function runRecovery() {
             if(mod === 'calc') updateCalcUI();
             if(mod === 'dashboard') setTimeout(renderErpCharts, 100);
             if(mod === 'alerts') renderErpAlerts();
+            if(mod === 'scicalc') {
+                setTimeout(() => {
+                    const sciDisp = document.getElementById('sci-display');
+                    if(sciDisp) sciDisp.focus();
+                }, 100);
+            }
         }
+
+        // Global keyboard support for PC
+        window.addEventListener('keydown', function(e) {
+            const modal = document.getElementById('smartToolModal');
+            if (modal && modal.style.display === 'flex') {
+                const sciDisp = document.getElementById('sci-display');
+                if (sciDisp) {
+                    if (e.key === 'Enter' || e.key === '=') {
+                        e.preventDefault();
+                        sciEval();
+                    } else if (document.activeElement !== sciDisp) {
+                        if (e.key.length === 1 && /^[0-9\+\-\*\/\.\(\)xX\^]$/.test(e.key)) {
+                            sciDisp.focus();
+                        } else if (e.key === 'Backspace') {
+                            sciDisp.focus();
+                        }
+                    }
+                }
+            }
+        });
 
         function closeSmartTool() {
             document.getElementById('smartToolModal').style.display = 'none';
