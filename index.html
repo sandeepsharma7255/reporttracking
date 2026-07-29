@@ -401,7 +401,13 @@
                 </div>
 
                 <div class="card">
-                    <div class="stat-header"><span id="holidayMonthLabel">Holidays in Month</span><i class="fas fa-gift" style="color:var(--warning)"></i></div>
+                    <div class="stat-header" style="justify-content:space-between; display:flex;">
+                        <span id="holidayMonthLabel">Holidays & Events</span>
+                        <div style="display:flex; gap:15px; align-items:center;">
+                            <button onclick="addCalendarEvent()" style="background:none; border:none; color:var(--accent-primary); cursor:pointer; font-size:1rem;" title="Add Custom Event"><i class="fas fa-calendar-plus"></i></button>
+                            <i class="fas fa-gift" style="color:var(--warning)"></i>
+                        </div>
+                    </div>
                     <div id="holidayListContainer" style="margin-top:15px; max-height:280px; overflow-y:auto; padding-right:5px;">
                         <!-- Holidays injected via JS -->
                     </div>
@@ -1477,7 +1483,7 @@ function runRecovery() {
             vault: { title: 'Document Vault', icon: 'fa-folder-open', html: `<input type="text" class="input-field" placeholder="Search by Project Name, LOA, PO, BG..."><div style="display:flex; gap:10px; margin-top:10px;"><button class="btn" style="flex:1;"><i class="fas fa-upload"></i> Upload</button><button class="btn" style="flex:1; background:#444;"><i class="fas fa-search"></i> Search</button></div><div style="margin-top:15px; color:var(--text-muted); font-size:0.85rem; text-align:center;">Local vault storage initialized.</div>` },
             chat: { title: 'AI Tender Chat', icon: 'fa-comments', html: `<div id="ai-chat-history" class="ai-chat-box"></div><div style="display:flex; gap:5px;"><input type="text" id="ai-chat-input" class="input-field" style="margin-bottom:0;" placeholder="e.g. BG kitna hai? Delivery kab hai?"><button class="btn" style="width:auto; padding:0 15px; background:#444;" onclick="startVoiceRecognition('ai-chat-input')"><i class="fas fa-microphone"></i></button><button class="btn" style="width:auto; padding:0 15px;" onclick="sendAiChat()"><i class="fas fa-paper-plane"></i></button></div>` },
             dashboard: { title: 'Daily Dashboard', icon: 'fa-tachometer-alt', html: `<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;"><strong>Meetings Today</strong><br><span style="font-size:1.5rem; color:var(--accent-primary);">0</span></div><div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;"><strong>Pending Bids</strong><br><span style="font-size:1.5rem; color:var(--danger);">2</span></div></div><div style="margin-top:15px;"><canvas id="erpChart" style="max-height:200px;"></canvas></div><div style="margin-top:15px; color:var(--text-muted); font-size:0.85rem; text-align:center;">Live metrics sync initialized.</div>` },
-            alerts: { title: 'Smart Alerts', icon: 'fa-bell', html: `<div style="background:rgba(255,0,0,0.1); border:1px solid var(--danger); padding:10px; border-radius:8px; margin-bottom:10px;"><i class="fas fa-exclamation-triangle" style="color:var(--danger)"></i> BG Expiry: Adani Project (2 days left)</div><div style="background:rgba(255,255,0,0.1); border:1px solid var(--warning); padding:10px; border-radius:8px;"><i class="fas fa-clock" style="color:var(--warning)"></i> Bid Submission: L&T Tender due today</div>` },
+            alerts: { title: 'Smart Alerts', icon: 'fa-bell', html: `<div id="erpAlertsContainer"></div><button class="btn" style="background:var(--accent-primary); margin-top:15px;" onclick="addErpAlert()"><i class="fas fa-plus"></i> Add New Alert</button>` },
             ocr: { title: 'OCR + AI Summarizer', icon: 'fa-camera', html: `<p>Upload Tender Photo or Scanned PDF</p><input type="file" accept="image/*,application/pdf" class="input-field"><button class="btn" onclick="callSandeepErpAI('Perform OCR on this image and summarize the key points.')"><i class="fas fa-eye"></i> Scan & Summarize</button><div id="ai-response-ocr" class="ai-chat-box" style="margin-top:15px; display:none;"></div>` },
             assistant: { title: 'AI Assistant', icon: 'fa-magic', html: `<div style="position:relative;"><textarea id="assist-prompt" class="input-field" rows="3" placeholder="Ask anything (e.g. Translate to Hindi, generate meeting minutes, make excel table...)"></textarea><button style="position:absolute; right:10px; bottom:15px; background:none; border:none; color:var(--accent-primary); cursor:pointer; font-size:1.2rem;" onclick="startVoiceRecognition('assist-prompt')"><i class="fas fa-microphone"></i></button></div><button class="btn" onclick="callSandeepErpAI('Assistant Task: ' + document.getElementById('assist-prompt').value)"><i class="fas fa-bolt"></i> Execute</button><div id="ai-response-assistant" class="ai-chat-box" style="margin-top:15px; display:none;"></div>` }
         };
@@ -1493,6 +1499,68 @@ function runRecovery() {
             `;
             if(mod === 'calc') updateCalcUI();
             if(mod === 'dashboard') setTimeout(renderErpCharts, 100);
+            if(mod === 'alerts') renderErpAlerts();
+        }
+
+        function renderErpAlerts() {
+            if(!appData.erpAlerts) {
+                appData.erpAlerts = [
+                    { type: 'danger', text: 'BG Expiry: Adani Project (2 days left)' },
+                    { type: 'warning', text: 'Bid Submission: L&T Tender due today' }
+                ];
+                silentSave();
+            }
+            const container = document.getElementById('erpAlertsContainer');
+            if(!container) return;
+            
+            if(appData.erpAlerts.length === 0) {
+                container.innerHTML = `<p style="color:var(--text-muted); font-style:italic;">No active alerts.</p>`;
+                return;
+            }
+            
+            let html = '';
+            appData.erpAlerts.forEach((al, idx) => {
+                let icon = al.type === 'danger' ? 'fa-exclamation-triangle' : (al.type === 'warning' ? 'fa-clock' : 'fa-info-circle');
+                let color = al.type === 'danger' ? 'var(--danger)' : (al.type === 'warning' ? 'var(--warning)' : 'var(--accent-primary)');
+                let bg = al.type === 'danger' ? 'rgba(255,0,0,0.1)' : (al.type === 'warning' ? 'rgba(255,255,0,0.1)' : 'rgba(0,229,255,0.1)');
+                
+                html += `
+                <div style="background:${bg}; border:1px solid ${color}; padding:10px; border-radius:8px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+                    <div><i class="fas ${icon}" style="color:${color}; margin-right:8px;"></i> ${al.text}</div>
+                    <div>
+                        <button onclick="editErpAlert(${idx})" style="background:none; border:none; color:var(--accent-primary); cursor:pointer;"><i class="fas fa-pen"></i></button>
+                        <button onclick="deleteErpAlert(${idx})" style="background:none; border:none; color:var(--danger); cursor:pointer;"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function addErpAlert() {
+            const text = prompt("Enter alert text:");
+            if(!text) return;
+            const typeStr = prompt("Alert Type (danger / warning / info):", "warning");
+            appData.erpAlerts.push({ type: typeStr || 'info', text: text });
+            silentSave();
+            renderErpAlerts();
+        }
+
+        function editErpAlert(idx) {
+            const current = appData.erpAlerts[idx];
+            const text = prompt("Edit alert text:", current.text);
+            if(!text) return;
+            const typeStr = prompt("Edit Alert Type (danger / warning / info):", current.type);
+            appData.erpAlerts[idx] = { type: typeStr || 'info', text: text };
+            silentSave();
+            renderErpAlerts();
+        }
+
+        function deleteErpAlert(idx) {
+            if(confirm("Delete this alert?")) {
+                appData.erpAlerts.splice(idx, 1);
+                silentSave();
+                renderErpAlerts();
+            }
         }
 
         async function callSandeepErpAI(prompt) {
@@ -1882,16 +1950,38 @@ function runRecovery() {
         let currentCalYear = new Date().getFullYear();
 
         const indianFestivals = {
+            "01-01": { name: "New Year", icon: "🎆" },
+            "01-13": { name: "Lohri", icon: "🔥" },
             "01-14": { name: "Makar Sankranti", icon: "🪁" },
             "01-26": { name: "Republic Day", icon: "🇮🇳" },
-            "03-03": { name: "Holi (2026)", icon: "🎨" },
+            "02-14": { name: "Vasant Panchami", icon: "🌼" },
+            "03-08": { name: "Maha Shivaratri", icon: "🔱" },
+            "03-24": { name: "Holika Dahan", icon: "🔥" },
+            "03-25": { name: "Holi", icon: "🎨" },
+            "03-29": { name: "Good Friday", icon: "✝️" },
+            "04-09": { name: "Ugadi / Gudi Padwa", icon: "🌿" },
+            "04-11": { name: "Eid al-Fitr", icon: "🌙" },
+            "04-14": { name: "Baisakhi / Ambedkar Jayanti", icon: "🌾" },
+            "04-17": { name: "Ram Navami", icon: "🏹" },
+            "04-23": { name: "Hanuman Jayanti", icon: "🐒" },
+            "06-17": { name: "Eid al-Adha (Bakrid)", icon: "🐐" },
+            "07-17": { name: "Muharram", icon: "🕌" },
             "08-15": { name: "Independence Day", icon: "🇮🇳" },
-            "08-26": { name: "Raksha Bandhan", icon: "🧿" },
-            "09-04": { name: "Janmashtami", icon: "🪈" },
-            "09-15": { name: "Ganesh Chaturthi", icon: "🐘" },
+            "08-19": { name: "Raksha Bandhan", icon: "🧿" },
+            "08-26": { name: "Janmashtami", icon: "🪈" },
+            "09-07": { name: "Ganesh Chaturthi", icon: "🐘" },
+            "09-17": { name: "Vishwakarma Puja", icon: "🛠️" },
             "10-02": { name: "Gandhi Jayanti", icon: "🕊️" },
-            "10-18": { name: "Dussehra", icon: "🏹" },
-            "11-08": { name: "Diwali (2026)", icon: "🪔" },
+            "10-11": { name: "Maha Navami", icon: "🌺" },
+            "10-12": { name: "Dussehra", icon: "🏹" },
+            "10-20": { name: "Karwa Chauth", icon: "🌕" },
+            "10-29": { name: "Dhanteras", icon: "💰" },
+            "10-31": { name: "Diwali (Choti)", icon: "🪔" },
+            "11-01": { name: "Diwali", icon: "🪔" },
+            "11-03": { name: "Bhai Dooj", icon: "👫" },
+            "11-07": { name: "Chhath Puja (Day 1)", icon: "🌅" },
+            "11-08": { name: "Chhath Puja (Main)", icon: "🌅" },
+            "11-15": { name: "Guru Nanak Jayanti", icon: "ੴ" },
             "12-25": { name: "Christmas", icon: "🎄" }
         };
 
@@ -1954,8 +2044,27 @@ function runRecovery() {
                 if(isAttended) markers += `<div style="width:6px; height:6px; background:var(--accent-primary); border-radius:50%; position:absolute; bottom:4px; right:25%;"></div>`;
                 
                 let festivalHtml = "";
+                let combinedFestivals = [];
+                
+                // Indian Festivals
                 if(indianFestivals[mmdd]) {
-                    festivalHtml = `<div style="font-size:0.6rem; color:var(--warning); line-height:1; margin-top:2px;" title="${indianFestivals[mmdd].name}">${indianFestivals[mmdd].icon}</div>`;
+                    combinedFestivals.push({ name: indianFestivals[mmdd].name, icon: indianFestivals[mmdd].icon });
+                }
+                
+                // Custom Events
+                if(appData.calendarEvents) {
+                    appData.calendarEvents.forEach(evt => {
+                        if(evt.date === dateStr) {
+                            combinedFestivals.push({ name: evt.name, icon: evt.icon || '📌' });
+                        }
+                    });
+                }
+
+                if(combinedFestivals.length > 0) {
+                    let dispIcon = combinedFestivals[0].icon;
+                    if(combinedFestivals.length > 1) dispIcon += '+';
+                    let dispName = combinedFestivals.map(f => f.name).join(', ');
+                    festivalHtml = `<div style="font-size:0.6rem; color:var(--warning); line-height:1; margin-top:2px;" title="${dispName}">${dispIcon}</div>`;
                 }
 
                 grid.innerHTML += `<div style="${style}"><span>${d}</span>${festivalHtml}${markers}</div>`;
@@ -1965,20 +2074,57 @@ function runRecovery() {
             const holContainer = document.getElementById('holidayListContainer');
             const holLabel = document.getElementById('holidayMonthLabel');
             if(holContainer && holLabel) {
-                holLabel.innerText = `Holidays in ${monthNames[month]}`;
+                holLabel.innerText = `Holidays & Events in ${monthNames[month]}`;
                 const mStr = (month+1).toString().padStart(2, '0');
                 let hHtm = '';
+                
+                let monthEvents = [];
                 Object.keys(indianFestivals).forEach(key => {
                     if(key.startsWith(mStr)) {
-                        let f = indianFestivals[key];
-                        let dNum = key.split('-')[1];
-                        hHtm += `<div class="list-item" style="border-left: 3px solid var(--warning);">
-                                   <span><strong style="color:var(--accent-primary); font-size:1.1rem; margin-right:8px;">${dNum}</strong> ${f.icon} ${f.name}</span>
-                                 </div>`;
+                        monthEvents.push({ dateNum: parseInt(key.split('-')[1]), name: indianFestivals[key].name, icon: indianFestivals[key].icon });
                     }
                 });
-                if(hHtm === '') hHtm = `<p style="color:var(--text-muted); font-size:0.8rem; font-style:italic;">No major holidays this month.</p>`;
+                
+                if(appData.calendarEvents) {
+                    appData.calendarEvents.forEach(evt => {
+                        if(evt.date.startsWith(`${year}-${mStr}`)) {
+                            monthEvents.push({ dateNum: parseInt(evt.date.split('-')[2]), name: evt.name, icon: evt.icon || '📌', isCustom: true });
+                        }
+                    });
+                }
+                
+                monthEvents.sort((a,b) => a.dateNum - b.dateNum);
+                
+                monthEvents.forEach(evt => {
+                    let delBtn = evt.isCustom ? `<button onclick="deleteCalendarEvent('${year}-${mStr}-${evt.dateNum.toString().padStart(2,'0')}', '${evt.name}')" style="background:none; border:none; color:var(--danger); cursor:pointer; float:right;" title="Delete Event"><i class="fas fa-trash"></i></button>` : '';
+                    hHtm += `<div class="list-item" style="border-left: 3px solid var(--warning);">
+                               <span><strong style="color:var(--accent-primary); font-size:1.1rem; margin-right:8px;">${evt.dateNum.toString().padStart(2, '0')}</strong> ${evt.icon} ${evt.name}</span>
+                               ${delBtn}
+                             </div>`;
+                });
+
+                if(hHtm === '') hHtm = `<p style="color:var(--text-muted); font-size:0.8rem; font-style:italic;">No holidays or events this month.</p>`;
                 holContainer.innerHTML = hHtm;
+            }
+        }
+
+        function addCalendarEvent() {
+            if(!appData.calendarEvents) appData.calendarEvents = [];
+            const dt = prompt("Enter Event Date (YYYY-MM-DD):", `${currentCalYear}-${(currentCalMonth+1).toString().padStart(2,'0')}-`);
+            if(!dt) return;
+            const name = prompt("Enter Event Name:");
+            if(!name) return;
+            appData.calendarEvents.push({ date: dt, name: name, icon: '📌' });
+            silentSave();
+            renderDashboardCalendar();
+        }
+
+        function deleteCalendarEvent(date, name) {
+            if(!appData.calendarEvents) return;
+            if(confirm(`Delete event '${name}'?`)) {
+                appData.calendarEvents = appData.calendarEvents.filter(e => !(e.date === date && e.name === name));
+                silentSave();
+                renderDashboardCalendar();
             }
         }
         
