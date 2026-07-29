@@ -1143,6 +1143,8 @@
                     <div class="erp-module-card" onclick="openErpModule('calc')"><i class="fas fa-calculator"></i><br>Tech Calc</div>
                     <div class="erp-module-card" onclick="openErpModule('scicalc')"><i class="fas fa-square-root-alt"></i><br>Sci Calc</div>
                     <div class="erp-module-card" onclick="openErpModule('pvcalc')" style="border:1px solid var(--accent-primary);"><i class="fas fa-chart-line" style="color:var(--accent-primary);"></i><br>PV Calculator</div>
+                    <div class="erp-module-card" onclick="openErpModule('bidding')" style="border:1px solid var(--warning);"><i class="fas fa-file-invoice-dollar" style="color:var(--warning);"></i><br>Commercial</div>
+                    <div class="erp-module-card" onclick="openErpModule('contract')" style="border:1px solid #e74c3c;"><i class="fas fa-file-contract" style="color:#e74c3c;"></i><br>Contracts</div>
                     <div class="erp-module-card" onclick="openErpModule('crm')"><i class="fas fa-users"></i><br>Customer CRM</div>
                     <div class="erp-module-card" onclick="openErpModule('travel')"><i class="fas fa-plane"></i><br>Travel Mgr</div>
                     <div class="erp-module-card" onclick="openErpModule('vault')"><i class="fas fa-folder-open"></i><br>Doc Vault</div>
@@ -1718,6 +1720,112 @@ function runRecovery() {
                 </div>
                 
                 <div id="pv-result" style="margin-top:15px; background:rgba(0,0,0,0.2); padding:15px; border-radius:8px; display:none; border-left:4px solid var(--accent-primary);"></div>
+            ` },
+            bidding: { title: 'Bidding & Commercial Suite', icon: 'fa-file-invoice-dollar', html: `
+                <style>
+                    .bid-tab-btn { flex:1; background:#333; border:none; color:#aaa; padding:10px; cursor:pointer; font-weight:bold; }
+                    .bid-tab-btn.active { background:var(--accent-primary); color:#000; }
+                    .bid-section { display:none; margin-top:15px; }
+                    .bid-section.active { display:block; }
+                    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+                </style>
+                <div style="display:flex; border-radius:8px; overflow:hidden; margin-bottom:10px;">
+                    <button class="bid-tab-btn active" onclick="switchBidTab('loss')">Loss Capitalization</button>
+                    <button class="bid-tab-btn" onclick="switchBidTab('cost')">Landed Cost (FOR)</button>
+                </div>
+
+                <div id="bid-loss" class="bid-section active">
+                    <p style="font-size:0.85rem; color:#aaa; margin-bottom:15px;">Calculate the true L1 ranking cost of a transformer by capitalizing its losses.</p>
+                    <div class="grid-2">
+                        <div>
+                            <label style="font-size:0.8rem; color:#ccc;">Ex-Works Price (₹)</label>
+                            <input type="number" id="cap-price" class="input-field" placeholder="e.g. 5000000">
+                        </div>
+                        <div>
+                            <label style="font-size:0.8rem; color:#ccc;">Rating (MVA/kVA)</label>
+                            <input type="text" id="cap-rating" class="input-field" placeholder="Optional">
+                        </div>
+                        <div>
+                            <label style="font-size:0.8rem; color:#ccc;">No-Load Loss (kW)</label>
+                            <input type="number" id="cap-nll" class="input-field" placeholder="NLL in kW">
+                        </div>
+                        <div>
+                            <label style="font-size:0.8rem; color:#ccc;">No-Load Rate (₹/kW)</label>
+                            <input type="number" id="cap-nll-rate" class="input-field" placeholder="e.g. 350000">
+                        </div>
+                        <div>
+                            <label style="font-size:0.8rem; color:#ccc;">Load Loss (kW)</label>
+                            <input type="number" id="cap-ll" class="input-field" placeholder="LL in kW">
+                        </div>
+                        <div>
+                            <label style="font-size:0.8rem; color:#ccc;">Load Rate (₹/kW)</label>
+                            <input type="number" id="cap-ll-rate" class="input-field" placeholder="e.g. 150000">
+                        </div>
+                        <div>
+                            <label style="font-size:0.8rem; color:#ccc;">Cooling/Aux Loss (kW)</label>
+                            <input type="number" id="cap-aux" class="input-field" placeholder="Aux Loss (Optional)">
+                        </div>
+                        <div>
+                            <label style="font-size:0.8rem; color:#ccc;">Aux Rate (₹/kW)</label>
+                            <input type="number" id="cap-aux-rate" class="input-field" placeholder="e.g. 100000">
+                        </div>
+                    </div>
+                    <button class="btn" style="background:var(--accent-primary);" onclick="calculateCapitalization()">Calculate Capitalized Cost</button>
+                    <div id="cap-res" style="margin-top:15px; background:rgba(0,0,0,0.2); padding:15px; border-radius:8px; display:none; border-left:4px solid var(--warning);"></div>
+                </div>
+
+                <div id="bid-cost" class="bid-section">
+                    <p style="font-size:0.85rem; color:#aaa; margin-bottom:15px;">Calculate Final Landed Cost (FOR Destination) from Ex-Works.</p>
+                    <label style="font-size:0.8rem; color:#ccc;">Ex-Works Price (₹)</label>
+                    <input type="number" id="for-exw" class="input-field" placeholder="Basic Price">
+                    <div class="grid-2">
+                        <div>
+                            <label style="font-size:0.8rem; color:#ccc;">Freight (₹)</label>
+                            <input type="number" id="for-freight" class="input-field" placeholder="Lumpsum Freight">
+                        </div>
+                        <div>
+                            <label style="font-size:0.8rem; color:#ccc;">Insurance (%)</label>
+                            <input type="number" id="for-ins" class="input-field" value="0.1" placeholder="e.g. 0.1">
+                        </div>
+                    </div>
+                    <label style="font-size:0.8rem; color:#ccc;">GST (%)</label>
+                    <select id="for-gst" class="input-field">
+                        <option value="18">18% (Standard)</option>
+                        <option value="12">12%</option>
+                        <option value="5">5%</option>
+                        <option value="0">0%</option>
+                    </select>
+                    <button class="btn" style="background:var(--success);" onclick="calculateLandedCost()">Calculate FOR Price</button>
+                    <div id="for-res" style="margin-top:15px; background:rgba(0,0,0,0.2); padding:15px; border-radius:8px; display:none; border-left:4px solid var(--success);"></div>
+                </div>
+            ` },
+            contract: { title: 'Contract Management', icon: 'fa-file-contract', html: `
+                <p style="font-size:0.85rem; color:#aaa; margin-bottom:15px;">Calculate Liquidated Damages (LD) for delayed deliveries in EPC/Supply contracts.</p>
+                <label style="font-size:0.8rem; color:#ccc;">Total Contract / Supply Value (₹)</label>
+                <input type="number" id="ld-value" class="input-field" placeholder="e.g. 10000000">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                    <div>
+                        <label style="font-size:0.8rem; color:#ccc;">Delay in Weeks</label>
+                        <input type="number" id="ld-weeks" class="input-field" placeholder="e.g. 4.5">
+                    </div>
+                    <div>
+                        <label style="font-size:0.8rem; color:#ccc;">Part Week counted as?</label>
+                        <select id="ld-round" class="input-field">
+                            <option value="full">Full Week (Standard)</option>
+                            <option value="exact">Exact Pro-rata</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size:0.8rem; color:#ccc;">LD Rate per week (%)</label>
+                        <input type="number" id="ld-rate" class="input-field" value="0.5" placeholder="e.g. 0.5">
+                    </div>
+                    <div>
+                        <label style="font-size:0.8rem; color:#ccc;">Max LD Cap (%)</label>
+                        <input type="number" id="ld-cap" class="input-field" value="10" placeholder="e.g. 10">
+                    </div>
+                </div>
+                <button class="btn" style="background:#e74c3c;" onclick="calculateLD()">Calculate Penalty (LD)</button>
+                <div id="ld-res" style="margin-top:15px; background:rgba(0,0,0,0.2); padding:15px; border-radius:8px; display:none; border-left:4px solid #e74c3c;"></div>
             ` },
             crm: { title: 'Customer CRM', icon: 'fa-users', html: `<p>Manage Meetings, Calls, and Follow-ups.</p><button class="btn" style="background:var(--success); margin-bottom:10px;"><i class="fas fa-plus"></i> Add Customer / Log Interaction</button><br><label style="font-size:0.85rem; color:#ccc;">Smart Business Card Scanner:</label><input type="file" accept="image/*" class="input-field" style="margin-top:5px;" onchange="callSandeepErpAI('Extract Name, Phone, Email, and Company from this business card image.')"><div id="ai-response-crm" class="ai-chat-box" style="margin-top:15px; display:none;"></div><div style="margin-top:15px; color:var(--text-muted); font-size:0.85rem; text-align:center;">Integrated with main Contacts list.</div>` },
             travel: { title: 'Travel Manager', icon: 'fa-plane', html: `<p>Manage Train/Flight, Hotel, TA/DA.</p><button class="btn" style="background:var(--warning)"><i class="fas fa-plus"></i> Add Travel Plan</button><div style="margin-top:15px; color:var(--text-muted); font-size:0.85rem; text-align:center;">Integrated with Expenses. Full travel UI coming soon.</div>` },
@@ -2537,6 +2645,100 @@ function runRecovery() {
             let ws = XLSX.utils.aoa_to_sheet(wsData);
             XLSX.utils.book_append_sheet(wb, ws, "PV Report");
             XLSX.writeFile(wb, (data.std==='ieema'?'IEEMA':'POWERGRID')+'_PV_Report.xlsx');
+        };
+
+        window.switchBidTab = function(tab) {
+            document.querySelectorAll('.bid-tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.bid-section').forEach(sec => sec.classList.remove('active'));
+            if(tab === 'loss') {
+                document.querySelectorAll('.bid-tab-btn')[0].classList.add('active');
+                document.getElementById('bid-loss').classList.add('active');
+            } else {
+                document.querySelectorAll('.bid-tab-btn')[1].classList.add('active');
+                document.getElementById('bid-cost').classList.add('active');
+            }
+        };
+
+        window.calculateCapitalization = function() {
+            let p = parseFloat(document.getElementById('cap-price').value) || 0;
+            let nll = parseFloat(document.getElementById('cap-nll').value) || 0;
+            let nllRate = parseFloat(document.getElementById('cap-nll-rate').value) || 0;
+            let ll = parseFloat(document.getElementById('cap-ll').value) || 0;
+            let llRate = parseFloat(document.getElementById('cap-ll-rate').value) || 0;
+            let aux = parseFloat(document.getElementById('cap-aux').value) || 0;
+            let auxRate = parseFloat(document.getElementById('cap-aux-rate').value) || 0;
+
+            if(!p || !nll || !nllRate || !ll || !llRate) return alert("Please enter Ex-Works, No-Load & Load losses and rates.");
+
+            let capNLL = nll * nllRate;
+            let capLL = ll * llRate;
+            let capAux = aux * auxRate;
+            
+            let totalCapCost = p + capNLL + capLL + capAux;
+            
+            let res = document.getElementById('cap-res');
+            res.style.display = 'block';
+            res.innerHTML = `
+                <div style="font-size:0.9rem; color:#aaa; margin-bottom:10px;">Loss Capitalization Result</div>
+                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #444; padding-bottom:5px;"><span>Ex-Works:</span> <b>₹${p.toLocaleString('en-IN')}</b></div>
+                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #444; padding:5px 0;"><span>No-Load Cap Cost:</span> <b>₹${capNLL.toLocaleString('en-IN')}</b></div>
+                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #444; padding:5px 0;"><span>Load Cap Cost:</span> <b>₹${capLL.toLocaleString('en-IN')}</b></div>
+                ${aux > 0 ? `<div style="display:flex; justify-content:space-between; border-bottom:1px solid #444; padding:5px 0;"><span>Aux Cap Cost:</span> <b>₹${capAux.toLocaleString('en-IN')}</b></div>` : ''}
+                <div style="display:flex; justify-content:space-between; margin-top:10px; font-size:1.3rem; color:var(--warning);"><span>Total L1 Cost:</span> <b>₹${totalCapCost.toLocaleString('en-IN')}</b></div>
+            `;
+        };
+
+        window.calculateLandedCost = function() {
+            let exw = parseFloat(document.getElementById('for-exw').value) || 0;
+            if(!exw) return alert("Please enter Ex-Works Price.");
+            let freight = parseFloat(document.getElementById('for-freight').value) || 0;
+            let insPct = parseFloat(document.getElementById('for-ins').value) || 0;
+            let gstPct = parseFloat(document.getElementById('for-gst').value) || 0;
+
+            let insurance = exw * (insPct / 100);
+            let subtotal = exw + freight + insurance;
+            let gst = subtotal * (gstPct / 100);
+            let landed = subtotal + gst;
+
+            let res = document.getElementById('for-res');
+            res.style.display = 'block';
+            res.innerHTML = `
+                <div style="font-size:0.9rem; color:#aaa; margin-bottom:10px;">Landed Cost (FOR) Breakdown</div>
+                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #444; padding-bottom:5px;"><span>Ex-Works:</span> <b>₹${exw.toLocaleString('en-IN')}</b></div>
+                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #444; padding:5px 0;"><span>Freight:</span> <b>₹${freight.toLocaleString('en-IN')}</b></div>
+                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #444; padding:5px 0;"><span>Insurance (${insPct}%):</span> <b>₹${insurance.toLocaleString('en-IN')}</b></div>
+                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #444; padding:5px 0;"><span>Subtotal:</span> <b>₹${subtotal.toLocaleString('en-IN')}</b></div>
+                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #444; padding:5px 0; color:var(--info);"><span>GST (${gstPct}%):</span> <b>₹${gst.toLocaleString('en-IN')}</b></div>
+                <div style="display:flex; justify-content:space-between; margin-top:10px; font-size:1.3rem; color:var(--success);"><span>FOR Destination:</span> <b>₹${landed.toLocaleString('en-IN')}</b></div>
+            `;
+        };
+
+        window.calculateLD = function() {
+            let val = parseFloat(document.getElementById('ld-value').value) || 0;
+            let weeks = parseFloat(document.getElementById('ld-weeks').value) || 0;
+            let rate = parseFloat(document.getElementById('ld-rate').value) || 0;
+            let cap = parseFloat(document.getElementById('ld-cap').value) || 0;
+            let round = document.getElementById('ld-round').value;
+
+            if(!val || !weeks || !rate || !cap) return alert("Please fill all fields for LD calculation.");
+
+            let effectiveWeeks = round === 'full' ? Math.ceil(weeks) : weeks;
+            
+            let penaltyPct = effectiveWeeks * rate;
+            if(penaltyPct > cap) penaltyPct = cap;
+            
+            let ldAmount = val * (penaltyPct / 100);
+            
+            let res = document.getElementById('ld-res');
+            res.style.display = 'block';
+            res.innerHTML = `
+                <div style="font-size:0.9rem; color:#aaa; margin-bottom:10px;">Liquidated Damages (Penalty) Result</div>
+                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #444; padding-bottom:5px;"><span>Contract Value:</span> <b>₹${val.toLocaleString('en-IN')}</b></div>
+                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #444; padding:5px 0;"><span>Effective Delay:</span> <b>${effectiveWeeks} Weeks</b> (Mode: ${round})</div>
+                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #444; padding:5px 0;"><span>Applied Penalty Rate:</span> <b>${penaltyPct}%</b> (Cap: ${cap}%)</div>
+                <div style="display:flex; justify-content:space-between; margin-top:10px; font-size:1.3rem; color:#e74c3c;"><span>LD Deduction:</span> <b>₹${ldAmount.toLocaleString('en-IN')}</b></div>
+                <div style="display:flex; justify-content:space-between; margin-top:10px; font-size:1.1rem; color:var(--success);"><span>Payable Value:</span> <b>₹${(val - ldAmount).toLocaleString('en-IN')}</b></div>
+            `;
         };
 
         const todayStr = getLocalDateStr();
