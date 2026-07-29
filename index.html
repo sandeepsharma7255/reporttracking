@@ -1140,11 +1140,7 @@
                     <div class="erp-module-card" onclick="openErpModule('finder')"><i class="fas fa-search"></i><br>Clause Finder</div>
                     <div class="erp-module-card" onclick="openErpModule('compare')"><i class="fas fa-balance-scale"></i><br>Tender Compare</div>
                     <div class="erp-module-card" onclick="openErpModule('email')"><i class="fas fa-envelope-open-text"></i><br>AI Email Gen</div>
-                    <div class="erp-module-card" onclick="openErpModule('calc')"><i class="fas fa-calculator"></i><br>Tech Calc</div>
-                    <div class="erp-module-card" onclick="openErpModule('scicalc')"><i class="fas fa-square-root-alt"></i><br>Sci Calc</div>
-                    <div class="erp-module-card" onclick="openErpModule('pvcalc')" style="border:1px solid var(--accent-primary);"><i class="fas fa-chart-line" style="color:var(--accent-primary);"></i><br>PV Calculator</div>
-                    <div class="erp-module-card" onclick="openErpModule('bidding')" style="border:1px solid var(--warning);"><i class="fas fa-file-invoice-dollar" style="color:var(--warning);"></i><br>Commercial</div>
-                    <div class="erp-module-card" onclick="openErpModule('contract')" style="border:1px solid #e74c3c;"><i class="fas fa-file-contract" style="color:#e74c3c;"></i><br>Contracts</div>
+                    <div class="erp-module-card" onclick="openErpModule('ultimate')" style="border:2px solid var(--accent-primary); box-shadow: 0 0 15px rgba(0,229,255,0.3);"><i class="fas fa-rocket" style="color:var(--accent-primary); font-size:2rem;"></i><br><b style="font-size:1rem;">Ultimate Calculator</b></div>
                     <div class="erp-module-card" onclick="openErpModule('crm')"><i class="fas fa-users"></i><br>Customer CRM</div>
                     <div class="erp-module-card" onclick="openErpModule('travel')"><i class="fas fa-plane"></i><br>Travel Mgr</div>
                     <div class="erp-module-card" onclick="openErpModule('vault')"><i class="fas fa-folder-open"></i><br>Doc Vault</div>
@@ -1644,189 +1640,10 @@ function runRecovery() {
             finder: { title: 'Clause Finder', icon: 'fa-search', html: `<div style="display:flex; gap:5px;"><input type="text" id="clause-search" class="input-field" style="margin-bottom:0;" placeholder="Search Oil, Reactor, FAT, etc."><button class="btn" style="width:auto; padding:0 15px;" onclick="startVoiceRecognition('clause-search')"><i class="fas fa-microphone"></i></button></div><button class="btn" style="margin-top:5px;" onclick="callSandeepErpAI('Find clauses related to: ' + document.getElementById('clause-search').value)"><i class="fas fa-search"></i> Search Document</button><div id="ai-response-finder" class="ai-chat-box" style="margin-top:15px; display:none;"></div>` },
             compare: { title: 'Tender Comparison', icon: 'fa-balance-scale', html: `<p>Upload two tenders to compare.</p><input type="file" class="input-field" style="margin-bottom:5px;"><input type="file" class="input-field"><button class="btn" onclick="callSandeepErpAI('Compare these two tenders and highlight differences')"><i class="fas fa-compress-arrows-alt"></i> Compare</button><div id="ai-response-compare" class="ai-chat-box" style="margin-top:15px; display:none;"></div>` },
             email: { title: 'AI Email Generator', icon: 'fa-envelope-open-text', html: `<select id="email-type" class="input-field"><option>Customer follow-up</option><option>Document request</option><option>Inspection call</option><option>BG release</option><option>Payment reminder</option><option>Meeting MOM</option></select><textarea id="email-ctx" class="input-field" rows="3" placeholder="Context (e.g. met Sandeep yesterday for 220kV project)"></textarea><button class="btn" onclick="callSandeepErpAI('Write a professional email for: ' + document.getElementById('email-type').value + '. Context: ' + document.getElementById('email-ctx').value)"><i class="fas fa-pen"></i> Generate Email</button><div id="ai-response-email" class="ai-chat-box" style="margin-top:15px; display:none;"></div>` },
-            calc: { title: 'Technical Calculator', icon: 'fa-calculator', html: `
-                <select id="calc-type" class="input-field" onchange="updateCalcUI()">
-                    <option value="1ph">1-Phase Transformer Calculator</option>
-                    <option value="3ph">3-Phase Transformer Calculator</option>
-                    <option value="tx_loss">Transformer Loss & Efficiency</option>
-                    <option value="tx_curve">📊 Transformer Efficiency Curve</option>
-                    <option value="cap">Capacitor Bank Calculator</option>
-                    <option value="rx">Reactor Rating Calculator</option>
-                    <option value="vd">Voltage Drop Calculator</option>
-                    <option value="library">📚 Transformer Formula Library</option>
-                </select>
-                <div id="calc-inputs" style="margin:10px 0;"></div>
-                <button id="calc-btn" class="btn" onclick="calculateTech()"><i class="fas fa-equals"></i> Calculate</button>
-                <button id="pdf-btn" class="btn" style="background:#444; margin-top:5px; display:none;" onclick="generateCalcPDF()"><i class="fas fa-file-pdf"></i> Download PDF Report</button>
-                <div id="calc-result" style="margin-top:15px; font-weight:bold; color:var(--accent-primary); font-size:1.2rem; background:rgba(0,0,0,0.2); padding:10px; border-radius:8px; display:none;"></div>
-                <div id="calc-chart-container" style="margin-top:15px; display:none;"><canvas id="calcChart" style="max-height:300px; background:#fff; border-radius:8px; padding:10px;"></canvas></div>` },
-            pvcalc: { title: 'Price Variation (PV) Suite', icon: 'fa-chart-line', html: `
-                <style>
-                    .pv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top:10px; }
-                    .pv-head { font-size: 0.9rem; color: var(--accent-primary); font-weight: bold; border-bottom: 1px solid #444; padding-bottom:5px; margin-bottom:5px; text-align:center; }
-                </style>
-                
-                <div style="display:flex; gap:10px; margin-bottom:15px;">
-                    <select id="pv-std" class="input-field" style="flex:1; margin-bottom:0;" onchange="updatePvStandard()">
-                        <option value="pgcil">POWERGRID PV Standard</option>
-                        <option value="ieema">IEEMA PV Standard</option>
-                    </select>
-                    <select id="pv-type" class="input-field" style="flex:2; margin-bottom:0;" onchange="updatePvCoefficients()">
-                        <option value="pgcil_tx">Power Transformer (33kV to 400kV)</option>
-                        <option value="pgcil_rx">Reactor (>400kV)</option>
-                    </select>
-                </div>
-                
-                <div class="pv-grid" style="margin-bottom:15px;">
-                    <div><label style="font-size:0.8rem; color:#aaa;">Base Price (P0)</label><input type="number" id="pv-p0" class="input-field" placeholder="Amount (e.g. 100000)"></div>
-                    <div>
-                        <label style="font-size:0.8rem; color:#aaa;">Dates</label>
-                        <input type="text" id="pv-d0" class="input-field" placeholder="Base Date" style="margin-bottom:5px;">
-                        <input type="text" id="pv-d1" class="input-field" placeholder="Current Date">
-                    </div>
-                </div>
-                
-                <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; margin-bottom:15px;">
-                    <div id="pv-coeff-title" style="font-size:0.85rem; color:#ccc; text-align:center; margin-bottom:10px;">Standard Coefficients (Sum = 100%)</div>
-                    <div id="pv-coeffs" style="display:flex; flex-wrap:wrap; gap:10px; justify-content:space-around; font-size:0.85rem; color:var(--success);">
-                    </div>
-                </div>
-
-                <div class="pv-grid">
-                    <div>
-                        <div class="pv-head">Base Indices (0)</div>
-                        <input type="number" id="pv-cu0" class="input-field" placeholder="Copper (A0/C0)">
-                        <input type="number" id="pv-crgo0" class="input-field" placeholder="CRGO (B0/ES0)">
-                        <input type="number" id="pv-st0" class="input-field" placeholder="Steel (C0/IS0)">
-                        <input type="number" id="pv-ins0" class="input-field" placeholder="Insulation (D0/IM0)">
-                        <input type="number" id="pv-oil0" class="input-field" placeholder="Oil (TO0)" style="display:none; border-color:var(--warning);">
-                        <input type="number" id="pv-lab0" class="input-field" placeholder="Labour (L0/W0)">
-                    </div>
-                    <div>
-                        <div class="pv-head">Current Indices (1)</div>
-                        <input type="number" id="pv-cu1" class="input-field" placeholder="Copper (A1/C)">
-                        <input type="number" id="pv-crgo1" class="input-field" placeholder="CRGO (B1/ES)">
-                        <input type="number" id="pv-st1" class="input-field" placeholder="Steel (C1/IS)">
-                        <input type="number" id="pv-ins1" class="input-field" placeholder="Insulation (D1/IM)">
-                        <input type="number" id="pv-oil1" class="input-field" placeholder="Oil (TO)" style="display:none; border-color:var(--warning);">
-                        <input type="number" id="pv-lab1" class="input-field" placeholder="Labour (L1/W)">
-                    </div>
-                </div>
-                
-                <button class="btn" style="background:var(--accent-primary); margin-top:15px;" onclick="calculatePV()"><i class="fas fa-calculator"></i> Calculate PV</button>
-                <div style="display:flex; gap:10px; margin-top:10px;">
-                    <button id="pv-pdf-btn" class="btn" style="background:#e74c3c; flex:1; display:none;" onclick="generatePVPDF()"><i class="fas fa-file-pdf"></i> Export PDF</button>
-                    <button id="pv-excel-btn" class="btn" style="background:#27ae60; flex:1; display:none;" onclick="generatePVExcel()"><i class="fas fa-file-excel"></i> Export Excel</button>
-                </div>
-                
-                <div id="pv-result" style="margin-top:15px; background:rgba(0,0,0,0.2); padding:15px; border-radius:8px; display:none; border-left:4px solid var(--accent-primary);"></div>
-            ` },
-            bidding: { title: 'Bidding & Commercial Suite', icon: 'fa-file-invoice-dollar', html: `
-                <style>
-                    .bid-tab-btn { flex:1; background:#333; border:none; color:#aaa; padding:10px; cursor:pointer; font-weight:bold; }
-                    .bid-tab-btn.active { background:var(--accent-primary); color:#000; }
-                    .bid-section { display:none; margin-top:15px; }
-                    .bid-section.active { display:block; }
-                    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-                </style>
-                <div style="display:flex; border-radius:8px; overflow:hidden; margin-bottom:10px;">
-                    <button class="bid-tab-btn active" onclick="switchBidTab('loss')">Loss Capitalization</button>
-                    <button class="bid-tab-btn" onclick="switchBidTab('cost')">Landed Cost (FOR)</button>
-                </div>
-
-                <div id="bid-loss" class="bid-section active">
-                    <p style="font-size:0.85rem; color:#aaa; margin-bottom:15px;">Calculate the true L1 ranking cost of a transformer by capitalizing its losses.</p>
-                    <div class="grid-2">
-                        <div>
-                            <label style="font-size:0.8rem; color:#ccc;">Ex-Works Price (₹)</label>
-                            <input type="number" id="cap-price" class="input-field" placeholder="e.g. 5000000">
-                        </div>
-                        <div>
-                            <label style="font-size:0.8rem; color:#ccc;">Rating (MVA/kVA)</label>
-                            <input type="text" id="cap-rating" class="input-field" placeholder="Optional">
-                        </div>
-                        <div>
-                            <label style="font-size:0.8rem; color:#ccc;">No-Load Loss (kW)</label>
-                            <input type="number" id="cap-nll" class="input-field" placeholder="NLL in kW">
-                        </div>
-                        <div>
-                            <label style="font-size:0.8rem; color:#ccc;">No-Load Rate (₹/kW)</label>
-                            <input type="number" id="cap-nll-rate" class="input-field" placeholder="e.g. 350000">
-                        </div>
-                        <div>
-                            <label style="font-size:0.8rem; color:#ccc;">Load Loss (kW)</label>
-                            <input type="number" id="cap-ll" class="input-field" placeholder="LL in kW">
-                        </div>
-                        <div>
-                            <label style="font-size:0.8rem; color:#ccc;">Load Rate (₹/kW)</label>
-                            <input type="number" id="cap-ll-rate" class="input-field" placeholder="e.g. 150000">
-                        </div>
-                        <div>
-                            <label style="font-size:0.8rem; color:#ccc;">Cooling/Aux Loss (kW)</label>
-                            <input type="number" id="cap-aux" class="input-field" placeholder="Aux Loss (Optional)">
-                        </div>
-                        <div>
-                            <label style="font-size:0.8rem; color:#ccc;">Aux Rate (₹/kW)</label>
-                            <input type="number" id="cap-aux-rate" class="input-field" placeholder="e.g. 100000">
-                        </div>
-                    </div>
-                    <button class="btn" style="background:var(--accent-primary);" onclick="calculateCapitalization()">Calculate Capitalized Cost</button>
-                    <div id="cap-res" style="margin-top:15px; background:rgba(0,0,0,0.2); padding:15px; border-radius:8px; display:none; border-left:4px solid var(--warning);"></div>
-                </div>
-
-                <div id="bid-cost" class="bid-section">
-                    <p style="font-size:0.85rem; color:#aaa; margin-bottom:15px;">Calculate Final Landed Cost (FOR Destination) from Ex-Works.</p>
-                    <label style="font-size:0.8rem; color:#ccc;">Ex-Works Price (₹)</label>
-                    <input type="number" id="for-exw" class="input-field" placeholder="Basic Price">
-                    <div class="grid-2">
-                        <div>
-                            <label style="font-size:0.8rem; color:#ccc;">Freight (₹)</label>
-                            <input type="number" id="for-freight" class="input-field" placeholder="Lumpsum Freight">
-                        </div>
-                        <div>
-                            <label style="font-size:0.8rem; color:#ccc;">Insurance (%)</label>
-                            <input type="number" id="for-ins" class="input-field" value="0.1" placeholder="e.g. 0.1">
-                        </div>
-                    </div>
-                    <label style="font-size:0.8rem; color:#ccc;">GST (%)</label>
-                    <select id="for-gst" class="input-field">
-                        <option value="18">18% (Standard)</option>
-                        <option value="12">12%</option>
-                        <option value="5">5%</option>
-                        <option value="0">0%</option>
-                    </select>
-                    <button class="btn" style="background:var(--success);" onclick="calculateLandedCost()">Calculate FOR Price</button>
-                    <div id="for-res" style="margin-top:15px; background:rgba(0,0,0,0.2); padding:15px; border-radius:8px; display:none; border-left:4px solid var(--success);"></div>
-                </div>
-            ` },
-            contract: { title: 'Contract Management', icon: 'fa-file-contract', html: `
-                <p style="font-size:0.85rem; color:#aaa; margin-bottom:15px;">Calculate Liquidated Damages (LD) for delayed deliveries in EPC/Supply contracts.</p>
-                <label style="font-size:0.8rem; color:#ccc;">Total Contract / Supply Value (₹)</label>
-                <input type="number" id="ld-value" class="input-field" placeholder="e.g. 10000000">
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                    <div>
-                        <label style="font-size:0.8rem; color:#ccc;">Delay in Weeks</label>
-                        <input type="number" id="ld-weeks" class="input-field" placeholder="e.g. 4.5">
-                    </div>
-                    <div>
-                        <label style="font-size:0.8rem; color:#ccc;">Part Week counted as?</label>
-                        <select id="ld-round" class="input-field">
-                            <option value="full">Full Week (Standard)</option>
-                            <option value="exact">Exact Pro-rata</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label style="font-size:0.8rem; color:#ccc;">LD Rate per week (%)</label>
-                        <input type="number" id="ld-rate" class="input-field" value="0.5" placeholder="e.g. 0.5">
-                    </div>
-                    <div>
-                        <label style="font-size:0.8rem; color:#ccc;">Max LD Cap (%)</label>
-                        <input type="number" id="ld-cap" class="input-field" value="10" placeholder="e.g. 10">
-                    </div>
-                </div>
-                <button class="btn" style="background:#e74c3c;" onclick="calculateLD()">Calculate Penalty (LD)</button>
-                <div id="ld-res" style="margin-top:15px; background:rgba(0,0,0,0.2); padding:15px; border-radius:8px; display:none; border-left:4px solid #e74c3c;"></div>
-            ` },
+            
+            
+            
+            
             crm: { title: 'Customer CRM', icon: 'fa-users', html: `<p>Manage Meetings, Calls, and Follow-ups.</p><button class="btn" style="background:var(--success); margin-bottom:10px;"><i class="fas fa-plus"></i> Add Customer / Log Interaction</button><br><label style="font-size:0.85rem; color:#ccc;">Smart Business Card Scanner:</label><input type="file" accept="image/*" class="input-field" style="margin-top:5px;" onchange="callSandeepErpAI('Extract Name, Phone, Email, and Company from this business card image.')"><div id="ai-response-crm" class="ai-chat-box" style="margin-top:15px; display:none;"></div><div style="margin-top:15px; color:var(--text-muted); font-size:0.85rem; text-align:center;">Integrated with main Contacts list.</div>` },
             travel: { title: 'Travel Manager', icon: 'fa-plane', html: `<p>Manage Train/Flight, Hotel, TA/DA.</p><button class="btn" style="background:var(--warning)"><i class="fas fa-plus"></i> Add Travel Plan</button><div style="margin-top:15px; color:var(--text-muted); font-size:0.85rem; text-align:center;">Integrated with Expenses. Full travel UI coming soon.</div>` },
             vault: { title: 'Document Vault', icon: 'fa-folder-open', html: `<input type="text" class="input-field" placeholder="Search by Project Name, LOA, PO, BG..."><div style="display:flex; gap:10px; margin-top:10px;"><button class="btn" style="flex:1;"><i class="fas fa-upload"></i> Upload</button><button class="btn" style="flex:1; background:#444;"><i class="fas fa-search"></i> Search</button></div><div style="margin-top:15px; color:var(--text-muted); font-size:0.85rem; text-align:center;">Local vault storage initialized.</div>` },
@@ -1835,48 +1652,7 @@ function runRecovery() {
             alerts: { title: 'Smart Alerts', icon: 'fa-bell', html: `<div id="erpAlertsContainer"></div><button class="btn" style="background:var(--accent-primary); margin-top:15px;" onclick="addErpAlert()"><i class="fas fa-plus"></i> Add New Alert</button>` },
             ocr: { title: 'OCR + AI Summarizer', icon: 'fa-camera', html: `<p>Upload Tender Photo or Scanned PDF</p><input type="file" accept="image/*,application/pdf" class="input-field"><button class="btn" onclick="callSandeepErpAI('Perform OCR on this image and summarize the key points.')"><i class="fas fa-eye"></i> Scan & Summarize</button><div id="ai-response-ocr" class="ai-chat-box" style="margin-top:15px; display:none;"></div>` },
             assistant: { title: 'AI Assistant', icon: 'fa-magic', html: `<div style="position:relative;"><textarea id="assist-prompt" class="input-field" rows="3" placeholder="Ask anything (e.g. Translate to Hindi, generate meeting minutes, make excel table...)"></textarea><button style="position:absolute; right:10px; bottom:15px; background:none; border:none; color:var(--accent-primary); cursor:pointer; font-size:1.2rem;" onclick="startVoiceRecognition('assist-prompt')"><i class="fas fa-microphone"></i></button></div><button class="btn" onclick="callSandeepErpAI('Assistant Task: ' + document.getElementById('assist-prompt').value)"><i class="fas fa-bolt"></i> Execute</button><div id="ai-response-assistant" class="ai-chat-box" style="margin-top:15px; display:none;"></div>` },
-            scicalc: { title: 'Advanced Scientific Calculator', icon: 'fa-square-root-alt', html: `
-                <style>
-                .sci-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 15px; }
-                .sci-btn { background: #333; border: 1px solid #444; color: white; padding: 15px; font-size: 1.2rem; border-radius: 5px; cursor: pointer; transition: 0.2s; }
-                .sci-btn:hover { background: #444; }
-                .sci-btn.op { background: var(--accent-primary); color: #000; font-weight: bold; }
-                .sci-btn.func { background: #555; }
-                .sci-display { width: 100%; padding: 15px; font-size: 1.5rem; background: #111; color: #00E5FF; border: 1px solid #333; border-radius: 5px; text-align: right; margin-bottom: 10px; font-family: monospace; }
-                </style>
-                <input type="text" id="sci-display" class="sci-display" placeholder="0" onkeyup="if(event.key === 'Enter' || event.keyCode === 13) sciEval()">
-                <div class="sci-grid">
-                    <button class="sci-btn func" onclick="sciInput('sin(')">sin</button>
-                    <button class="sci-btn func" onclick="sciInput('cos(')">cos</button>
-                    <button class="sci-btn func" onclick="sciInput('tan(')">tan</button>
-                    <button class="sci-btn op" onclick="sciClear()">C</button>
-                    
-                    <button class="sci-btn func" onclick="sciInput('sqrt(')">√</button>
-                    <button class="sci-btn func" onclick="sciInput('^')">xʸ</button>
-                    <button class="sci-btn func" onclick="sciInput('log(')">log</button>
-                    <button class="sci-btn op" onclick="sciDel()">⌫</button>
-                    
-                    <button class="sci-btn" onclick="sciInput('7')">7</button>
-                    <button class="sci-btn" onclick="sciInput('8')">8</button>
-                    <button class="sci-btn" onclick="sciInput('9')">9</button>
-                    <button class="sci-btn op" onclick="sciInput('/')">÷</button>
-                    
-                    <button class="sci-btn" onclick="sciInput('4')">4</button>
-                    <button class="sci-btn" onclick="sciInput('5')">5</button>
-                    <button class="sci-btn" onclick="sciInput('6')">6</button>
-                    <button class="sci-btn op" onclick="sciInput('*')">×</button>
-                    
-                    <button class="sci-btn" onclick="sciInput('1')">1</button>
-                    <button class="sci-btn" onclick="sciInput('2')">2</button>
-                    <button class="sci-btn" onclick="sciInput('3')">3</button>
-                    <button class="sci-btn op" onclick="sciInput('-')">-</button>
-                    
-                    <button class="sci-btn" onclick="sciInput('.')">.</button>
-                    <button class="sci-btn" onclick="sciInput('0')">0</button>
-                    <button class="sci-btn func" onclick="sciInput(')')">)</button>
-                    <button class="sci-btn op" onclick="sciEval()">=</button>
-                </div>
-            ` }
+            
         };
 
         window.sciInput = function(val) {
@@ -1928,8 +1704,9 @@ function runRecovery() {
             
             modal.style.display = 'flex';
             
-            if(mod === 'calc') updateCalcUI();
-            if(mod === 'pvcalc') updatePvCoefficients();
+            if(mod === 'ultimate') {
+                switchUltimateTool();
+            }
             if(mod === 'dashboard') setTimeout(renderErpCharts, 100);
             if(mod === 'alerts') renderErpAlerts();
             if(mod === 'scicalc') {
@@ -2645,6 +2422,22 @@ function runRecovery() {
             let ws = XLSX.utils.aoa_to_sheet(wsData);
             XLSX.utils.book_append_sheet(wb, ws, "PV Report");
             XLSX.writeFile(wb, (data.std==='ieema'?'IEEMA':'POWERGRID')+'_PV_Report.xlsx');
+        };
+
+        
+        window.switchUltimateTool = function() {
+            let tool = document.getElementById('ultimate-selector').value;
+            document.querySelectorAll('.u-tool-section').forEach(sec => sec.style.display = 'none');
+            document.getElementById('u-' + tool).style.display = 'block';
+            
+            if(tool === 'calc') updateCalcUI();
+            if(tool === 'pvcalc') updatePvCoefficients();
+            if(tool === 'scicalc') {
+                setTimeout(() => {
+                    const sciDisp = document.getElementById('sci-display');
+                    if(sciDisp) sciDisp.focus();
+                }, 100);
+            }
         };
 
         window.switchBidTab = function(tab) {
