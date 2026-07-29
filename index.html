@@ -1658,7 +1658,7 @@ function runRecovery() {
                 .sci-btn.func { background: #555; }
                 .sci-display { width: 100%; padding: 15px; font-size: 1.5rem; background: #111; color: #00E5FF; border: 1px solid #333; border-radius: 5px; text-align: right; margin-bottom: 10px; font-family: monospace; }
                 </style>
-                <input type="text" id="sci-display" class="sci-display" placeholder="0" readonly>
+                <input type="text" id="sci-display" class="sci-display" placeholder="0" onkeydown="if(event.key === 'Enter') sciEval()">
                 <div class="sci-grid">
                     <button class="sci-btn func" onclick="sciInput('sin(')">sin</button>
                     <button class="sci-btn func" onclick="sciInput('cos(')">cos</button>
