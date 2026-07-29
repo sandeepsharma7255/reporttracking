@@ -308,11 +308,15 @@
             <li class="nav-item" onclick="switchTab('inquiries')"><i class="fas fa-industry"></i> Sales Inquiries</li>
             <li class="nav-item" onclick="switchTab('quotation')"><i class="fas fa-file-invoice-dollar"></i> Quotations</li>
 
-            <div style="color:var(--text-muted); font-size:0.75rem; text-transform:uppercase; letter-spacing:1px; margin: 15px 0 5px 15px; font-weight:800;">More Tools</div>
-            <li class="nav-item" onclick="switchTab('smart-travel')"><i class="fas fa-map-marked-alt"></i> Smart Maps & Travel <span style="background:#00E5FF;color:#000;font-size:0.6rem;padding:2px 5px;border-radius:10px;margin-left:auto;font-weight:bold;">NEW</span></li>
-            <li class="nav-item" onclick="switchTab('tender-erp')"><i class="fas fa-robot"></i> Tender & AI ERP <span style="background:#00E5FF;color:#000;font-size:0.6rem;padding:2px 5px;border-radius:10px;margin-left:auto;font-weight:bold;">NEW</span></li>
-            <li class="nav-item" onclick="switchTab('archives')"><i class="fas fa-archive"></i> Past Archives</li>
-            <li class="nav-item" onclick="switchTab('settings')"><i class="fas fa-cog"></i> Settings</li>
+            <li class="nav-item" onclick="toggleSubMenu('moreToolsMenu')">
+                <i class="fas fa-cubes"></i> More Tools <i class="fas fa-chevron-down" style="margin-left:auto; font-size:0.8rem;"></i>
+            </li>
+            <div id="moreToolsMenu" style="display: none; background: rgba(0,0,0,0.2); border-left: 2px solid var(--accent-primary); margin-left: 10px; padding-left: 5px;">
+                <li class="nav-item" onclick="switchTab('smart-travel')"><i class="fas fa-map-marked-alt"></i> Smart Maps & Travel <span style="background:#00E5FF;color:#000;font-size:0.6rem;padding:2px 5px;border-radius:10px;margin-left:auto;font-weight:bold;">NEW</span></li>
+                <li class="nav-item" onclick="switchTab('tender-erp')"><i class="fas fa-robot"></i> Tender & AI ERP <span style="background:#00E5FF;color:#000;font-size:0.6rem;padding:2px 5px;border-radius:10px;margin-left:auto;font-weight:bold;">NEW</span></li>
+                <li class="nav-item" onclick="switchTab('archives')"><i class="fas fa-archive"></i> Past Archives</li>
+                <li class="nav-item" onclick="switchTab('settings')"><i class="fas fa-cog"></i> Settings</li>
+            </div>
         </ul>
         <div style="margin-top: auto; text-align: center; font-size: 0.8rem; color: var(--accent-primary); font-weight: 800;">
             Developed by<br>Sandeep Kumar<br><span style="color:#aaa; font-size:0.6rem;">v1.3</span>
@@ -2044,6 +2048,7 @@ function runRecovery() {
             }
         }
         function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('active'); const ham = document.querySelector('.hamburger-container'); if(ham) ham.classList.toggle('change'); }
+        function toggleSubMenu(id) { const el = document.getElementById(id); el.style.display = el.style.display === 'none' ? 'block' : 'none'; }
         function showToast(msg) { const t = document.getElementById('toast'); document.getElementById('toastMsg').innerText = msg; t.style.bottom = '30px'; setTimeout(() => t.style.bottom = '-60px', 3000); }
         function switchTab(id) { document.querySelectorAll('.module-section, .nav-item').forEach(e => e.classList.remove('active')); document.getElementById(id).classList.add('active'); event.currentTarget.classList.add('active'); toggleSidebar(); }
         
