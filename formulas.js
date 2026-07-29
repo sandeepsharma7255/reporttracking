@@ -1,4 +1,4 @@
-const transformerFormulas = [
+window.transformerFormulas = [
     { id: 1, name: "Voltage Ratio", formula: "V1 / V2 = N1 / N2" },
     { id: 2, name: "Current Ratio", formula: "I1 / I2 = N2 / N1" },
     { id: 3, name: "Turns Ratio", formula: "K = N2 / N1 = V2 / V1" },

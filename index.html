@@ -2060,7 +2060,7 @@ function runRecovery() {
             let list = document.getElementById('formula-list');
             let q = query.toLowerCase();
             let html = '';
-            transformerFormulas.forEach(f => {
+            window.transformerFormulas.forEach(f => {
                 if(f.name.toLowerCase().includes(q) || f.formula.toLowerCase().includes(q)) {
                     html += `<div style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.05); cursor:pointer; transition:0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'" onclick="openDynamicSolver(${f.id})">
                         <div style="font-weight:bold; color:var(--accent-primary); font-size:0.9rem;">${f.id}. ${f.name} <span style="float:right; font-size:0.7rem; background:#444; padding:2px 5px; border-radius:3px;">Auto-Solve</span></div>
@@ -2076,7 +2076,7 @@ function runRecovery() {
         };
 
         window.openDynamicSolver = function(id) {
-            let f = transformerFormulas.find(x => x.id === id);
+            let f = window.transformerFormulas.find(x => x.id === id);
             if(!f) return;
             let parts = f.formula.split('=');
             if(parts.length < 2) { alert('Complex formula structure. Auto-solver coming soon.'); return; }
