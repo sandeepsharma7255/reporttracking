@@ -15,6 +15,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
+    <script src="formulas.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCnnsqwjRsfvFX9ZCvHUPRwi9EqP-Lqx50&libraries=places&callback=initGoogleAutocomplete" async defer></script>
 
     <style>
@@ -1640,7 +1641,19 @@ function runRecovery() {
             finder: { title: 'Clause Finder', icon: 'fa-search', html: `<div style="display:flex; gap:5px;"><input type="text" id="clause-search" class="input-field" style="margin-bottom:0;" placeholder="Search Oil, Reactor, FAT, etc."><button class="btn" style="width:auto; padding:0 15px;" onclick="startVoiceRecognition('clause-search')"><i class="fas fa-microphone"></i></button></div><button class="btn" style="margin-top:5px;" onclick="callSandeepErpAI('Find clauses related to: ' + document.getElementById('clause-search').value)"><i class="fas fa-search"></i> Search Document</button><div id="ai-response-finder" class="ai-chat-box" style="margin-top:15px; display:none;"></div>` },
             compare: { title: 'Tender Comparison', icon: 'fa-balance-scale', html: `<p>Upload two tenders to compare.</p><input type="file" class="input-field" style="margin-bottom:5px;"><input type="file" class="input-field"><button class="btn" onclick="callSandeepErpAI('Compare these two tenders and highlight differences')"><i class="fas fa-compress-arrows-alt"></i> Compare</button><div id="ai-response-compare" class="ai-chat-box" style="margin-top:15px; display:none;"></div>` },
             email: { title: 'AI Email Generator', icon: 'fa-envelope-open-text', html: `<select id="email-type" class="input-field"><option>Customer follow-up</option><option>Document request</option><option>Inspection call</option><option>BG release</option><option>Payment reminder</option><option>Meeting MOM</option></select><textarea id="email-ctx" class="input-field" rows="3" placeholder="Context (e.g. met Sandeep yesterday for 220kV project)"></textarea><button class="btn" onclick="callSandeepErpAI('Write a professional email for: ' + document.getElementById('email-type').value + '. Context: ' + document.getElementById('email-ctx').value)"><i class="fas fa-pen"></i> Generate Email</button><div id="ai-response-email" class="ai-chat-box" style="margin-top:15px; display:none;"></div>` },
-            calc: { title: 'Technical Calculator', icon: 'fa-calculator', html: `<select id="calc-type" class="input-field" onchange="updateCalcUI()"><option value="cap">Capacitor Bank Calculator</option><option value="rx">Reactor Rating Calculator</option><option value="tx">Transformer Loss Calculator</option><option value="pwr">Current/Power Calculator</option><option value="vd">Voltage Drop Calculator</option></select><div id="calc-inputs" style="margin:10px 0;"></div><button class="btn" onclick="calculateTech()"><i class="fas fa-equals"></i> Calculate</button><div id="calc-result" style="margin-top:15px; font-weight:bold; color:var(--accent-primary); font-size:1.2rem;"></div>` },
+            calc: { title: 'Technical Calculator', icon: 'fa-calculator', html: `
+                <select id="calc-type" class="input-field" onchange="updateCalcUI()">
+                    <option value="1ph">1-Phase Transformer Calculator</option>
+                    <option value="3ph">3-Phase Transformer Calculator</option>
+                    <option value="tx_loss">Transformer Loss & Efficiency</option>
+                    <option value="cap">Capacitor Bank Calculator</option>
+                    <option value="rx">Reactor Rating Calculator</option>
+                    <option value="vd">Voltage Drop Calculator</option>
+                    <option value="library">📚 Transformer Formula Library</option>
+                </select>
+                <div id="calc-inputs" style="margin:10px 0;"></div>
+                <button id="calc-btn" class="btn" onclick="calculateTech()"><i class="fas fa-equals"></i> Calculate</button>
+                <div id="calc-result" style="margin-top:15px; font-weight:bold; color:var(--accent-primary); font-size:1.2rem;"></div>` },
             crm: { title: 'Customer CRM', icon: 'fa-users', html: `<p>Manage Meetings, Calls, and Follow-ups.</p><button class="btn" style="background:var(--success); margin-bottom:10px;"><i class="fas fa-plus"></i> Add Customer / Log Interaction</button><br><label style="font-size:0.85rem; color:#ccc;">Smart Business Card Scanner:</label><input type="file" accept="image/*" class="input-field" style="margin-top:5px;" onchange="callSandeepErpAI('Extract Name, Phone, Email, and Company from this business card image.')"><div id="ai-response-crm" class="ai-chat-box" style="margin-top:15px; display:none;"></div><div style="margin-top:15px; color:var(--text-muted); font-size:0.85rem; text-align:center;">Integrated with main Contacts list.</div>` },
             travel: { title: 'Travel Manager', icon: 'fa-plane', html: `<p>Manage Train/Flight, Hotel, TA/DA.</p><button class="btn" style="background:var(--warning)"><i class="fas fa-plus"></i> Add Travel Plan</button><div style="margin-top:15px; color:var(--text-muted); font-size:0.85rem; text-align:center;">Integrated with Expenses. Full travel UI coming soon.</div>` },
             vault: { title: 'Document Vault', icon: 'fa-folder-open', html: `<input type="text" class="input-field" placeholder="Search by Project Name, LOA, PO, BG..."><div style="display:flex; gap:10px; margin-top:10px;"><button class="btn" style="flex:1;"><i class="fas fa-upload"></i> Upload</button><button class="btn" style="flex:1; background:#444;"><i class="fas fa-search"></i> Search</button></div><div style="margin-top:15px; color:var(--text-muted); font-size:0.85rem; text-align:center;">Local vault storage initialized.</div>` },
@@ -2014,41 +2027,83 @@ function runRecovery() {
         function updateCalcUI() {
             let type = document.getElementById('calc-type').value;
             let div = document.getElementById('calc-inputs');
-            if(type === 'cap') div.innerHTML = '<input type="number" id="c-kvar" class="input-field" placeholder="Target kVAR"><input type="number" id="c-v" class="input-field" placeholder="Voltage (V)">';
+            let btn = document.getElementById('calc-btn');
+            if(btn) btn.style.display = 'block';
+            document.getElementById('calc-result').innerHTML = '';
+            
+            if(type === '1ph') div.innerHTML = '<input type="number" id="ph1-v" class="input-field" placeholder="Voltage (V)"><input type="number" id="ph1-i" class="input-field" placeholder="Current (A)"><input type="number" id="ph1-pf" class="input-field" placeholder="Power Factor (0-1)">';
+            else if(type === '3ph') div.innerHTML = '<input type="number" id="ph3-vl" class="input-field" placeholder="Line Voltage VL (V)"><input type="number" id="ph3-il" class="input-field" placeholder="Line Current IL (A)"><input type="number" id="ph3-pf" class="input-field" placeholder="Power Factor (0-1)">';
+            else if(type === 'tx_loss') div.innerHTML = '<input type="number" id="t-nl" class="input-field" placeholder="No Load Loss / Core Loss (W)"><input type="number" id="t-ll" class="input-field" placeholder="Full Load Cu Loss (W)"><input type="number" id="t-ld" class="input-field" placeholder="Load Percentage (%)">';
+            else if(type === 'cap') div.innerHTML = '<input type="number" id="c-kvar" class="input-field" placeholder="Target kVAR"><input type="number" id="c-v" class="input-field" placeholder="Voltage (V)">';
             else if(type === 'rx') div.innerHTML = '<input type="number" id="r-v" class="input-field" placeholder="System Voltage (kV)"><input type="number" id="r-sc" class="input-field" placeholder="Short Circuit MVA">';
-            else if(type === 'tx') div.innerHTML = '<input type="number" id="t-nl" class="input-field" placeholder="No Load Loss (W)"><input type="number" id="t-ll" class="input-field" placeholder="Load Loss (W)"><input type="number" id="t-ld" class="input-field" placeholder="Load % (0-100)">';
-            else if(type === 'pwr') div.innerHTML = '<input type="number" id="p-v" class="input-field" placeholder="Voltage (V)"><input type="number" id="p-i" class="input-field" placeholder="Current (A)"><input type="number" id="p-pf" class="input-field" placeholder="Power Factor (0-1)">';
             else if(type === 'vd') div.innerHTML = '<input type="number" id="v-i" class="input-field" placeholder="Current (A)"><input type="number" id="v-r" class="input-field" placeholder="Resistance (Ohms)"><input type="number" id="v-l" class="input-field" placeholder="Length (m)">';
+            else if(type === 'library') {
+                if(btn) btn.style.display = 'none';
+                div.innerHTML = `<input type="text" id="formula-search" class="input-field" placeholder="Search formulas (e.g., Power, Loss)..." onkeyup="searchFormulas()"><div id="formula-list" style="max-height:400px; overflow-y:auto; border:1px solid var(--card-border); padding:10px; border-radius:8px;"></div>`;
+                renderFormulas('');
+            }
         }
+
+        window.renderFormulas = function(query) {
+            if(!window.transformerFormulas) return;
+            let list = document.getElementById('formula-list');
+            let q = query.toLowerCase();
+            let html = '';
+            transformerFormulas.forEach(f => {
+                if(f.name.toLowerCase().includes(q) || f.formula.toLowerCase().includes(q)) {
+                    html += `<div style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <div style="font-weight:bold; color:var(--accent-primary); font-size:0.9rem;">${f.id}. ${f.name}</div>
+                        <div style="font-family:monospace; color:#fff; font-size:1.1rem; margin-top:5px; word-wrap:break-word;">${f.formula}</div>
+                    </div>`;
+                }
+            });
+            list.innerHTML = html;
+        };
+        window.searchFormulas = function() {
+            renderFormulas(document.getElementById('formula-search').value);
+        };
 
         function calculateTech() {
             let type = document.getElementById('calc-type').value;
             let res = document.getElementById('calc-result');
             try {
-                if(type === 'cap') {
-                    let kvar = parseFloat(document.getElementById('c-kvar').value);
-                    let v = parseFloat(document.getElementById('c-v').value);
-                    let c = (kvar * 1000) / (2 * Math.PI * 50 * v * v);
-                    res.innerText = 'Capacitance: ' + (c * 1000000).toFixed(2) + ' μF';
+                if(type === '1ph') {
+                    let v = parseFloat(document.getElementById('ph1-v').value);
+                    let i = parseFloat(document.getElementById('ph1-i').value);
+                    let pf = parseFloat(document.getElementById('ph1-pf').value);
+                    let kva = (v * i) / 1000;
+                    let kw = kva * pf;
+                    res.innerHTML = `kVA: ${kva.toFixed(2)}<br>kW (Active): ${kw.toFixed(2)}`;
                 }
-                else if(type === 'tx') {
+                else if(type === '3ph') {
+                    let v = parseFloat(document.getElementById('ph3-vl').value);
+                    let i = parseFloat(document.getElementById('ph3-il').value);
+                    let pf = parseFloat(document.getElementById('ph3-pf').value);
+                    let kva = (Math.sqrt(3) * v * i) / 1000;
+                    let kw = kva * pf;
+                    let kvar = kva * Math.sin(Math.acos(pf));
+                    res.innerHTML = `kVA: ${kva.toFixed(2)}<br>kW: ${kw.toFixed(2)}<br>kVAR: ${kvar.toFixed(2)}`;
+                }
+                else if(type === 'tx_loss') {
                     let nl = parseFloat(document.getElementById('t-nl').value);
                     let ll = parseFloat(document.getElementById('t-ll').value);
                     let ld = parseFloat(document.getElementById('t-ld').value) / 100;
                     let tot = nl + (ll * ld * ld);
-                    res.innerText = 'Total Loss at ' + (ld*100) + '% load: ' + tot.toFixed(2) + ' W';
+                    res.innerHTML = `Copper Loss at ${ld*100}% load: ${(ll*ld*ld).toFixed(2)} W<br>Total Loss: ${tot.toFixed(2)} W`;
                 }
-                else if(type === 'pwr') {
-                    let v = parseFloat(document.getElementById('p-v').value);
-                    let i = parseFloat(document.getElementById('p-i').value);
-                    let pf = parseFloat(document.getElementById('p-pf').value);
-                    let p = Math.sqrt(3) * v * i * pf / 1000;
-                    res.innerText = '3-Phase Power: ' + p.toFixed(2) + ' kW';
+                else if(type === 'cap') {
+                    let kvar = parseFloat(document.getElementById('c-kvar').value);
+                    let v = parseFloat(document.getElementById('c-v').value);
+                    let c = (kvar * 1000) / (2 * Math.PI * 50 * v * v);
+                    res.innerHTML = 'Capacitance: ' + (c * 1000000).toFixed(2) + ' μF';
                 }
-                else {
-                    res.innerText = 'Formula processing...';
+                else if(type === 'rx') {
+                    res.innerHTML = 'Formula processing...';
                 }
-            } catch(e) { res.innerText = 'Invalid Input'; }
+                else if(type === 'vd') {
+                    res.innerHTML = 'Formula processing...';
+                }
+            } catch(e) { res.innerHTML = 'Invalid Input'; }
         }
 
         const todayStr = getLocalDateStr();
