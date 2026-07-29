@@ -275,6 +275,18 @@
         </div>
     </div>
 
+    <!-- SMART TOOL MODAL -->
+    <div id="smartToolModal" class="overlay-screen" style="display: none; background: rgba(0,0,0,0.95); z-index: 40000; align-items: center; justify-content: center; padding: 20px;">
+        <div class="card" style="width: 100%; max-width: 800px; max-height: 90vh; overflow-y: auto; position: relative; border: 1px solid var(--accent-primary); box-shadow: 0 0 20px rgba(0,229,255,0.2);">
+            <button onclick="closeSmartTool()" style="position: absolute; top: 15px; right: 15px; background: var(--danger); border: none; color: white; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; z-index: 10; transition: 0.3s;" title="Close Tool">
+                <i class="fas fa-times"></i>
+            </button>
+            <div id="smartToolContent" style="margin-top: 15px;">
+                <!-- Tool content injected here -->
+            </div>
+        </div>
+    </div>
+
     <div id="toast"><i class="fas fa-check-circle"></i> <span id="toastMsg">Synced successfully!</span></div>
     <div class="overlay-bg" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
@@ -1125,13 +1137,6 @@
                 </div>
             </div>
 
-            <!-- Module Container -->
-            <div class="card" id="erp-module-container" style="min-height:400px; display:flex; flex-direction:column;">
-                <div style="text-align:center; color:var(--text-muted); margin-top:100px;">
-                    <i class="fas fa-arrow-up" style="font-size:2rem; margin-bottom:10px;"></i>
-                    <p>Select a module from above to begin.</p>
-                </div>
-            </div>
         </section>
 
         <style>
@@ -1632,17 +1637,26 @@ function runRecovery() {
         };
 
         function openErpModule(mod) {
-            const container = document.getElementById('erp-module-container');
+            const modal = document.getElementById('smartToolModal');
+            const content = document.getElementById('smartToolContent');
             const data = erpModules[mod];
-            container.innerHTML = `
+            
+            content.innerHTML = `
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">
-                    <h3 style="margin:0; color:var(--accent-primary);"><i class="fas ${data.icon}"></i> ${data.title}</h3>
+                    <h2 style="margin:0; color:var(--accent-primary);"><i class="fas ${data.icon}"></i> ${data.title}</h2>
                 </div>
                 ${data.html}
             `;
+            
+            modal.style.display = 'flex';
+            
             if(mod === 'calc') updateCalcUI();
             if(mod === 'dashboard') setTimeout(renderErpCharts, 100);
             if(mod === 'alerts') renderErpAlerts();
+        }
+
+        function closeSmartTool() {
+            document.getElementById('smartToolModal').style.display = 'none';
         }
 
         function renderErpAlerts() {
