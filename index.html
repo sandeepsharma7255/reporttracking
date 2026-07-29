@@ -4157,8 +4157,36 @@ Update: ${r.text}
                 });
             }
         }
-    </script>
 
+        function autoFetchLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    
+                    if (typeof google === 'object' && typeof google.maps === 'object') {
+                        const geocoder = new google.maps.Geocoder();
+                        geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+                            if (status === 'OK' && results[0]) {
+                                const currentAddress = results[0].formatted_address;
+                                const mapOrigin = document.getElementById('mapOrigin');
+                                if (mapOrigin && !mapOrigin.value) {
+                                    mapOrigin.value = currentAddress;
+                                }
+                            }
+                        });
+                    }
+                }, (error) => {
+                    console.log("Geolocation error:", error);
+                }, { enableHighAccuracy: true });
+            }
+        }
+        
+        window.addEventListener('load', () => {
+            setTimeout(autoFetchLocation, 1000); // Wait 1s so it doesn't block critical rendering
+        });
+
+    </script>
     <!-- JARVIS FLOATING ORB -->
     <div id="jarvisOrb" onclick="toggleJarvis()" style="position:fixed; bottom:30px; right:30px; width:60px; height:60px; border-radius:50%; background:radial-gradient(circle, var(--accent-secondary), var(--accent-primary)); box-shadow: 0 0 20px var(--accent-primary); display:flex; justify-content:center; align-items:center; z-index:9000; cursor:pointer; transition:0.3s;">
         <i class="fas fa-microphone" style="color:#000; font-size:1.5rem;"></i>
