@@ -293,6 +293,8 @@
             </div>
             
             <div style="display:flex; align-items:center; gap:15px;">
+                <button class="btn" id="recoveryBtn" onclick="runRecovery()" style="width:auto; padding:8px 10px; font-size:1rem; background: transparent; border: none; color: var(--danger); margin-top:0;" title="Restore Missing Data"><i class="fas fa-database"></i></button>
+                
                 <button class="btn" style="width:auto; padding:8px 15px; font-size:1rem; background: transparent; border: none; color: var(--accent-primary); margin-top:0;" onclick="toggleTheme()" title="Toggle Theme">
                     <i class="fas fa-moon" id="themeIcon"></i>
                 </button>
@@ -305,7 +307,6 @@
 
         <!-- MODULE 1: DASHBOARD -->
         <section id="dashboard" class="module-section active">
-            <button id="recoveryBtn" onclick="runRecovery()" style="background: red; color: white; padding: 15px; width: 100%; border: none; border-radius: 10px; font-weight: bold; margin-bottom: 20px; font-size: 1.2rem; cursor: pointer;">🚨 CLICK HERE TO RESTORE ALL LOST DATA 🚨</button>
             <div id="smartAlertsContainer" style="margin-bottom: 20px;"></div>
             
             <div class="dashboard-banner">
