@@ -1660,7 +1660,42 @@ function runRecovery() {
             
             crm: { title: 'Customer CRM', icon: 'fa-users', html: `<p>Manage Meetings, Calls, and Follow-ups.</p><button class="btn" style="background:var(--success); margin-bottom:10px;"><i class="fas fa-plus"></i> Add Customer / Log Interaction</button><br><label style="font-size:0.85rem; color:#ccc;">Smart Business Card Scanner:</label><input type="file" accept="image/*" class="input-field" style="margin-top:5px;" onchange="callSandeepErpAI('Extract Name, Phone, Email, and Company from this business card image.')"><div id="ai-response-crm" class="ai-chat-box" style="margin-top:15px; display:none;"></div><div style="margin-top:15px; color:var(--text-muted); font-size:0.85rem; text-align:center;">Integrated with main Contacts list.</div>` },
             travel: { title: 'Travel Manager', icon: 'fa-plane', html: `<p>Manage Train/Flight, Hotel, TA/DA.</p><button class="btn" style="background:var(--warning)"><i class="fas fa-plus"></i> Add Travel Plan</button><div style="margin-top:15px; color:var(--text-muted); font-size:0.85rem; text-align:center;">Integrated with Expenses. Full travel UI coming soon.</div>` },
-            vault: { title: 'Document Vault', icon: 'fa-folder-open', html: `<input type="text" class="input-field" placeholder="Search by Project Name, LOA, PO, BG..."><div style="display:flex; gap:10px; margin-top:10px;"><button class="btn" style="flex:1;"><i class="fas fa-upload"></i> Upload</button><button class="btn" style="flex:1; background:#444;"><i class="fas fa-search"></i> Search</button></div><div style="margin-top:15px; color:var(--text-muted); font-size:0.85rem; text-align:center;">Local vault storage initialized.</div>` },
+            vault: { title: 'Personal Vault', icon: 'fa-lock', html: `
+    <style>
+        .v-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; margin-top: 20px; }
+        .v-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 12px; position: relative; transition: var(--transition); backdrop-filter: blur(10px); }
+        .v-card:hover { transform: translateY(-3px); box-shadow: var(--glow); background: rgba(255,255,255,0.08); border-color: var(--accent-primary); }
+        .v-tag { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; margin-bottom: 8px; background: var(--accent-primary); color: #000; }
+        .v-tag.work { background: #e74c3c; color: #fff; }
+        .v-tag.study { background: #3498db; color: #fff; }
+        .v-tag.important { background: #f1c40f; color: #000; }
+        .v-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; color: #fff; }
+        .v-content { font-size: 0.85rem; color: var(--text-muted); word-break: break-all; white-space: pre-wrap; margin-bottom: 15px; }
+        .v-del-btn { position: absolute; top: 10px; right: 10px; background: transparent; border: none; color: var(--danger); cursor: pointer; opacity: 0; transition: 0.2s; font-size: 1rem; }
+        .v-card:hover .v-del-btn { opacity: 1; }
+        .v-del-btn:hover { transform: scale(1.2); }
+        .v-copy-btn { width: 100%; padding: 8px; background: rgba(255,255,255,0.1); border: none; border-radius: 4px; color: var(--accent-primary); cursor: pointer; transition: 0.2s; font-size: 0.8rem; font-weight: bold; }
+        .v-copy-btn:hover { background: var(--accent-primary); color: #000; }
+    </style>
+    
+    <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px;">
+        <h4 style="margin-bottom: 10px;"><i class="fas fa-plus-circle"></i> Add New Link / Note</h4>
+        <input type="text" id="v-title" class="input-field" placeholder="Title (e.g. My Portfolio)">
+        <textarea id="v-content" class="input-field" placeholder="Paste link or write your secret note here..." style="min-height:60px; margin-bottom:10px;"></textarea>
+        <div style="display:flex; gap:10px;">
+            <select id="v-tag" class="input-field" style="flex:1; margin-bottom:0;">
+                <option value="important">Important</option>
+                <option value="work">Work</option>
+                <option value="study">Study</option>
+                <option value="personal">Personal</option>
+            </select>
+            <button class="btn" style="flex:1; margin-top:0;" onclick="saveVaultItem()"><i class="fas fa-save"></i> Save to Vault</button>
+        </div>
+    </div>
+    
+    <input type="text" id="v-search" class="input-field" placeholder="Search your vault..." onkeyup="renderVaultItems()">
+    <div id="v-items-container" class="v-grid"></div>
+` },
             chat: { title: 'AI Tender Chat', icon: 'fa-comments', html: `<div id="ai-chat-history" class="ai-chat-box"></div><div style="display:flex; gap:5px;"><input type="text" id="ai-chat-input" class="input-field" style="margin-bottom:0;" placeholder="e.g. BG kitna hai? Delivery kab hai?"><button class="btn" style="width:auto; padding:0 15px; background:#444;" onclick="startVoiceRecognition('ai-chat-input')"><i class="fas fa-microphone"></i></button><button class="btn" style="width:auto; padding:0 15px;" onclick="sendAiChat()"><i class="fas fa-paper-plane"></i></button></div>` },
             dashboard: { title: 'Daily Dashboard', icon: 'fa-tachometer-alt', html: `<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;"><strong>Meetings Today</strong><br><span style="font-size:1.5rem; color:var(--accent-primary);">0</span></div><div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;"><strong>Pending Bids</strong><br><span style="font-size:1.5rem; color:var(--danger);">2</span></div></div><div style="margin-top:15px;"><canvas id="erpChart" style="max-height:200px;"></canvas></div><div style="margin-top:15px; color:var(--text-muted); font-size:0.85rem; text-align:center;">Live metrics sync initialized.</div>` },
             alerts: { title: 'Smart Alerts', icon: 'fa-bell', html: `<div id="erpAlertsContainer"></div><button class="btn" style="background:var(--accent-primary); margin-top:15px;" onclick="addErpAlert()"><i class="fas fa-plus"></i> Add New Alert</button>` },
@@ -2020,6 +2055,7 @@ function runRecovery() {
             }
             if(mod === 'dashboard') setTimeout(renderErpCharts, 100);
             if(mod === 'whiteboard') setTimeout(initWhiteboard, 200);
+            if(mod === 'vault') setTimeout(renderVaultItems, 100);
             if(mod === 'alerts') renderErpAlerts();
             if(mod === 'scicalc') {
                 setTimeout(() => {
@@ -3045,6 +3081,77 @@ function runRecovery() {
             div.className = 'g-task-row';
             div.innerHTML = `<div class="g-task-name">${name}</div><div class="g-track"><div class="g-bar" style="left:0%; width:20%; background:#2ecc71;">New Task</div></div>`;
             container.appendChild(div);
+        };
+
+        
+        // --- PERSONAL VAULT LOGIC ---
+        window.saveVaultItem = function() {
+            const title = document.getElementById('v-title').value.trim();
+            const content = document.getElementById('v-content').value.trim();
+            const tag = document.getElementById('v-tag').value;
+            
+            if(!title || !content) return showToast("Please enter title and content!");
+            
+            let vaultData = JSON.parse(localStorage.getItem('erp_vault') || '[]');
+            const newItem = {
+                id: Date.now(),
+                title: title,
+                content: content,
+                tag: tag,
+                date: new Date().toLocaleDateString()
+            };
+            
+            vaultData.unshift(newItem); // Add to beginning
+            localStorage.setItem('erp_vault', JSON.stringify(vaultData));
+            
+            document.getElementById('v-title').value = '';
+            document.getElementById('v-content').value = '';
+            
+            showToast("Saved to Vault!");
+            renderVaultItems();
+        };
+        
+        window.deleteVaultItem = function(id) {
+            if(!confirm("Delete this item?")) return;
+            let vaultData = JSON.parse(localStorage.getItem('erp_vault') || '[]');
+            vaultData = vaultData.filter(item => item.id !== id);
+            localStorage.setItem('erp_vault', JSON.stringify(vaultData));
+            renderVaultItems();
+            showToast("Item Deleted!");
+        };
+        
+        window.copyVaultItem = function(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Copied to clipboard!");
+            });
+        };
+        
+        window.renderVaultItems = function() {
+            const container = document.getElementById('v-items-container');
+            if(!container) return; // Not open
+            
+            const searchQ = (document.getElementById('v-search').value || '').toLowerCase();
+            let vaultData = JSON.parse(localStorage.getItem('erp_vault') || '[]');
+            
+            if(searchQ) {
+                vaultData = vaultData.filter(i => i.title.toLowerCase().includes(searchQ) || i.content.toLowerCase().includes(searchQ) || i.tag.toLowerCase().includes(searchQ));
+            }
+            
+            if(vaultData.length === 0) {
+                container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; color:#666; padding:30px;">Vault is empty. Add a note above!</div>`;
+                return;
+            }
+            
+            container.innerHTML = vaultData.map(item => `
+                <div class="v-card">
+                    <button class="v-del-btn" onclick="deleteVaultItem(${item.id})"><i class="fas fa-trash"></i></button>
+                    <div class="v-tag ${item.tag}">${item.tag.toUpperCase()}</div>
+                    <div class="v-title">${item.title}</div>
+                    <div class="v-content">${item.content}</div>
+                    <div style="font-size:0.7rem; color:#555; margin-bottom:8px;"><i class="far fa-clock"></i> ${item.date}</div>
+                    <button class="v-copy-btn" onclick="copyVaultItem(\`${item.content.replace(/`/g, "'")}\`)"><i class="fas fa-copy"></i> Copy Content</button>
+                </div>
+            `).join('');
         };
 
         const todayStr = getLocalDateStr();
