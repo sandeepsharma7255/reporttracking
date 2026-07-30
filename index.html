@@ -94,6 +94,32 @@
         .sidebar.open { left: 0; }
         .brand { display: flex; align-items: center; gap: 15px; margin-bottom: 2rem; padding-left: 10px; }
         .brand i { font-size: 1.8rem; color: var(--accent-primary); }
+
+        .nav-category {
+            padding: 10px 12px;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            font-size: 0.75rem;
+            color: var(--accent-primary);
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 3px solid var(--accent-primary);
+            background: linear-gradient(90deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0) 100%);
+            border-radius: 0 6px 6px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        .nav-category i {
+            font-size: 1rem;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 5px;
+            border-radius: 4px;
+        }
+
         .nav-item { padding: 12px 15px; border-radius: 8px; cursor: pointer; transition: var(--transition); display: flex; align-items: center; gap: 15px; color: var(--text-muted); margin-bottom: 5px; font-size: 0.95rem; font-weight: 600; }
         .nav-item:hover, .nav-item.active { background: var(--card-bg); color: var(--accent-primary); border: 1px solid var(--card-border); box-shadow: inset 4px 0 0 var(--accent-primary); }
         .nav-menu { flex: 1; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; -ms-overflow-style: none; padding-right: 5px; }
@@ -318,31 +344,33 @@
             <h2 style="font-size: 1.3rem; margin-left: 10px;">CORP HUB</h2>
             <i class="fas fa-times menu-toggle" style="margin-left:auto; display:block;" onclick="toggleSidebar()"></i>
         </div>
-                <ul class="nav-menu" style="list-style: none;">
-            <div style="padding: 15px 15px 5px 15px; font-size: 0.75rem; color: var(--text-muted); font-weight: 800; letter-spacing: 1px;">MAIN SYSTEM</div>
+                        <ul class="nav-menu" style="list-style: none;">
+            <div class="nav-category"><i class="fas fa-home" style="color:#00E5FF;"></i> CORE WORKSPACE</div>
             <li class="nav-item active" onclick="switchTab('dashboard')"><i class="fas fa-tachometer-alt"></i> Dashboard</li>
             <li class="nav-item" onclick="openErpModule('vault')"><i class="fas fa-lock" style="color:var(--accent-primary);"></i> Personal Vault</li>
+            <li class="nav-item" onclick="switchTab('planner')"><i class="fas fa-tasks"></i> Daily Plan</li>
             
-            <div style="padding: 15px 15px 5px 15px; font-size: 0.75rem; color: var(--text-muted); font-weight: 800; letter-spacing: 1px;">SUPER TOOLS</div>
+            <div class="nav-category"><i class="fas fa-bolt" style="color:#f1c40f;"></i> ENGINEERING & DESIGN</div>
             <li class="nav-item" onclick="openErpModule('ultimate')"><i class="fas fa-rocket" style="color:var(--accent-primary);"></i> Ultimate Calc</li>
             <li class="nav-item" onclick="openErpModule('whiteboard')"><i class="fas fa-chalkboard"></i> Whiteboard</li>
             <li class="nav-item" onclick="openErpModule('schematic')"><i class="fas fa-project-diagram" style="color:#f1c40f;"></i> AI Schematic</li>
-            <li class="nav-item" onclick="openErpModule('gantt')"><i class="fas fa-stream" style="color:#2ecc71;"></i> Gantt Chart</li>
-            <li class="nav-item" onclick="openErpModule('qrcode')"><i class="fas fa-qrcode" style="color:#9b59b6;"></i> QR Code</li>
-            <li class="nav-item" onclick="openErpModule('pomodoro')"><i class="fas fa-clock" style="color:#e74c3c;"></i> Focus Timer</li>
             
-            <div style="padding: 15px 15px 5px 15px; font-size: 0.75rem; color: var(--text-muted); font-weight: 800; letter-spacing: 1px;">OFFICE WORK</div>
-            <li class="nav-item" onclick="switchTab('planner')"><i class="fas fa-tasks"></i> Daily Plan</li>
-            <li class="nav-item" onclick="switchTab('reports')"><i class="fas fa-file-signature"></i> Visit Page</li>
-            <li class="nav-item" onclick="switchTab('attendance')"><i class="fas fa-map-marker-alt"></i> Attendance</li>
-            <li class="nav-item" onclick="switchTab('contacts')"><i class="fas fa-address-book"></i> Contacts (CRM)</li>
+            <div class="nav-category"><i class="fas fa-briefcase" style="color:#2ecc71;"></i> SALES & CRM</div>
+            <li class="nav-item" onclick="switchTab('contacts')"><i class="fas fa-address-book"></i> Contacts</li>
             <li class="nav-item" onclick="switchTab('inquiries')"><i class="fas fa-industry"></i> Sales Inquiries</li>
             <li class="nav-item" onclick="switchTab('quotation')"><i class="fas fa-file-invoice-dollar"></i> Quotations</li>
             <li class="nav-item" onclick="switchTab('tender-erp')"><i class="fas fa-robot"></i> Tender & AI ERP</li>
-            <li class="nav-item" onclick="switchTab('expenses')"><i class="fas fa-wallet"></i> Expenses</li>
-
-            <div style="padding: 15px 15px 5px 15px; font-size: 0.75rem; color: var(--text-muted); font-weight: 800; letter-spacing: 1px;">REPORTS & SETTINGS</div>
+            
+            <div class="nav-category"><i class="fas fa-industry" style="color:#e74c3c;"></i> OPERATIONS & HR</div>
+            <li class="nav-item" onclick="switchTab('attendance')"><i class="fas fa-map-marker-alt"></i> Attendance</li>
+            <li class="nav-item" onclick="switchTab('expenses')"><i class="fas fa-wallet"></i> Expenses Tracker</li>
+            <li class="nav-item" onclick="openErpModule('gantt')"><i class="fas fa-stream" style="color:#2ecc71;"></i> Gantt Chart</li>
+            
+            <div class="nav-category"><i class="fas fa-tools" style="color:#9b59b6;"></i> UTILITIES & SETTINGS</div>
+            <li class="nav-item" onclick="switchTab('reports')"><i class="fas fa-file-signature"></i> Visit Page</li>
             <li class="nav-item" onclick="switchTab('master-reports')"><i class="fas fa-chart-pie"></i> Master Reports</li>
+            <li class="nav-item" onclick="openErpModule('qrcode')"><i class="fas fa-qrcode" style="color:#9b59b6;"></i> QR Code</li>
+            <li class="nav-item" onclick="openErpModule('pomodoro')"><i class="fas fa-clock" style="color:#e74c3c;"></i> Focus Timer</li>
             <li class="nav-item" onclick="switchTab('smart-travel')"><i class="fas fa-map-marked-alt"></i> Smart Maps</li>
             <li class="nav-item" onclick="switchTab('archives')"><i class="fas fa-archive"></i> Past Archives</li>
             <li class="nav-item" onclick="switchTab('settings')"><i class="fas fa-cog"></i> Settings</li>
