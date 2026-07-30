@@ -1155,6 +1155,8 @@
                     <div class="erp-module-card" onclick="openErpModule('whiteboard')" style="border:1px solid #fff;"><i class="fas fa-chalkboard" style="color:#fff;"></i><br>Whiteboard</div>
                     <div class="erp-module-card" onclick="openErpModule('schematic')" style="border:1px solid #f1c40f;"><i class="fas fa-project-diagram" style="color:#f1c40f;"></i><br>AI Schematic</div>
                     <div class="erp-module-card" onclick="openErpModule('gantt')" style="border:1px solid #2ecc71;"><i class="fas fa-stream" style="color:#2ecc71;"></i><br>Gantt Chart</div>
+                    <div class="erp-module-card" onclick="openErpModule('qrcode')" style="border:1px solid #9b59b6;"><i class="fas fa-qrcode" style="color:#9b59b6;"></i><br>QR Code</div>
+                    <div class="erp-module-card" onclick="openErpModule('pomodoro')" style="border:1px solid #e74c3c;"><i class="fas fa-clock" style="color:#e74c3c;"></i><br>Focus Timer</div>
 
                     <div class="erp-module-card" onclick="openErpModule('crm')"><i class="fas fa-users"></i><br>Customer CRM</div>
                     <div class="erp-module-card" onclick="openErpModule('travel')"><i class="fas fa-plane"></i><br>Travel Mgr</div>
@@ -1680,7 +1682,10 @@ function runRecovery() {
     </style>
     
     <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px;">
-        <h4 style="margin-bottom: 10px;"><i class="fas fa-plus-circle"></i> Add New Link / Note</h4>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+            <h4><i class="fas fa-plus-circle"></i> Add New Link / Note</h4>
+            <button class="btn" style="width:auto; padding:5px 10px; font-size:0.75rem; margin:0;" onclick="generateVaultPassword()"><i class="fas fa-magic"></i> Gen Password</button>
+        </div>
         <input type="text" id="v-title" class="input-field" placeholder="Title (e.g. My Portfolio)">
         <textarea id="v-content" class="input-field" placeholder="Paste link or write your secret note here..." style="min-height:60px; margin-bottom:10px;"></textarea>
         <div style="display:flex; gap:10px;">
@@ -1729,6 +1734,28 @@ function runRecovery() {
                 </div>
                 <button class="btn" style="margin-top:10px; background:var(--success);" onclick="generateSchematic()"><i class="fas fa-magic"></i> Generate SLD</button>
                 <div id="sch-canvas" style="margin-top:20px; background:#e8f0fe; padding:20px; border-radius:8px; min-height:200px; display:none; color:#000; overflow-x:auto;"></div>
+            ` },
+
+            qrcode: { title: 'QR Code Generator', icon: 'fa-qrcode', html: `
+                <p style="font-size:0.85rem; color:#aaa; margin-bottom:15px;">Enter a URL or Text to generate a scannable QR Code instantly.</p>
+                <input type="text" id="qr-input" class="input-field" placeholder="Enter link (e.g. https://google.com)">
+                <button class="btn" onclick="generateQR()"><i class="fas fa-qrcode"></i> Generate QR</button>
+                <div id="qr-result" style="margin-top:20px; text-align:center; display:none;">
+                    <img id="qr-img" src="" alt="QR Code" style="border-radius:8px; border:2px solid var(--accent-primary); padding:10px; background:#fff; max-width:200px;">
+                    <br>
+                    <a id="qr-download" href="" download="qrcode.png" class="btn" style="display:inline-block; margin-top:10px; width:auto; padding:8px 20px;"><i class="fas fa-download"></i> Save Image</a>
+                </div>
+            ` },
+            pomodoro: { title: 'Focus Timer', icon: 'fa-clock', html: `
+                <div style="text-align:center;">
+                    <h2 id="pomo-time" style="font-size:4rem; color:var(--text-main); margin-bottom:10px; font-weight:800; font-variant-numeric: tabular-nums;">25:00</h2>
+                    <p id="pomo-status" style="color:var(--accent-primary); font-weight:bold; margin-bottom:20px; text-transform:uppercase;">Work Session</p>
+                    <div style="display:flex; justify-content:center; gap:10px;">
+                        <button class="btn" style="width:auto; padding:10px 20px; background:var(--success);" onclick="startPomodoro()"><i class="fas fa-play"></i> Start</button>
+                        <button class="btn" style="width:auto; padding:10px 20px; background:var(--warning); color:#000;" onclick="pausePomodoro()"><i class="fas fa-pause"></i> Pause</button>
+                        <button class="btn" style="width:auto; padding:10px 20px; background:var(--danger);" onclick="resetPomodoro()"><i class="fas fa-redo"></i> Reset</button>
+                    </div>
+                </div>
             ` },
             gantt: { title: 'Interactive Gantt Chart', icon: 'fa-stream', html: `
                 <style>
@@ -1954,6 +1981,38 @@ function runRecovery() {
                 <div id="calc-chart-container" style="margin-top:15px; display:none;"><canvas id="calcChart" style="max-height:300px; background:#fff; border-radius:8px; padding:10px;"></canvas></div>
                 </div>
                 
+                
+                <div id="u-gstcalc" class="u-tool-section" style="display:none;">
+                    <div class="grid-2">
+                        <div>
+                            <label>Base Amount (₹)</label>
+                            <input type="number" id="gst-base" class="input-field" placeholder="Enter amount" oninput="calcGST()">
+                        </div>
+                        <div>
+                            <label>GST Rate (%)</label>
+                            <select id="gst-rate" class="input-field" onchange="calcGST()">
+                                <option value="5">5%</option>
+                                <option value="12">12%</option>
+                                <option value="18" selected>18%</option>
+                                <option value="28">28%</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:10px; margin-bottom:15px;">
+                        <button id="btn-add-gst" class="btn" style="flex:1;" onclick="setGstMode('add')">Add GST (+)</button>
+                        <button id="btn-rem-gst" class="btn" style="flex:1; background:rgba(255,255,255,0.1); color:#fff;" onclick="setGstMode('rem')">Remove GST (-)</button>
+                    </div>
+                    
+                    <div class="table-container" style="background:rgba(0,0,0,0.4); padding:15px;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>Base Value:</span> <b id="gst-out-base">₹0.00</b></div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:10px; color:#3498db;"><span>CGST (<span id="gst-cgst-pct">9</span>%):</span> <b id="gst-out-cgst">₹0.00</b></div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:10px; color:#3498db;"><span>SGST (<span id="gst-sgst-pct">9</span>%):</span> <b id="gst-out-sgst">₹0.00</b></div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:10px; color:var(--success);"><span>Total GST:</span> <b id="gst-out-tax">₹0.00</b></div>
+                        <hr style="border-color:rgba(255,255,255,0.1); margin:10px 0;">
+                        <div style="display:flex; justify-content:space-between; font-size:1.2rem; color:var(--accent-primary);"><span>Final Amount:</span> <b id="gst-out-total">₹0.00</b></div>
+                    </div>
+                </div>
+
                 <div id="u-scicalc" class="u-tool-section" style="display:none;">
 
                 <style>
@@ -2774,6 +2833,44 @@ function runRecovery() {
         };
 
         
+        
+        let gstMode = 'add';
+        window.setGstMode = function(mode) {
+            gstMode = mode;
+            document.getElementById('btn-add-gst').style.background = mode === 'add' ? 'linear-gradient(45deg, var(--accent-secondary), var(--accent-primary))' : 'rgba(255,255,255,0.1)';
+            document.getElementById('btn-add-gst').style.color = mode === 'add' ? '#000' : '#fff';
+            document.getElementById('btn-rem-gst').style.background = mode === 'rem' ? 'linear-gradient(45deg, var(--accent-secondary), var(--accent-primary))' : 'rgba(255,255,255,0.1)';
+            document.getElementById('btn-rem-gst').style.color = mode === 'rem' ? '#000' : '#fff';
+            calcGST();
+        };
+        window.calcGST = function() {
+            let amount = parseFloat(document.getElementById('gst-base').value) || 0;
+            let rate = parseFloat(document.getElementById('gst-rate').value) || 18;
+            
+            document.getElementById('gst-cgst-pct').innerText = (rate/2);
+            document.getElementById('gst-sgst-pct').innerText = (rate/2);
+            
+            let baseVal, taxVal, totalVal;
+            
+            if(gstMode === 'add') {
+                baseVal = amount;
+                taxVal = amount * (rate / 100);
+                totalVal = baseVal + taxVal;
+            } else {
+                totalVal = amount;
+                baseVal = amount / (1 + (rate / 100));
+                taxVal = totalVal - baseVal;
+            }
+            
+            let halfTax = taxVal / 2;
+            
+            document.getElementById('gst-out-base').innerText = '₹' + baseVal.toFixed(2);
+            document.getElementById('gst-out-cgst').innerText = '₹' + halfTax.toFixed(2);
+            document.getElementById('gst-out-sgst').innerText = '₹' + halfTax.toFixed(2);
+            document.getElementById('gst-out-tax').innerText = '₹' + taxVal.toFixed(2);
+            document.getElementById('gst-out-total').innerText = '₹' + totalVal.toFixed(2);
+        };
+
         window.switchUltimateTool = function() {
             let tool = document.getElementById('ultimate-selector').value;
             document.querySelectorAll('.u-tool-section').forEach(sec => sec.style.display = 'none');
@@ -3085,7 +3182,77 @@ function runRecovery() {
         };
 
         
+
+        // --- QR CODE LOGIC ---
+        window.generateQR = function() {
+            const val = document.getElementById('qr-input').value.trim();
+            if(!val) return showToast("Please enter some text or URL!");
+            const qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + encodeURIComponent(val);
+            document.getElementById('qr-img').src = qrUrl;
+            document.getElementById('qr-download').href = qrUrl;
+            document.getElementById('qr-result').style.display = 'block';
+            showToast("QR Code Generated!");
+        };
+
+        // --- POMODORO LOGIC ---
+        let pomoInterval = null;
+        let pomoTime = 25 * 60; // 25 mins
+        let isPomoWork = true;
+        
+        function updatePomoDisplay() {
+            const m = Math.floor(pomoTime / 60).toString().padStart(2, '0');
+            const s = (pomoTime % 60).toString().padStart(2, '0');
+            const disp = document.getElementById('pomo-time');
+            if(disp) disp.innerText = `${m}:${s}`;
+        }
+        
+        window.startPomodoro = function() {
+            if(pomoInterval) return;
+            pomoInterval = setInterval(() => {
+                pomoTime--;
+                if(pomoTime <= 0) {
+                    clearInterval(pomoInterval);
+                    pomoInterval = null;
+                    isPomoWork = !isPomoWork;
+                    pomoTime = isPomoWork ? 25 * 60 : 5 * 60;
+                    document.getElementById('pomo-status').innerText = isPomoWork ? "Work Session" : "Break Time!";
+                    document.getElementById('pomo-status').style.color = isPomoWork ? "var(--accent-primary)" : "var(--success)";
+                    showToast(isPomoWork ? "Back to work!" : "Take a break!");
+                }
+                updatePomoDisplay();
+            }, 1000);
+        };
+        
+        window.pausePomodoro = function() {
+            clearInterval(pomoInterval);
+            pomoInterval = null;
+        };
+        
+        window.resetPomodoro = function() {
+            clearInterval(pomoInterval);
+            pomoInterval = null;
+            isPomoWork = true;
+            pomoTime = 25 * 60;
+            const stat = document.getElementById('pomo-status');
+            if(stat) {
+                stat.innerText = "Work Session";
+                stat.style.color = "var(--accent-primary)";
+            }
+            updatePomoDisplay();
+        };
+
         // --- PERSONAL VAULT LOGIC ---
+        
+        window.generateVaultPassword = function() {
+            const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+            let pwd = "";
+            for(let i=0; i<12; i++) pwd += chars.charAt(Math.floor(Math.random() * chars.length));
+            document.getElementById('v-title').value = 'Generated Password';
+            document.getElementById('v-content').value = pwd;
+            document.getElementById('v-tag').value = 'important';
+            showToast("Password Generated!");
+        };
+
         window.saveVaultItem = function() {
             const title = document.getElementById('v-title').value.trim();
             const content = document.getElementById('v-content').value.trim();
