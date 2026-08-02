@@ -1696,6 +1696,46 @@ function runRecovery() {
             
             crm: { title: 'Customer CRM', icon: 'fa-users', html: `<p>Manage Meetings, Calls, and Follow-ups.</p><button class="btn" style="background:var(--success); margin-bottom:10px;"><i class="fas fa-plus"></i> Add Customer / Log Interaction</button><br><label style="font-size:0.85rem; color:#ccc;">Smart Business Card Scanner:</label><input type="file" accept="image/*" class="input-field" style="margin-top:5px;" onchange="callSandeepErpAI('Extract Name, Phone, Email, and Company from this business card image.')"><div id="ai-response-crm" class="ai-chat-box" style="margin-top:15px; display:none;"></div><div style="margin-top:15px; color:var(--text-muted); font-size:0.85rem; text-align:center;">Integrated with main Contacts list.</div>` },
             travel: { title: 'Travel Manager', icon: 'fa-plane', html: `<p>Manage Train/Flight, Hotel, TA/DA.</p><button class="btn" style="background:var(--warning)"><i class="fas fa-plus"></i> Add Travel Plan</button><div style="margin-top:15px; color:var(--text-muted); font-size:0.85rem; text-align:center;">Integrated with Expenses. Full travel UI coming soon.</div>` },
+            tenderscanner: { title: 'Live Tender Scanner', icon: 'fa-satellite-dish', html: `
+    <style>
+        .t-scan-btn { background: linear-gradient(45deg, #f1c40f, #e67e22); color: #000; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 800; cursor: pointer; transition: 0.3s; width: 100%; box-shadow: 0 4px 15px rgba(241, 196, 15, 0.4); text-transform: uppercase; letter-spacing: 1px; }
+        .t-scan-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(241, 196, 15, 0.6); }
+        .t-scan-btn.scanning { animation: pulse 1.5s infinite; background: linear-gradient(45deg, #e67e22, #f39c12); }
+        .t-card { background: rgba(0,0,0,0.4); border-left: 4px solid var(--accent-primary); border-radius: 8px; padding: 15px; margin-bottom: 15px; position: relative; backdrop-filter: blur(5px); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .t-badge { position: absolute; top: 15px; right: 15px; background: rgba(255, 215, 0, 0.15); color: var(--accent-primary); padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; border: 1px solid rgba(255, 215, 0, 0.3); }
+        .t-meta { display: flex; gap: 20px; font-size: 0.8rem; color: #888; margin-top: 10px; }
+        .loader-spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(0,0,0,0.3); border-radius: 50%; border-top-color: #000; animation: spin 1s ease-in-out infinite; vertical-align: middle; margin-right: 10px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+    </style>
+
+    <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin-bottom: 25px;">
+        <h4 style="margin-bottom:15px; color:var(--accent-primary);"><i class="fas fa-radar"></i> Live PowerGrid Tender Scanner</h4>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom: 15px;">AI bot will scan the live PGCIL website and filter tenders matching your keywords.</p>
+        <div style="display:flex; gap:10px; margin-bottom: 15px;">
+            <div style="flex:2;">
+                <label style="font-size:0.8rem; color:#aaa;">Keywords (comma separated)</label>
+                <input type="text" id="tender-keywords" class="input-field" style="margin-bottom:0;" value="Transformer, Reactor">
+            </div>
+            <div style="flex:1;">
+                <label style="font-size:0.8rem; color:#aaa;">Website Target</label>
+                <select class="input-field" style="margin-bottom:0;" disabled>
+                    <option>PowerGrid (PGCIL)</option>
+                </select>
+            </div>
+        </div>
+        <button id="btn-scan-tenders" class="t-scan-btn" onclick="scanLiveTenders()">
+            <i class="fas fa-search"></i> Initiate Deep AI Scan
+        </button>
+    </div>
+
+    <div id="tender-scan-results" style="margin-top: 20px;">
+        <div style="text-align:center; padding: 30px; color:#555;">
+            <i class="fas fa-satellite-dish" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.2;"></i><br>
+            Awaiting Command. Press Scan to fetch live tenders.
+        </div>
+    </div>
+` },
             vault: { title: 'Personal Vault', icon: 'fa-lock', html: `
     <style>
         .v-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; margin-top: 20px; }
