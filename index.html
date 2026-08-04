@@ -360,10 +360,17 @@
             <li class="nav-item" onclick="switchTab('contacts')"><i class="fas fa-address-book"></i> Contacts</li>
             <li class="nav-item" onclick="switchTab('inquiries')"><i class="fas fa-industry"></i> Sales Inquiries</li>
             <li class="nav-item" onclick="switchTab('quotation')"><i class="fas fa-file-invoice-dollar"></i> Quotations</li>
-            <li class="nav-item" onclick="switchTab('tender-erp')"><i class="fas fa-robot"></i> Tender & AI ERP</li>
+            
             <li class="nav-item" onclick="switchTab('attendance')"><i class="fas fa-map-marker-alt"></i> Attendance</li>
             <li class="nav-item" onclick="switchTab('expenses')"><i class="fas fa-wallet"></i> Expenses Tracker</li>
             <li class="nav-item" onclick="openErpModule('gantt')"><i class="fas fa-stream" style="color:#2ecc71;"></i> Gantt Chart</li>
+            <li class="nav-item" onclick="openErpModule('analyzer')"><i class="fas fa-file-pdf"></i> Tender Analyzer</li>
+            <li class="nav-item" onclick="openErpModule('finder')"><i class="fas fa-search"></i> Clause Finder</li>
+            <li class="nav-item" onclick="openErpModule('compare')"><i class="fas fa-balance-scale"></i> Tender Compare</li>
+            <li class="nav-item" onclick="openErpModule('email')"><i class="fas fa-envelope-open-text"></i> AI Email Gen</li>
+            <li class="nav-item" onclick="openErpModule('crm')"><i class="fas fa-users"></i> Customer CRM</li>
+            <li class="nav-item" onclick="openErpModule('travel')"><i class="fas fa-plane"></i> Travel Mgr</li>
+
             
             <div class="nav-category"><i class="fas fa-tools" style="color:#9b59b6;"></i> UTILITIES & SETTINGS</div>
             <li class="nav-item" onclick="switchTab('master-reports')"><i class="fas fa-chart-pie"></i> Master Reports</li>
@@ -1173,36 +1180,7 @@
             </div>
         </section>
 
-        <section id="tender-erp" class="module-section" style="padding:10px;">
-            <div class="card" style="margin-bottom:15px; text-align:center;">
-                <h2><i class="fas fa-robot"></i> Tender & AI ERP Suite</h2>
-                <p style="color:var(--text-muted); font-size:0.9rem;">14 Powerful Modules Integrated with Sandeep AI</p>
-                
-                <!-- Navigation Grid for 14 Modules -->
-                <div class="erp-tools-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:10px; margin-top:20px;">
-                    <div class="erp-module-card" onclick="openErpModule('analyzer')"><i class="fas fa-file-pdf"></i><br>Tender Analyzer</div>
-                    <div class="erp-module-card" onclick="openErpModule('finder')"><i class="fas fa-search"></i><br>Clause Finder</div>
-                    <div class="erp-module-card" onclick="openErpModule('compare')"><i class="fas fa-balance-scale"></i><br>Tender Compare</div>
-                    <div class="erp-module-card" onclick="openErpModule('email')"><i class="fas fa-envelope-open-text"></i><br>AI Email Gen</div>
-                    <div class="erp-module-card" onclick="openErpModule('ultimate')" style="border:2px solid var(--accent-primary); box-shadow: 0 0 15px rgba(0,229,255,0.3);"><i class="fas fa-rocket" style="color:var(--accent-primary); font-size:2rem;"></i><br><b style="font-size:1rem;">Ultimate Calculator</b></div>
-                    <div class="erp-module-card" onclick="openErpModule('whiteboard')" style="border:1px solid #fff;"><i class="fas fa-chalkboard" style="color:#fff;"></i><br>Whiteboard</div>
-                    <div class="erp-module-card" onclick="openErpModule('schematic')" style="border:1px solid #f1c40f;"><i class="fas fa-project-diagram" style="color:#f1c40f;"></i><br>AI Schematic</div>
-                    <div class="erp-module-card" onclick="openErpModule('gantt')" style="border:1px solid #2ecc71;"><i class="fas fa-stream" style="color:#2ecc71;"></i><br>Gantt Chart</div>
-                    <div class="erp-module-card" onclick="openErpModule('qrcode')" style="border:1px solid #9b59b6;"><i class="fas fa-qrcode" style="color:#9b59b6;"></i><br>QR Code</div>
-                    <div class="erp-module-card" onclick="openErpModule('pomodoro')" style="border:1px solid #e74c3c;"><i class="fas fa-clock" style="color:#e74c3c;"></i><br>Focus Timer</div>
-
-                    <div class="erp-module-card" onclick="openErpModule('crm')"><i class="fas fa-users"></i><br>Customer CRM</div>
-                    <div class="erp-module-card" onclick="openErpModule('travel')"><i class="fas fa-plane"></i><br>Travel Mgr</div>
-                    <div class="erp-module-card" onclick="openErpModule('vault')"><i class="fas fa-lock" style="color:var(--accent-primary); font-size:1.8rem;"></i><br><b style="font-size:1rem;">Personal Vault</b></div>
-                    <div class="erp-module-card" onclick="openErpModule('chat')"><i class="fas fa-comments"></i><br>AI Tender Chat</div>
-                    <div class="erp-module-card" onclick="openErpModule('dashboard')"><i class="fas fa-tachometer-alt"></i><br>Daily Dashboard</div>
-                    <div class="erp-module-card" onclick="openErpModule('alerts')"><i class="fas fa-bell"></i><br>Smart Alerts</div>
-                    <div class="erp-module-card" onclick="openErpModule('ocr')"><i class="fas fa-camera"></i><br>OCR + AI</div>
-                    <div class="erp-module-card" onclick="openErpModule('assistant')"><i class="fas fa-magic"></i><br>AI Assistant</div>
-                </div>
-            </div>
-
-        </section>
+        
 
         <style>
 
