@@ -344,41 +344,10 @@
             <h2 style="font-size: 1.3rem; margin-left: 10px;">CORP HUB</h2>
             <i class="fas fa-times menu-toggle" style="margin-left:auto; display:block;" onclick="toggleSidebar()"></i>
         </div>
-                                <ul class="nav-menu" style="list-style: none;">
-            <div class="nav-category"><i class="fas fa-home" style="color:#00E5FF;"></i> CORE WORKSPACE</div>
-            <li class="nav-item active" onclick="switchTab('dashboard')"><i class="fas fa-tachometer-alt"></i> Dashboard</li>
-            <li class="nav-item" onclick="openErpModule('vault')"><i class="fas fa-lock" style="color:var(--accent-primary);"></i> Personal Vault</li>
-            
-            <div class="nav-category"><i class="fas fa-bolt" style="color:#f1c40f;"></i> ENGINEERING & DESIGN</div>
-            <li class="nav-item" onclick="openErpModule('ultimate')"><i class="fas fa-rocket" style="color:var(--accent-primary);"></i> Ultimate Calc</li>
-            <li class="nav-item" onclick="openErpModule('whiteboard')"><i class="fas fa-chalkboard"></i> Whiteboard</li>
-            <li class="nav-item" onclick="openErpModule('schematic')"><i class="fas fa-project-diagram" style="color:#f1c40f;"></i> AI Schematic</li>
-            
-            <div class="nav-category"><i class="fas fa-building" style="color:#2ecc71;"></i> OFFICE WORK & CRM</div>
-            <li class="nav-item" onclick="switchTab('planner')"><i class="fas fa-tasks"></i> Daily Plan</li>
-            <li class="nav-item" onclick="switchTab('reports')"><i class="fas fa-file-signature"></i> Visit Page</li>
-            <li class="nav-item" onclick="switchTab('contacts')"><i class="fas fa-address-book"></i> Contacts</li>
-            <li class="nav-item" onclick="switchTab('inquiries')"><i class="fas fa-industry"></i> Sales Inquiries</li>
-            <li class="nav-item" onclick="switchTab('quotation')"><i class="fas fa-file-invoice-dollar"></i> Quotations</li>
-            
-            <li class="nav-item" onclick="switchTab('attendance')"><i class="fas fa-map-marker-alt"></i> Attendance</li>
-            <li class="nav-item" onclick="switchTab('expenses')"><i class="fas fa-wallet"></i> Expenses Tracker</li>
-            <li class="nav-item" onclick="openErpModule('gantt')"><i class="fas fa-stream" style="color:#2ecc71;"></i> Gantt Chart</li>
-            <li class="nav-item" onclick="openErpModule('analyzer')"><i class="fas fa-file-pdf"></i> Tender Analyzer</li>
-            <li class="nav-item" onclick="openErpModule('finder')"><i class="fas fa-search"></i> Clause Finder</li>
-            <li class="nav-item" onclick="openErpModule('compare')"><i class="fas fa-balance-scale"></i> Tender Compare</li>
-            <li class="nav-item" onclick="openErpModule('email')"><i class="fas fa-envelope-open-text"></i> AI Email Gen</li>
-            <li class="nav-item" onclick="openErpModule('crm')"><i class="fas fa-users"></i> Customer CRM</li>
-            <li class="nav-item" onclick="openErpModule('travel')"><i class="fas fa-plane"></i> Travel Mgr</li>
-
-            
-            <div class="nav-category"><i class="fas fa-tools" style="color:#9b59b6;"></i> UTILITIES & SETTINGS</div>
-            <li class="nav-item" onclick="switchTab('master-reports')"><i class="fas fa-chart-pie"></i> Master Reports</li>
-            <li class="nav-item" onclick="openErpModule('qrcode')"><i class="fas fa-qrcode" style="color:#9b59b6;"></i> QR Code</li>
-            <li class="nav-item" onclick="openErpModule('pomodoro')"><i class="fas fa-clock" style="color:#e74c3c;"></i> Focus Timer</li>
-            <li class="nav-item" onclick="switchTab('smart-travel')"><i class="fas fa-map-marked-alt"></i> Smart Maps</li>
-            <li class="nav-item" onclick="switchTab('archives')"><i class="fas fa-archive"></i> Past Archives</li>
-            <li class="nav-item" onclick="switchTab('settings')"><i class="fas fa-cog"></i> Settings</li>
+                                        <ul class="nav-menu" style="list-style: none;" id="dynamic-sidebar">
+        </ul>
+        <ul class="nav-menu" style="list-style: none; margin-top:10px; border-top:1px solid rgba(255,255,255,0.05); padding-top:10px;">
+            <li class="nav-item" style="color:var(--accent-primary); font-weight:800; border: 1px solid var(--accent-primary);" onclick="switchTab('app-library')"><i class="fas fa-cubes"></i> App Library</li>
         </ul>
         <div style="margin-top: auto; text-align: center; font-size: 0.8rem; color: var(--accent-primary); font-weight: 800;">
             Developed by<br>Sandeep Kumar<br><span style="color:#aaa; font-size:0.6rem;">v1.3</span>
@@ -413,6 +382,16 @@
         </header>
 
         <!-- MODULE 1: DASHBOARD -->
+        
+        <section id="app-library" class="module-section" style="padding:10px;">
+            <div class="card" style="margin-bottom:15px; text-align:center;">
+                <h2><i class="fas fa-cubes"></i> App Library</h2>
+                <p style="color:var(--text-muted); font-size:0.9rem;">Pin your favorite tools to the Sidebar menu.</p>
+                <div class="erp-tools-grid" id="app-library-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap:15px; margin-top:20px;">
+                </div>
+            </div>
+        </section>
+
         <section id="dashboard" class="module-section active">
             <div id="smartAlertsContainer" style="margin-bottom: 20px;"></div>
             
