@@ -3398,6 +3398,76 @@ function runRecovery() {
             resDiv.innerHTML = htmlStr;
         }
 
+
+        // --- SANDEEP AI LOGIC ---
+        let chatHistory = [{"role": "system", "content": "You are Sandeep AI, a highly intelligent and professional assistant integrated into Sandeep Kumar's ERP and business dashboard. You help with business tasks, drafting emails, technical engineering questions (especially transformers and electrical engineering), and general productivity. Be concise and helpful."}];
+        
+        async function sendAiMessage() {
+            const inputEl = document.getElementById('aiInputBox');
+            const msg = inputEl.value.trim();
+            if(!msg) return;
+            
+            appendAiMsg(msg, 'user');
+            inputEl.value = '';
+            
+            chatHistory.push({"role": "user", "content": msg});
+            
+            const typingIndicator = appendAiTyping();
+            const apiKey = 'sk-YqeBL8BOjTGkj3GmFokjYf4af2W1eTSWbP1eXxzECa3Z0iww';
+            
+            try {
+                const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + apiKey
+                    },
+                    body: JSON.stringify({
+                        model: 'gpt-3.5-turbo',
+                        messages: chatHistory
+                    })
+                });
+                
+                typingIndicator.remove();
+                
+                if(!response.ok) {
+                    throw new Error("API Error: " + response.status);
+                }
+                
+                const data = await response.json();
+                const aiReply = data.choices[0].message.content;
+                chatHistory.push({"role": "assistant", "content": aiReply});
+                appendAiMsg(aiReply, 'bot');
+                
+            } catch (err) {
+                typingIndicator.remove();
+                appendAiMsg("Oops! Something went wrong with the AI connection. Please check your internet or API key limit.\nError: " + err.message, 'bot');
+                chatHistory.pop(); // remove user msg from history if failed
+            }
+        }
+
+        function appendAiMsg(text, sender) {
+            const container = document.getElementById('aiChatContainer');
+            if(!container) return;
+            const div = document.createElement('div');
+            div.className = `ai-msg ${sender}`;
+            // Convert simple newlines to br
+            div.innerHTML = text.replace(/\n/g, '<br>');
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function appendAiTyping() {
+            const container = document.getElementById('aiChatContainer');
+            if(!container) return null;
+            const div = document.createElement('div');
+            div.className = 'ai-typing';
+            div.innerHTML = '<div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div>';
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+            return div;
+        }
+
         // --- QR CODE LOGIC ---
         window.generateQR = function() {
             const val = document.getElementById('qr-input').value.trim();
