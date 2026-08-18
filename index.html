@@ -781,7 +781,7 @@
                     <div style="display:flex; gap:10px; align-items:center;">
                         <input type="text" id="planTask" class="input-field" placeholder="What needs to be done today?" style="flex:1; margin-bottom:0;" required>
                         <button type="button" class="btn" style="width:auto; padding:0 15px; background:var(--accent-primary); color:#000;" onclick="translateToEnglish('planTask')" title="Translate Hindi to Professional English"><i class="fas fa-language"></i> AI</button>
-                        <button class="btn" style="width:auto; padding:0 15px;" onclick="addPlan()"><i class="fas fa-plus"></i></button>
+                        <button type="submit" class="btn" style="width:auto; padding:0 15px;"><i class="fas fa-plus"></i></button>
                     </div>
                     <button type="submit" id="planSubmitBtn" class="btn" style="width:auto; margin-top:0;">Add Task</button>
                     <button type="button" id="planAIBtn" class="btn" style="width:auto; margin-top:0; background: linear-gradient(45deg, #00E5FF, #00BFFF); color: black;" onclick="enhanceTextWithAI('planTask', 'planAIBtn')"><i class="fas fa-magic"></i> ✨ AI Enhance</button>
