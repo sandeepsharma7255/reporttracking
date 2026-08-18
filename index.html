@@ -54,7 +54,7 @@
             --glow: 0 0 25px rgba(0, 255, 204, 0.4);
         }
         :root {
-            --bg-main: #f4f7fb; 
+            --bg-main: #f1f5f9; 
             --bg-secondary: #ffffff; 
             --accent-primary: #1a56db; 
             --accent-secondary: #3b82f6;
@@ -4926,7 +4926,7 @@ function runRecovery() {
                 btn.disabled = false;
             }
         }
-        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('active'); const ham = document.querySelector('.hamburger-container'); if(ham) ham.classList.toggle('change'); }
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); document.getElementById('sidebarOverlay').classList.toggle('active'); const ham = document.querySelector('.hamburger-container'); if(ham) ham.classList.toggle('change'); }
         function toggleSubMenu(id) { const el = document.getElementById(id); el.style.display = el.style.display === 'none' ? 'block' : 'none'; }
         function showToast(msg) { const t = document.getElementById('toast'); document.getElementById('toastMsg').innerText = msg; t.style.bottom = '30px'; setTimeout(() => t.style.bottom = '-60px', 3000); }
         function switchTab(id) { document.querySelectorAll('.module-section, .nav-item').forEach(e => e.classList.remove('active')); document.getElementById(id).classList.add('active'); event.currentTarget.classList.add('active'); toggleSidebar(); }
