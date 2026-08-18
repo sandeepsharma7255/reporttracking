@@ -5281,7 +5281,7 @@ function runRecovery() {
                 todaysPlans = appData.plans.filter(p => p.date === todayStr || (p.date < todayStr && p.status !== 'Completed'));
             }
             
-            todaysPlans.sort((a,b) => b.date.localeCompare(a.date)); // Sort newest first
+            todaysPlans.sort((a,b) => b.id - a.id); // Sort newest first (by creation time)
             
             if(todaysPlans.length === 0) return div.innerHTML = '<p style="color:grey;text-align:center;">No tasks found.</p>';
             todaysPlans.forEach(p => {
