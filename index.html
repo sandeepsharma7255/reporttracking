@@ -655,7 +655,7 @@
     <main class="main-content" style="padding: 0; display:flex; flex-direction:column; height: 100vh; overflow: hidden;">
         <header class="top-header-new">
             <div style="display:flex; align-items:center; gap:15px;">
-                <div class="hamburger-container" onclick="toggleSidebar()" id="mobileHamburger" style="display:none;">
+                <div class="hamburger-container" onclick="toggleSidebar()" id="mobileHamburger">
                     <div class="bar1"></div><div class="bar2"></div><div class="bar3"></div>
                 </div>
                 <div class="header-greeting">
@@ -7481,7 +7481,8 @@ Update: ${r.text}
             { id: 'qrcode', name: 'QR Code', icon: 'fa-qrcode', type: 'module', category: 'UTILITIES & SETTINGS', defaultPin: true },
             { id: 'pomodoro', name: 'Focus Timer', icon: 'fa-clock', type: 'module', category: 'UTILITIES & SETTINGS', defaultPin: true },
             { id: 'smart-travel', name: 'Smart Maps', icon: 'fa-map-marked-alt', type: 'tab', category: 'UTILITIES & SETTINGS', defaultPin: true },
-            { id: 'archives', name: 'Past Archives', icon: 'fa-archive', type: 'tab', category: 'UTILITIES & SETTINGS', defaultPin: true }
+            { id: 'archives', name: 'Past Archives', icon: 'fa-archive', type: 'tab', category: 'UTILITIES & SETTINGS', defaultPin: true },
+            { id: 'settings', name: 'Settings', icon: 'fa-cog', type: 'tab', category: 'UTILITIES & SETTINGS', defaultPin: true }
         ];
 
         let pinnedApps = null;
