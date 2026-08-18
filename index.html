@@ -744,15 +744,15 @@
                         
                         <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:20px; border-top:1px solid rgba(255,255,255,0.05); padding-top:15px;">
                             <div style="text-align:center;">
-                                <div style="font-size:1.2rem; font-weight:800; color:var(--accent-primary);">12</div>
+                                <div style="font-size:1.2rem; font-weight:800; color:var(--accent-primary);" id="dashLeftVisits">0</div>
                                 <div style="font-size:0.7rem; color:#888;">Total Visits</div>
                             </div>
                             <div style="text-align:center;">
-                                <div style="font-size:1.2rem; font-weight:800; color:#9b59b6;">3</div>
+                                <div style="font-size:1.2rem; font-weight:800; color:#9b59b6;" id="dashLeftUniqueDays">0</div>
                                 <div style="font-size:0.7rem; color:#888;">Unique Days</div>
                             </div>
                             <div style="text-align:center;">
-                                <div style="font-size:1.2rem; font-weight:800; color:#ccc;">8</div>
+                                <div style="font-size:1.2rem; font-weight:800; color:#ccc;" id="dashLeftInquiries">0</div>
                                 <div style="font-size:0.7rem; color:#888;">Inquiries</div>
                             </div>
                             <div style="text-align:center;">
@@ -793,68 +793,10 @@
                 <div class="dashboard-layout-right">
                     <div class="card" style="padding:20px;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                            <h3 style="margin:0; font-size:0.9rem; color:#fff;"><i class="fas fa-tasks" style="color:var(--accent-primary); margin-right:5px;"></i> Upcoming Tasks</h3>
-                            <span style="color:var(--accent-primary); font-size:0.75rem; cursor:pointer;">View All</span>
+                            <h3 style="margin:0; font-size:1rem; color:#111827;"><i class="fas fa-calendar-alt" style="color:var(--accent-primary); margin-right:5px;"></i> Calendar Overview</h3>
                         </div>
-                        <div id="mock-tasks">
-                            <div class="task-item">
-                                <div class="task-check"><i class="fas fa-check"></i></div>
-                                <div class="task-label">Quarterly Report Review</div>
-                                <div class="task-date">17 Aug</div>
-                                <div class="task-badge" style="background:rgba(231, 76, 60, 0.1); color:#e74c3c; border:1px solid #e74c3c;">High</div>
-                            </div>
-                            <div class="task-item">
-                                <div class="task-check"><i class="fas fa-check"></i></div>
-                                <div class="task-label">Client Meeting Preparation</div>
-                                <div class="task-date">18 Aug</div>
-                                <div class="task-badge" style="background:rgba(243, 156, 18, 0.1); color:#f39c12; border:1px solid #f39c12;">Medium</div>
-                            </div>
-                            <div class="task-item">
-                                <div class="task-check done"><i class="fas fa-check"></i></div>
-                                <div class="task-label" style="text-decoration:line-through; color:#666;">Project Documentation</div>
-                                <div class="task-date">19 Aug</div>
-                                <div class="task-badge" style="background:rgba(46, 204, 113, 0.1); color:#2ecc71; border:1px solid #2ecc71;">Low</div>
-                            </div>
-                            <div class="task-item">
-                                <div class="task-check"><i class="fas fa-check"></i></div>
-                                <div class="task-label">UI/UX Design Review</div>
-                                <div class="task-date">20 Aug</div>
-                                <div class="task-badge" style="background:rgba(243, 156, 18, 0.1); color:#f39c12; border:1px solid #f39c12;">Medium</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="card" style="padding:20px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                            <h3 style="margin:0; font-size:0.9rem; color:#fff;"><i class="fas fa-history" style="color:var(--accent-primary); margin-right:5px;"></i> Recent Activity</h3>
-                            <span style="color:var(--accent-primary); font-size:0.75rem; cursor:pointer;">View All</span>
-                        </div>
-                        <div style="padding-top:10px;">
-                            <div class="timeline-item">
-                                <div class="timeline-icon" style="color:#00E5FF; background:rgba(0,229,255,0.1);"><i class="fas fa-sign-in-alt"></i></div>
-                                <div class="timeline-content">
-                                    <h4>Login</h4>
-                                    <p>Welcome back to Corp Hub</p>
-                                </div>
-                                <div class="timeline-time">5:50 PM</div>
-                            </div>
-                            <div class="timeline-item">
-                                <div class="timeline-icon" style="color:#2ecc71; background:rgba(46,204,113,0.1);"><i class="fas fa-chart-line"></i></div>
-                                <div class="timeline-content">
-                                    <h4>Visited Dashboard</h4>
-                                    <p>Checked overview statistics</p>
-                                </div>
-                                <div class="timeline-time">5:52 PM</div>
-                            </div>
-                            <div class="timeline-item">
-                                <div class="timeline-icon" style="color:#9b59b6; background:rgba(155,89,182,0.1);"><i class="fas fa-tasks"></i></div>
-                                <div class="timeline-content">
-                                    <h4>Added New Task</h4>
-                                    <p>Project Documentation created</p>
-                                </div>
-                                <div class="timeline-time">5:53 PM</div>
-                            </div>
-                        </div>
+                        <div style="text-align:center; font-weight:800; font-size:1.2rem; margin-bottom:15px; color:var(--accent-primary);" id="calendarMonthLabel"></div>
+                        <div id="calendarGrid" style="display:grid; grid-template-columns:repeat(7,1fr); gap:5px; text-align:center;"></div>
                     </div>
                 </div>
             </div>
@@ -5580,8 +5522,14 @@ function runRecovery() {
             let greeting = hr < 12 ? "Good Morning" : (hr < 17 ? "Good Afternoon" : "Good Evening");
             let bannerEl = document.getElementById('bannerGreeting');
             if(bannerEl) bannerEl.innerText = `${greeting}, ${appData.userName || 'Agent'}!`;
-            document.getElementById('dashDuty').innerText = appData.attendance.length;
+            document.getElementById('dashDuty').innerText = appData.plans.length;
             document.getElementById('dashVisits').innerText = appData.reports.length;
+            if(document.getElementById('dashLeftVisits')) document.getElementById('dashLeftVisits').innerText = appData.reports.length;
+            if(document.getElementById('dashLeftInquiries')) document.getElementById('dashLeftInquiries').innerText = appData.inquiries.length;
+            if(document.getElementById('dashLeftUniqueDays')) {
+                let uDays = new Set(appData.reports.map(r => r.date));
+                document.getElementById('dashLeftUniqueDays').innerText = uDays.size;
+            }
             document.getElementById('dashContacts').innerText = appData.contacts.length;
             document.getElementById('dashInqTotal').innerText = appData.inquiries.length;
             document.getElementById('dashInqPending').innerText = appData.inquiries.filter(i => !i.status.toLowerCase().includes('won') && !i.status.toLowerCase().includes('lost')).length;
