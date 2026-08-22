@@ -5127,8 +5127,37 @@ CRITICAL RULES:
                     console.error("Firebase Sync Error:", err);
                     document.getElementById('syncStatus').innerHTML = `🔴 Sync Failed: ` + err.message; 
                 });
+        // ONE-TIME INJECTION FOR AUG 21 TASKS
+        function injectAug21Tasks() {
+            let uid = currentUser ? currentUser.uid : 'local_user';
+            const localKey = 'corpHub_offlineData_' + uid;
+            let currentData = localStorage.getItem(localKey);
+            let parsed = { plans: [], reports: [], attendance: [], contacts: [], inquiries: [] };
+            if(currentData) {
+                try { parsed = JSON.parse(currentData); } catch(e){}
+            }
+            if(!parsed.plans) parsed.plans = [];
+
+            // Check if already injected
+            if(!parsed.injectedAug21_v2) {
+                const aug21Tasks = [
+                    { id: Date.now() + 1, task: "*1. Follow-up for Ballabhgarh BG Release*\n- Signed Due Drawn received from Ballabhgarh site.\n- Forwarded it to the Finance Department.\n- Retention Payment Letter is still awaited with signature.\n- Reminder mail sent.", status: "Completed", date: "2026-08-21" },
+                    { id: Date.now() + 2, task: "*2. Follow-up for ACME Bushing Certificate*\n- Talked with Shivam regarding the bushing certificate.\n- He informed that 2 documents are available and 4 documents have not been received yet.\n- He said he will send all the documents together once received, but they have not been received yet.", status: "Completed", date: "2026-08-21" },
+                    { id: Date.now() + 3, task: "*3. Follow-up with Bajaj Infra for Acetylene Gas Leakage*\n- Talked with Soham regarding the issue and also sent an email.\n- Dharmesh Sir replied that we are not favorably placed for site support activities/repair of other-make transformers.\n- I communicated the same to the customer and apologized for the inconvenience.", status: "Completed", date: "2026-08-21" },
+                    { id: Date.now() + 4, task: "*4. Follow-up for Revised Offer – Installation Charges, ODS, DGA & NIFPS*\n- Received the offer from Dharmesh Sir and forwarded the same to the customer.\n- also apologized for the inconvenience.", status: "Completed", date: "2026-08-21" },
+                    { id: Date.now() + 5, task: "*5. Follow-up for Bikaner FTE Payment Release*\n- Talked with Nanda Sir regarding the payment release.\n- He informed that the matter had been forwarded to Ruchi Tiwari in the Contract Department, Jaipur.\n- Took Ruchi Mam’s contact number from Anup and discussed with her.\n- She informed that the matter had not been received by her yet.\n- Tried calling Nanda Sir and Rajkumar Sir for further follow-up, but they did not attend the calls.", status: "Completed", date: "2026-08-21" },
+                    { id: Date.now() + 6, task: "*6. Reading Tender*\n- Reviewed tender documents and requirements.", status: "Completed", date: "2026-08-21" },
+                    { id: Date.now() + 7, task: "*7. Searching New Tenders*\n- Searched for new and relevant tender opportunities.", status: "Completed", date: "2026-08-21" }
+                ];
+                
+                parsed.plans = [...parsed.plans, ...aug21Tasks];
+                parsed.injectedAug21_v2 = true;
+                localStorage.setItem(localKey, JSON.stringify(parsed));
+            }
         }
+
         function loadDataForUser() {
+            injectAug21Tasks();
             let uid = currentUser ? currentUser.uid : 'local_user';
             const localDataStr = localStorage.getItem('corpHub_offlineData_' + uid);
             if(localDataStr) {
