@@ -759,12 +759,44 @@
 
                 <!-- RIGHT COLUMN -->
                 <div class="dashboard-layout-right">
-                    <div class="card" style="padding:20px;">
+                    <div class="card" style="padding:20px; margin-bottom: 20px;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                             <h3 style="margin:0; font-size:1rem; color:#ffffff;"><i class="fas fa-calendar-alt" style="color:var(--accent-primary); margin-right:5px;"></i> Calendar Overview</h3>
                         </div>
                         <div style="text-align:center; font-weight:800; font-size:1.2rem; margin-bottom:15px; color:var(--accent-primary);" id="calendarMonthLabel"></div>
                         <div id="calendarGrid" style="display:grid; grid-template-columns:repeat(7,1fr); gap:5px; text-align:center;"></div>
+                    </div>
+
+                    <!-- LIVE MARKETS API WIDGET -->
+                    <div class="card" style="padding:20px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                            <h3 style="margin:0; font-size:1rem; color:#ffffff;"><i class="fas fa-chart-line" style="color:#2ecc71; margin-right:5px;"></i> Live Markets & Rates</h3>
+                            <button onclick="fetchDashboardAPIs()" style="background:transparent; border:none; color:#888; cursor:pointer;"><i class="fas fa-sync-alt"></i></button>
+                        </div>
+                        
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px;">
+                            <div style="background:rgba(255,255,255,0.02); padding:15px; border-radius:10px; border:1px solid rgba(255,255,255,0.05); text-align:center;">
+                                <div style="font-size:0.75rem; color:#aaa; margin-bottom:5px;">USD to INR (₹)</div>
+                                <div id="liveRateINR" style="font-size:1.4rem; font-weight:800; color:#00E5FF;">Loading...</div>
+                                <div style="font-size:0.65rem; color:#888; margin-top:5px;">Free Currency API</div>
+                            </div>
+                            <div style="background:rgba(255,255,255,0.02); padding:15px; border-radius:10px; border:1px solid rgba(255,255,255,0.05); text-align:center;">
+                                <div style="font-size:0.75rem; color:#aaa; margin-bottom:5px;">EUR to INR (₹)</div>
+                                <div id="liveRateEUR" style="font-size:1.4rem; font-weight:800; color:#9b59b6;">Loading...</div>
+                                <div style="font-size:0.65rem; color:#888; margin-top:5px;">Free Currency API</div>
+                            </div>
+                        </div>
+
+                        <div style="background:rgba(241, 196, 15, 0.05); padding:15px; border-radius:10px; border:1px solid rgba(241, 196, 15, 0.2);">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div>
+                                    <div style="font-size:0.75rem; color:#f1c40f; margin-bottom:5px;"><i class="fas fa-coins"></i> Gold Price (XAU/USD)</div>
+                                    <div id="liveGoldRate" style="font-size:1.4rem; font-weight:800; color:#fff;">Fetching...</div>
+                                </div>
+                                <i class="fas fa-chart-area" style="font-size:2rem; color:rgba(241, 196, 15, 0.2);"></i>
+                            </div>
+                            <div style="font-size:0.65rem; color:#888; margin-top:5px;" id="goldApiStatus">GoldAPI.io</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -830,7 +862,6 @@
                         <button class="btn" style="font-size:0.8rem; padding:8px; background:#107c41; color:#fff; border:none; flex:1;" onclick="exportMasterExcel()"><i class="fas fa-file-excel"></i> Excel</button>
                     </div>           </div>
                 </div>
-            </div>
         </section>
 
         <!-- MODULE 2: DAILY PLAN -->
@@ -844,7 +875,6 @@
                     <div style="display:flex; gap:10px; align-items:center;">
                         <input type="text" id="planTask" class="input-field" placeholder="What needs to be done today?" style="flex:1; margin-bottom:0;" required>
                         <button type="button" class="btn" style="width:auto; padding:0 15px; background:var(--accent-primary); color:#000;" onclick="translateToEnglish('planTask')" title="Translate Hindi to Professional English"><i class="fas fa-language"></i> AI</button>
-                        <button type="submit" class="btn" style="width:auto; padding:0 15px;"><i class="fas fa-plus"></i></button>
                     </div>
                     <button type="submit" id="planSubmitBtn" class="btn" style="width:auto; margin-top:0;">Add Task</button>
                     <button type="button" id="planAIBtn" class="btn" style="width:auto; margin-top:0; background: linear-gradient(45deg, #00E5FF, #00BFFF); color: black;" onclick="enhanceTextWithAI('planTask', 'planAIBtn')"><i class="fas fa-magic"></i> ✨ AI Enhance</button>
@@ -1296,11 +1326,11 @@
         </section>
         
         <!-- PLAN HISTORY MODAL -->
-        <div id="planHistoryModal" class="modal-overlay">
-            <div class="modal" style="width: 90%; max-width: 600px; background:var(--card-bg); padding:20px; border-radius:10px; border:1px solid var(--card-border);">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+        <div id="planHistoryModal" class="overlay-screen" style="display: none; background: rgba(0,0,0,0.85); z-index: 40000; align-items: center; justify-content: center; padding: 20px;">
+            <div class="modal" style="width: 90%; max-width: 600px; background:var(--card-bg); padding:20px; border-radius:10px; border:1px solid var(--card-border); max-height: 80vh; display: flex; flex-direction: column;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-shrink: 0;">
                     <h2 style="margin:0; color:var(--accent-primary);"><i class="fas fa-history"></i> Plan History</h2>
-                    <button type="button" class="icon-btn" onclick="document.getElementById('planHistoryModal').classList.remove('active')"><i class="fas fa-times"></i></button>
+                    <button type="button" class="icon-btn" onclick="document.getElementById('planHistoryModal').style.display='none'"><i class="fas fa-times"></i></button>
                 </div>
                 <div id="planHistoryContent" style="max-height: 60vh; overflow-y: auto; padding-right: 5px;">
                     <!-- History injected here -->
@@ -4957,7 +4987,8 @@ function runRecovery() {
         }
         // OFFLINE & AUTO-SYNC ENGINE
         function saveLocally() {
-            localStorage.setItem('corpHub_offlineData_' + currentUser.uid, JSON.stringify(cleanData(appData)));
+            let uid = currentUser ? currentUser.uid : 'local_user';
+            localStorage.setItem('corpHub_offlineData_' + uid, JSON.stringify(cleanData(appData)));
         }
         function pushToFirebase() {
             if(!currentUser || !navigator.onLine || !isDataLoaded) return;
@@ -4972,12 +5003,12 @@ function runRecovery() {
                 });
         }
         function loadDataForUser() {
-            if (!currentUser) return;
-            const localDataStr = localStorage.getItem('corpHub_offlineData_' + currentUser.uid);
+            let uid = currentUser ? currentUser.uid : 'local_user';
+            const localDataStr = localStorage.getItem('corpHub_offlineData_' + uid);
             if(localDataStr) {
                 try { appData = cleanData({ ...appData, ...JSON.parse(localDataStr) }); } catch(e){}
             }
-            if(navigator.onLine) {
+            if(currentUser && navigator.onLine) {
                 db.collection('corporateOperationsData').doc(currentUser.uid).get().then((doc) => {
                     if (doc.exists) appData = cleanData({ ...appData, ...doc.data() }); else { appData = cleanData(appData); autoSave(); }
                     
@@ -4998,11 +5029,10 @@ function runRecovery() {
             }
         }
         function autoSave() { 
-            if(!currentUser) return;
             appData = cleanData(appData);
             saveLocally();
-            if(navigator.onLine) { pushToFirebase(); showToast('Data Synced! ☁️'); }
-            else { document.getElementById('syncStatus').innerHTML = `🔴 Saved Offline (Waiting for Internet)`; showToast('Saved Locally. Will sync when online.'); }
+            if(currentUser && navigator.onLine) { pushToFirebase(); showToast('Data Synced! ☁️'); }
+            else { document.getElementById('syncStatus').innerHTML = `🔴 Saved Offline`; showToast('Saved Locally.'); }
             updateUI(); 
         }
 
@@ -5045,7 +5075,10 @@ function runRecovery() {
             "12-25": { name: "Christmas", icon: "🎄" }
         };
 
-        function changeCalMonth(offset) {
+        function setCalMonth(m) { currentCalMonth = parseInt(m); renderDashboardCalendar(); }
+        function setCalYear(y) { currentCalYear = parseInt(y); renderDashboardCalendar(); }
+        
+        function changeDashboardCalendar(offset) {
             currentCalMonth += offset;
             if(currentCalMonth > 11) { currentCalMonth = 0; currentCalYear++; }
             if(currentCalMonth < 0) { currentCalMonth = 11; currentCalYear--; }
@@ -5062,7 +5095,17 @@ function runRecovery() {
             const month = currentCalMonth;
             
             const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-            monthLabel.innerText = `${monthNames[month]} ${year}`;
+            
+            let mOpts = monthNames.map((m, idx) => `<option value="${idx}" ${idx === month ? 'selected' : ''}>${m}</option>`).join('');
+            let yOpts = '';
+            for(let y = today.getFullYear() - 5; y <= today.getFullYear() + 5; y++) {
+                yOpts += `<option value="${y}" ${y === year ? 'selected' : ''}>${y}</option>`;
+            }
+            
+            monthLabel.innerHTML = `
+                <select onchange="setCalMonth(this.value)" style="background:transparent; color:var(--accent-primary); border:none; font-weight:800; font-size:1.2rem; cursor:pointer; text-align:center; outline:none; appearance:none;">${mOpts}</select>
+                <select onchange="setCalYear(this.value)" style="background:transparent; color:var(--accent-primary); border:none; font-weight:800; font-size:1.2rem; cursor:pointer; text-align:center; outline:none; appearance:none;">${yOpts}</select>
+            `;
             
             const firstDay = new Date(year, month, 1).getDay();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -5123,8 +5166,8 @@ function runRecovery() {
                 if(combinedFestivals.length > 0) {
                     let dispIcon = combinedFestivals[0].icon;
                     if(combinedFestivals.length > 1) dispIcon += '+';
-                    let dispName = combinedFestivals.map(f => f.name).join(', ');
-                    festivalHtml = `<div style="font-size:0.6rem; color:var(--warning); line-height:1; margin-top:2px;" title="${dispName}">${dispIcon}</div>`;
+                    let dispName = combinedFestivals.map(f => f.name).join(', ').replace(/'/g, "\\'");
+                    festivalHtml = `<div style="font-size:0.6rem; color:var(--warning); line-height:1; margin-top:2px; cursor:pointer;" onclick="showToast('${dispName}')" title="${dispName}">${dispIcon}</div>`;
                 }
 
                 grid.innerHTML += `<div style="${style}"><span>${d}</span>${festivalHtml}${markers}</div>`;
@@ -5777,15 +5820,23 @@ function runRecovery() {
 
         document.getElementById('planForm').addEventListener('submit', function(e) { 
             e.preventDefault(); 
-            let taskText = document.getElementById('planTask').value;
-            if(editPlanId) {
-                appData.plans = appData.plans.map(p => p.id === editPlanId ? { ...p, task: taskText } : p);
-                editPlanId = null;
-                document.getElementById('planSubmitBtn').innerText = 'Add Task';
-            } else {
-                appData.plans.push({ id: Date.now(), task: taskText, status: 'Pending', date: todayStr }); 
+            try {
+                let taskText = document.getElementById('planTask').value;
+                if(editPlanId) {
+                    appData.plans = appData.plans.map(p => p.id === editPlanId ? { ...p, task: taskText } : p);
+                    editPlanId = null;
+                    document.getElementById('planSubmitBtn').innerText = 'Add Task';
+                } else {
+                    appData.plans.push({ id: Date.now(), task: taskText, status: 'Pending', date: todayStr }); 
+                }
+                this.reset(); 
+                autoSave(); 
+                renderPlans();
+                showToast('Task added successfully!');
+            } catch (err) {
+                alert("Error saving task: " + err.message);
+                console.error(err);
             }
-            this.reset(); autoSave(); renderPlans();
         });
         
         function editPlan(id) {
@@ -5833,7 +5884,7 @@ function runRecovery() {
                 content.innerHTML = html;
             }
             
-            document.getElementById('planHistoryModal').classList.add('active');
+            document.getElementById('planHistoryModal').style.display = 'flex';
         }
 
         let showAllPlanHistory = false;
@@ -7364,7 +7415,66 @@ Update: ${r.text}
         setTimeout(() => {
             renderSidebar();
             renderAppLibrary();
+            fetchDashboardAPIs(); // Fetch API data on load
         }, 500);
+
+        // --- DASHBOARD API INTEGRATION ---
+        async function fetchDashboardAPIs() {
+            // 1. Currency Exchange API
+            try {
+                const currencyRes = await fetch('https://latest.currency-api.pages.dev/v1/currencies/usd.json');
+                const currencyData = await currencyRes.json();
+                
+                if (currencyData && currencyData.usd && currencyData.usd.inr) {
+                    document.getElementById('liveRateINR').innerText = '₹ ' + currencyData.usd.inr.toFixed(2);
+                } else {
+                    document.getElementById('liveRateINR').innerText = 'Error';
+                }
+
+                // Also fetch EUR for the second box
+                const eurRes = await fetch('https://latest.currency-api.pages.dev/v1/currencies/eur.json');
+                const eurData = await eurRes.json();
+                if (eurData && eurData.eur && eurData.eur.inr) {
+                    document.getElementById('liveRateEUR').innerText = '₹ ' + eurData.eur.inr.toFixed(2);
+                } else {
+                    document.getElementById('liveRateEUR').innerText = 'Error';
+                }
+            } catch(e) {
+                console.error('Currency API Error', e);
+                document.getElementById('liveRateINR').innerText = 'N/A';
+                document.getElementById('liveRateEUR').innerText = 'N/A';
+            }
+
+            // 2. Finance / Gold API
+            try {
+                const myHeaders = new Headers();
+                myHeaders.append("x-access-token", "ga_live_QhYkSy5Ropvi68u4yFHIWouwJDhY_clM73M9EKbz");
+                myHeaders.append("Content-Type", "application/json");
+
+                const requestOptions = {
+                    method: 'GET',
+                    headers: myHeaders,
+                    redirect: 'follow'
+                };
+
+                const goldRes = await fetch("https://www.goldapi.io/api/XAU/USD", requestOptions);
+                const goldData = await goldRes.json();
+
+                if (goldData && goldData.price) {
+                    document.getElementById('liveGoldRate').innerText = '$ ' + goldData.price.toFixed(2);
+                    document.getElementById('goldApiStatus').innerText = 'Last updated: ' + new Date().toLocaleTimeString();
+                } else if (goldData.error) {
+                    document.getElementById('liveGoldRate').innerText = 'API Key Err';
+                    document.getElementById('goldApiStatus').innerText = goldData.error;
+                }
+            } catch(e) {
+                console.error('Gold API Error', e);
+                document.getElementById('liveGoldRate').innerText = 'N/A';
+                document.getElementById('goldApiStatus').innerText = 'Network error fetching Gold rates';
+            }
+        }
+        // --- END DASHBOARD API LOGIC ---
+
         // --- END DYNAMIC SIDEBAR LOGIC ---
 </script>
 
