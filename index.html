@@ -5127,6 +5127,7 @@ CRITICAL RULES:
                     console.error("Firebase Sync Error:", err);
                     document.getElementById('syncStatus').innerHTML = `🔴 Sync Failed: ` + err.message; 
                 });
+        }
         // ONE-TIME INJECTION FOR AUG 21 TASKS
         function injectAug21Tasks() {
             let uid = currentUser ? currentUser.uid : 'local_user';
