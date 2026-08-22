@@ -6215,9 +6215,8 @@ Rules:
                             <h1 style="color: #0f172a; margin:0; font-size: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">${appData.userName || 'Sandeep Kumar'}</h1>
                             <h2 style="margin:5px 0 0 0; color: #3b82f6; font-size: 15px; font-weight: 600;">${title}</h2>
                         </div>
-                        <div style="text-align:right; color: #64748b; font-size: 11px;">
-                            <strong>Generated:</strong> ${new Date().toLocaleDateString('en-GB')}<br>
-                            <strong>Corp Hub Reporting</strong>
+                        <div style="text-align:right; color: #475569; font-size: 11px; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 4px; background: #f8fafc;">
+                            <strong>Report Date:</strong> ${new Date().toLocaleDateString('en-GB')}
                         </div>
                     </div>
                     
@@ -6372,9 +6371,6 @@ Rules:
                 text += `\n`;
             }
 
-            html += `<div style="text-align:center; color:#94a3b8; font-size:10px; margin-top:40px; border-top:1px solid #e2e8f0; padding-top:10px;">
-                Generated securely via Corp Hub Reporting System &bull; <span style="color:#cbd5e1;">${new Date().toLocaleString('en-GB')}</span>
-            </div>`;
             html += `</div>`;
             
             document.getElementById('compiledReportBox').style.display = 'block';
