@@ -891,6 +891,32 @@
             </div>
         </section>
 
+        <!-- MODULE 2A: SMART DAILY REPORT -->
+        <section id="daily-report" class="module-section">
+            <div class="card">
+                <h2><i class="fas fa-file-signature"></i> Smart Daily Work Report</h2>
+                <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:15px;">Generate a perfectly formatted daily work summary (bullet points, grouped by task) ready to share on WhatsApp or Email. You can type rough notes or use Voice Dictation.</p>
+                
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <label>Rough Notes / Activities:</label>
+                    <div class="ai-textarea-wrapper">
+                        <textarea id="dailyRoughNotes" placeholder="Example: went to ballabhgarh site for bg release. signed due drawn received. sent to finance. retention payment letter pending signature so sent reminder mail..."></textarea>
+                        <div class="ai-tools">
+                            <button type="button" class="icon-btn" id="btnDailyDictate" onclick="toggleDailyDictate()" title="Voice Dictation"><i class="fas fa-microphone"></i></button>
+                        </div>
+                    </div>
+                    
+                    <button type="button" id="btnGenerateDailyReport" class="btn" style="background: linear-gradient(45deg, #00E5FF, #00BFFF); color: black; font-weight:bold; margin-top:0;" onclick="generateDailyReportAI()"><i class="fas fa-magic"></i> ✨ Generate Formatted Report</button>
+                    
+                    <div id="dailyReportOutputContainer" style="display:none; margin-top:20px;">
+                        <label>Formatted Report:</label>
+                        <textarea id="dailyFormattedReport" style="height:250px; font-family: monospace; white-space: pre-wrap; font-size: 0.85rem; line-height: 1.4;"></textarea>
+                        <button type="button" class="btn" style="background:#25D366; color:#fff; border:none; margin-top:5px;" onclick="copyDailyReportWA()"><i class="fab fa-whatsapp"></i> Copy for WhatsApp</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- MODULE 3: DAILY REPORTS -->
         <section id="reports" class="module-section">
             <div class="grid-2">
@@ -4805,6 +4831,101 @@ function runRecovery() {
                 btn.disabled = false;
             }
         }
+        
+        // --- SMART DAILY REPORT AI LOGIC ---
+        let dailyDictateActive = false;
+        let dailyRecognition = null;
+        function toggleDailyDictate() {
+            if(!('webkitSpeechRecognition' in window)) return alert("Speech recognition not supported in your browser!");
+            if(dailyDictateActive && dailyRecognition) {
+                dailyRecognition.stop();
+                return;
+            }
+            dailyRecognition = new webkitSpeechRecognition();
+            dailyRecognition.continuous = true;
+            dailyRecognition.interimResults = true;
+            dailyRecognition.lang = 'hi-IN'; // Hinglish friendly
+            
+            dailyRecognition.onstart = function() {
+                dailyDictateActive = true;
+                document.getElementById('btnDailyDictate').classList.add('listening');
+                showToast("Listening... Speak now!");
+            };
+            
+            dailyRecognition.onresult = function(event) {
+                let final_transcript = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) final_transcript += event.results[i][0].transcript + ' ';
+                }
+                if(final_transcript) {
+                    const txt = document.getElementById('dailyRoughNotes');
+                    txt.value += final_transcript;
+                }
+            };
+            
+            dailyRecognition.onend = function() {
+                dailyDictateActive = false;
+                document.getElementById('btnDailyDictate').classList.remove('listening');
+                showToast("Voice dictation stopped.");
+            };
+            
+            dailyRecognition.start();
+        }
+
+        async function generateDailyReportAI() {
+            const inputEl = document.getElementById('dailyRoughNotes');
+            const notes = inputEl.value.trim();
+            if(!notes) return alert('Please enter some rough notes first!');
+            
+            const btn = document.getElementById('btnGenerateDailyReport');
+            const oldHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating Professional Report...';
+            btn.disabled = true;
+            document.getElementById('dailyReportOutputContainer').style.display = 'block';
+            document.getElementById('dailyFormattedReport').value = 'AI is writing your report...';
+            
+            try {
+                const systemPrompt = `You are an executive assistant. Your task is to convert the user's rough, unstructured daily work notes into a highly professional, well-formatted daily work report. 
+                
+Use the exact structure below:
+*Daily Work - ${new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })}*
+
+*1. [Major Task or Follow-up Topic]*
+* [Professional bullet point 1]
+* [Professional bullet point 2]
+
+*2. [Next Topic]*
+* [Point 1]...
+
+Rules:
+- Fix all grammar and translate Hindi/Hinglish to professional Corporate English.
+- Group related points logically under numbered topics.
+- Be concise but detailed.
+- Output ONLY the formatted text, no conversational filler.`;
+
+                const formatted = await callSandeepAI(systemPrompt, notes);
+                if(formatted) {
+                    document.getElementById('dailyFormattedReport').value = formatted;
+                    showToast("Report Generated!");
+                } else {
+                    document.getElementById('dailyFormattedReport').value = "Failed to generate report.";
+                }
+            } catch(e) {
+                document.getElementById('dailyFormattedReport').value = "Error: " + e.message;
+            } finally {
+                btn.innerHTML = oldHtml;
+                btn.disabled = false;
+            }
+        }
+
+        function copyDailyReportWA() {
+            const text = document.getElementById('dailyFormattedReport').value;
+            if(!text) return;
+            navigator.clipboard.writeText(text);
+            showToast("Copied! Ready to paste in WhatsApp.");
+            // Try to open WhatsApp Web/App directly
+            window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank");
+        }
         function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); document.getElementById('sidebarOverlay').classList.toggle('active'); const ham = document.querySelector('.hamburger-container'); if(ham) ham.classList.toggle('change'); }
         function toggleSubMenu(id) { const el = document.getElementById(id); el.style.display = el.style.display === 'none' ? 'block' : 'none'; }
         function showToast(msg) { const t = document.getElementById('toast'); document.getElementById('toastMsg').innerText = msg; t.style.bottom = '30px'; setTimeout(() => t.style.bottom = '-60px', 3000); }
@@ -7304,7 +7425,8 @@ Update: ${r.text}
             { id: 'inquiries', name: 'Leads & Inquiries', icon: 'fa-funnel-dollar', type: 'tab', category: 'CORE WORKSPACE', defaultPin: true },
             { id: 'crm', name: 'Customer CRM', icon: 'fa-users', type: 'module', category: 'CORE WORKSPACE', defaultPin: true },
             { id: 'planner', name: 'Daily Plan & Tasks', icon: 'fa-tasks', type: 'tab', category: 'CORE WORKSPACE', defaultPin: true },
-            { id: 'reports', name: 'Visit Reports', icon: 'fa-file-signature', type: 'tab', category: 'CORE WORKSPACE', defaultPin: true },
+            { id: 'daily-report', name: 'Smart Daily Report', icon: 'fa-file-signature', type: 'tab', category: 'CORE WORKSPACE', defaultPin: true },
+            { id: 'reports', name: 'Visit Reports', icon: 'fa-map-marked-alt', type: 'tab', category: 'CORE WORKSPACE', defaultPin: true },
             { id: 'quotation', name: 'Quotations', icon: 'fa-file-invoice-dollar', type: 'tab', category: 'CORE WORKSPACE', defaultPin: true },
             
             // OFFICE WORK & EXPENSES
