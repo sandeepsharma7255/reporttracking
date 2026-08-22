@@ -6196,21 +6196,52 @@ Rules:
             
             const title = `${reportType} (${fromDateStr} ${diffDays > 0 ? 'to ' + toDateStr : ''})`;
 
+            // Calculate some summary metrics
+            let sumVisits = data.reports.length;
+            let sumTasks = data.plans.length;
+            let sumPendingTasks = data.plans.filter(p => p.status !== 'Completed').length;
+            let sumExpenses = 0;
+            if(!appData.personalExpenses) appData.personalExpenses = [];
+            let fPersonalExpSum = appData.personalExpenses.filter(e => e.date >= fromDateStr && e.date <= toDateStr);
+            let fSheetsSum = (appData.expenseSheets || []).filter(s => s.date >= fromDateStr && s.date <= toDateStr);
+            fPersonalExpSum.forEach(e => sumExpenses += parseFloat(e.amount)||0);
+            fSheetsSum.forEach(s => sumExpenses += parseFloat(s.total)||0);
+            data.reports.forEach(r => sumExpenses += (parseFloat(r.goingFare)||0)+(parseFloat(r.returnFare)||0)+(parseFloat(r.food)||0));
+
             let html = `
-                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #000; font-size: 12px; line-height: 1.4;">
-                    <div style="text-align:center; border-bottom: 3px solid #0056b3; margin-bottom: 20px; padding-bottom:10px;">
-                        <h1 style="color: #000; margin:0; font-size: 24px; text-transform: uppercase; letter-spacing: 1px;">${appData.userName || 'Sandeep Kumar'}</h1>
-                        <h2 style="margin:8px 0 0 0; color: #0056b3; font-size: 16px;">${title}</h2>
+                <div style="font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; font-size: 12px; line-height: 1.5; max-width: 100%; background: #fff; padding: 10px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px; padding-bottom:15px;">
+                        <div>
+                            <h1 style="color: #0f172a; margin:0; font-size: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">${appData.userName || 'Sandeep Kumar'}</h1>
+                            <h2 style="margin:5px 0 0 0; color: #3b82f6; font-size: 15px; font-weight: 600;">${title}</h2>
+                        </div>
+                        <div style="text-align:right; color: #64748b; font-size: 11px;">
+                            <strong>Generated:</strong> ${new Date().toLocaleDateString('en-GB')}<br>
+                            <strong>Corp Hub Reporting</strong>
+                        </div>
+                    </div>
+                    
+                    <div style="display:flex; gap:15px; margin-bottom:25px;">
+                        <div style="flex:1; background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:12px; text-align:center;">
+                            <div style="font-size:11px; color:#64748b; text-transform:uppercase; font-weight:700;">Total Visits</div>
+                            <div style="font-size:18px; color:#0f172a; font-weight:800; margin-top:5px;">${sumVisits}</div>
+                        </div>
+                        <div style="flex:1; background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:12px; text-align:center;">
+                            <div style="font-size:11px; color:#64748b; text-transform:uppercase; font-weight:700;">Tasks (Pending)</div>
+                            <div style="font-size:18px; color:#0f172a; font-weight:800; margin-top:5px;">${sumTasks} <span style="font-size:12px; color:#ef4444;">(${sumPendingTasks})</span></div>
+                        </div>
+                        <div style="flex:1; background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:12px; text-align:center;">
+                            <div style="font-size:11px; color:#64748b; text-transform:uppercase; font-weight:700;">Total Outflow</div>
+                            <div style="font-size:18px; color:#0f172a; font-weight:800; margin-top:5px;">₹${sumExpenses.toLocaleString()}</div>
+                        </div>
                     </div>
             `;
-            let text = `${appData.userName || 'Sandeep Kumar'}
-${title}
+            
+            let text = `${appData.userName || 'Sandeep Kumar'}\n${title}\nGenerated: ${new Date().toLocaleDateString('en-GB')}\n---------------------------\nVisits: ${sumVisits} | Tasks: ${sumTasks} | Expenses: Rs.${sumExpenses}\n---------------------------\n\n`;
 
-`;
-
-            const tableStyle = 'width:100%; border-collapse:collapse; margin-bottom:25px; table-layout: fixed; word-wrap: break-word; box-shadow: 0 1px 3px rgba(0,0,0,0.1);';
-            const thStyle = 'background:#0056b3; color:#ffffff; padding:10px 12px; text-align:left; border:1px solid #004494; font-weight:bold; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;';
-            const tdStyle = 'padding:10px 12px; border:1px solid #ddd; vertical-align: top; white-space: pre-wrap; word-wrap: break-word; font-size: 12px; color: #333; background: #fff;';
+            const tableStyle = 'width:100%; border-collapse:collapse; margin-bottom:30px; table-layout: fixed; word-wrap: break-word;';
+            const thStyle = 'background:#f1f5f9; color:#475569; padding:10px 12px; text-align:left; border-bottom:2px solid #cbd5e1; font-weight:700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;';
+            const tdStyle = 'padding:10px 12px; border-bottom:1px solid #e2e8f0; vertical-align: top; white-space: pre-wrap; word-wrap: break-word; font-size: 12px; color: #334155; background: #fff;';
 
             if(incAttendance && data.attendance.length > 0) {
                 data.attendance.sort((a,b) => a.date.localeCompare(b.date));
@@ -6341,6 +6372,9 @@ ${title}
                 text += `\n`;
             }
 
+            html += `<div style="text-align:center; color:#94a3b8; font-size:10px; margin-top:40px; border-top:1px solid #e2e8f0; padding-top:10px;">
+                Generated securely via Corp Hub Reporting System &bull; <span style="color:#cbd5e1;">${new Date().toLocaleString('en-GB')}</span>
+            </div>`;
             html += `</div>`;
             
             document.getElementById('compiledReportBox').style.display = 'block';
