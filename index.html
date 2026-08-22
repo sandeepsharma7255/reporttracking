@@ -635,7 +635,10 @@
             </div>
             
             <div class="header-icons">
-                <div class="icon-btn" title="Sync Status" id="syncStatusBtn"><i class="fas fa-server"></i></div>
+                <div style="display:flex; flex-direction:column; align-items:center;">
+                    <div class="icon-btn" title="Sync Status" id="syncStatusBtn"><i class="fas fa-server"></i></div>
+                    <div id="syncStatus" style="font-size:0.5rem; color:#888; margin-top:2px; white-space:nowrap;"></div>
+                </div>
                 <div class="theme-toggle-pill" onclick="toggleTheme()" title="Toggle Theme">
                     <div class="mode"><i class="fas fa-moon"></i></div>
                     <div class="mode active"><i class="fas fa-sun"></i></div>
@@ -872,8 +875,9 @@
                     <button type="button" onclick="togglePlanHistory()" class="btn" style="width:auto; padding:5px 10px; font-size:0.8rem; background:transparent; border:1px solid var(--accent-primary); color:var(--accent-primary); margin:0;"><i class="fas fa-history"></i> <span id="planHistoryBtnText">Show History</span></button>
                 </div>
                 <form id="planForm" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 20px;">
-                    <div style="display:flex; gap:10px; align-items:center;">
-                        <input type="text" id="planTask" class="input-field" placeholder="What needs to be done today?" style="flex:1; margin-bottom:0;" required>
+                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                        <input type="date" id="planTaskDate" class="input-field" style="width:auto; margin-bottom:0;" required>
+                        <input type="text" id="planTask" class="input-field" placeholder="What needs to be done?" style="flex:1; min-width:200px; margin-bottom:0;" required>
                         <button type="button" class="btn" style="width:auto; padding:0 15px; background:var(--accent-primary); color:#000;" onclick="translateToEnglish('planTask')" title="Translate Hindi to Professional English"><i class="fas fa-language"></i> AI</button>
                     </div>
                     <button type="submit" id="planSubmitBtn" class="btn" style="width:auto; margin-top:0;">Add Task</button>
@@ -5818,18 +5822,22 @@ function runRecovery() {
         // DAILY PLAN
         let editPlanId = null;
 
+        document.getElementById('planTaskDate').value = todayStr;
         document.getElementById('planForm').addEventListener('submit', function(e) { 
             e.preventDefault(); 
             try {
                 let taskText = document.getElementById('planTask').value;
+                let taskDate = document.getElementById('planTaskDate').value || todayStr;
+                
                 if(editPlanId) {
-                    appData.plans = appData.plans.map(p => p.id === editPlanId ? { ...p, task: taskText } : p);
+                    appData.plans = appData.plans.map(p => p.id === editPlanId ? { ...p, task: taskText, date: taskDate } : p);
                     editPlanId = null;
                     document.getElementById('planSubmitBtn').innerText = 'Add Task';
                 } else {
-                    appData.plans.push({ id: Date.now(), task: taskText, status: 'Pending', date: todayStr }); 
+                    appData.plans.push({ id: Date.now(), task: taskText, status: 'Pending', date: taskDate }); 
                 }
                 this.reset(); 
+                document.getElementById('planTaskDate').value = taskDate; // keep date after reset
                 autoSave(); 
                 renderPlans();
                 showToast('Task added successfully!');
