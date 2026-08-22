@@ -4885,23 +4885,24 @@ function runRecovery() {
             document.getElementById('dailyFormattedReport').value = 'AI is writing your report...';
             
             try {
-                const systemPrompt = `You are an executive assistant. Your task is to convert the user's rough, unstructured daily work notes into a highly professional, well-formatted daily work report. 
+                const systemPrompt = `You are an executive assistant. Your task is to format the user's daily work notes into a structured WhatsApp report. 
                 
 Use the exact structure below:
 *Daily Work - ${new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })}*
 
 *1. [Major Task or Follow-up Topic]*
-* [Professional bullet point 1]
-* [Professional bullet point 2]
+- [Bullet point 1]
+- [Bullet point 2]
 
 *2. [Next Topic]*
-* [Point 1]...
+- [Point 1]...
 
-Rules:
-- Fix all grammar and translate Hindi/Hinglish to professional Corporate English.
-- Group related points logically under numbered topics.
-- Be concise but detailed.
-- Output ONLY the formatted text, no conversational filler.`;
+CRITICAL RULES:
+1. DO NOT change the user's wording or sentences! Only organize them into topics.
+2. DO NOT use '*' for bullet points. Use '-' or '•' instead.
+3. Keep the headings wrapped in '*' so they are bold in WhatsApp (e.g., *1. Follow-up for...*).
+4. Do not translate or re-write extensively, just clean up structure.
+5. Output ONLY the formatted text, no conversational filler.`;
 
                 const formatted = await callSandeepAI(systemPrompt, notes);
                 if(formatted) {
