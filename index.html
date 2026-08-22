@@ -5425,11 +5425,11 @@ function runRecovery() {
             document.getElementById('dashContacts').innerText = appData.contacts.length;
             document.getElementById('dashInqTotal').innerText = appData.inquiries.length;
             document.getElementById('dashInqPending').innerText = appData.inquiries.filter(i => !i.status.toLowerCase().includes('won') && !i.status.toLowerCase().includes('lost')).length;
-            document.getElementById('dashInqWon').innerText = appData.inquiries.filter(i => i.status === 'Order Won').length;
-            document.getElementById('chkPlan').innerHTML = appData.plans.some(p => p.date === todayStr) ? '<span style="color:var(--success)">YES</span>' : '<span style="color:var(--danger)">NO</span>';
-            document.getElementById('chkReport').innerHTML = appData.reports.some(r => r.date === todayStr) ? '<span style="color:var(--success)">YES</span>' : '<span style="color:var(--danger)">NO</span>';
-            document.getElementById('chkAttend').innerHTML = appData.attendance.some(a => a.date === todayStr) ? '<span style="color:var(--success)">YES</span>' : '<span style="color:var(--danger)">NO</span>';
-            document.getElementById('welcomeText').innerHTML = `${appData.userName || 'Sandeep Kumar'}`;
+            if(document.getElementById('dashInqWon')) document.getElementById('dashInqWon').innerText = appData.inquiries.filter(i => i.status === 'Order Won').length;
+            if(document.getElementById('chkPlan')) document.getElementById('chkPlan').innerHTML = appData.plans.some(p => p.date === todayStr) ? '<span style="color:var(--success)">YES</span>' : '<span style="color:var(--danger)">NO</span>';
+            if(document.getElementById('chkReport')) document.getElementById('chkReport').innerHTML = appData.reports.some(r => r.date === todayStr) ? '<span style="color:var(--success)">YES</span>' : '<span style="color:var(--danger)">NO</span>';
+            if(document.getElementById('chkAttend')) document.getElementById('chkAttend').innerHTML = appData.attendance.some(a => a.date === todayStr) ? '<span style="color:var(--success)">YES</span>' : '<span style="color:var(--danger)">NO</span>';
+            if(document.getElementById('welcomeText')) document.getElementById('welcomeText').innerHTML = `👋 Welcome back, ${appData.userName || 'Sandeep Kumar'}!`;
 
             // Phase 2: Analytics & Goals calculations
             const currentMonth = todayStr.slice(0,7); // YYYY-MM
