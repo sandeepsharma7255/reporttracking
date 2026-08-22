@@ -6213,33 +6213,35 @@ ${title}
             const tdStyle = 'padding:10px 12px; border:1px solid #ddd; vertical-align: top; white-space: pre-wrap; word-wrap: break-word; font-size: 12px; color: #333; background: #fff;';
 
             if(incAttendance && data.attendance.length > 0) {
+                data.attendance.sort((a,b) => a.date.localeCompare(b.date));
+                let lastDate = "";
                 html += `<h4 style="color:#d9534f; margin:10px 0 5px 0;">1. ${reportType.replace(" Report", "")} Attendance</h4>`;
                 html += `<table style="${tableStyle}"><tr><th style="${thStyle}; width:80px;">Date</th><th style="${thStyle}; width:100px;">Type</th><th style="${thStyle}">In</th><th style="${thStyle}">Out</th></tr>`;
-                text += `=== 1. ATTENDANCE ===
-`;
+                text += `=== 1. ATTENDANCE ===\n`;
                 data.attendance.forEach(a => {
-                    html += `<tr><td style="${tdStyle}">${a.date}</td><td style="${tdStyle}">${a.type}</td><td style="${tdStyle}">${a.timeIn}</td><td style="${tdStyle}">${a.timeOut || '--'}</td></tr>`;
-                    text += `[${a.date}] ${a.type} | In: ${a.timeIn} | Out: ${a.timeOut||'--'}
-`;
+                    let printD = (a.date !== lastDate) ? a.date : "";
+                    html += `<tr><td style="${tdStyle}"><b>${printD}</b></td><td style="${tdStyle}">${a.type}</td><td style="${tdStyle}">${a.timeIn}</td><td style="${tdStyle}">${a.timeOut || '--'}</td></tr>`;
+                    text += `[${printD || '          '}] ${a.type} | In: ${a.timeIn} | Out: ${a.timeOut||'--'}\n`;
+                    lastDate = a.date;
                 });
                 html += `</table>`;
-                text += `
-`;
+                text += `\n`;
             }
 
             if(incTasks && data.plans.length > 0) {
+                data.plans.sort((a,b) => a.date.localeCompare(b.date));
+                let lastDate = "";
                 html += `<h4 style="color:#f0ad4e; margin:10px 0 5px 0;">2. ${reportType.replace(' Report', '')} Action Plans</h4>`;
                 html += `<table style="${tableStyle}"><tr><th style="${thStyle}; width:80px;">Date</th><th style="${thStyle}">Task</th><th style="${thStyle}; width:100px;">Status</th></tr>`;
-                text += `=== 2. ${reportType.replace(' Report', '').toUpperCase()} ACTION PLANS ===
-`;
+                text += `=== 2. ${reportType.replace(' Report', '').toUpperCase()} ACTION PLANS ===\n`;
                 data.plans.forEach(p => {
-                    html += `<tr><td style="${tdStyle}">${p.date}</td><td style="${tdStyle}">${p.task}</td><td style="${tdStyle}; font-weight:bold; color:${p.status==='Completed'?'green':'red'};">${p.status}</td></tr>`;
-                    text += `[${p.date}] ${p.task} - Status: ${p.status}
-`;
+                    let printD = (p.date !== lastDate) ? p.date : "";
+                    html += `<tr><td style="${tdStyle}"><b>${printD}</b></td><td style="${tdStyle}">${p.task}</td><td style="${tdStyle}; font-weight:bold; color:${p.status==='Completed'?'green':'red'};">${p.status}</td></tr>`;
+                    text += `[${printD || '          '}] ${p.task} - Status: ${p.status}\n`;
+                    lastDate = p.date;
                 });
                 html += `</table>`;
-                text += `
-`;
+                text += `\n`;
             }
 
             if(incVisits) {
@@ -6251,22 +6253,22 @@ ${title}
                 let totalVisitsExpMaster = 0;
                 let hasVisits = data.reports.length > 0;
                 if(hasVisits) {
+                    data.reports.sort((a,b) => a.date.localeCompare(b.date));
+                    let lastDate = "";
                     html += `<h4 style="color:#5cb85c; margin:10px 0 5px 0;">3. ${reportType.replace(" Report", "")} Field Visits</h4>`;
                     html += `<table style="${tableStyle}"><tr><th style="${thStyle}; width:80px;">Date</th><th style="${thStyle}; width:100px;">Company</th><th style="${thStyle}; width:100px;">Met</th><th style="${thStyle}">Remarks</th><th style="${thStyle}; width:70px;">Exp(₹)</th></tr>`;
-                    text += `=== 3. FIELD VISITS & REPORTS ===
-`;
+                    text += `=== 3. FIELD VISITS & REPORTS ===\n`;
                     data.reports.forEach(r => {
+                        let printD = (r.date !== lastDate) ? r.date : "";
                         let pNames = '';
                         if(r.persons && r.persons.length > 0) pNames = r.persons.map(p => p.name).join(', ');
                         else if(r.metName) pNames = r.metName;
                         const totExp = (parseFloat(r.goingFare)||0)+(parseFloat(r.returnFare)||0)+(parseFloat(r.food)||0);
                         totalVisitsExpMaster += totExp;
                         let sigHtml = r.signature ? `<br><img src="${r.signature}" style="width:100px; height:auto; margin-top:5px; border:1px solid #ddd;">` : '';
-                        html += `<tr><td style="${tdStyle}">${r.date}</td><td style="${tdStyle}">${r.company || 'Visit'}</td><td style="${tdStyle}">${pNames || 'N/A'}</td><td style="${tdStyle}">${r.text}${sigHtml}</td><td style="${tdStyle}">₹${totExp}</td></tr>`;
-                        text += `[${r.date}] ${r.company ? r.company : 'Visit'} | Met: ${pNames || 'N/A'} (Exp: Rs.${totExp})
-Update: ${r.text}
-
-`;
+                        html += `<tr><td style="${tdStyle}"><b>${printD}</b></td><td style="${tdStyle}">${r.company || 'Visit'}</td><td style="${tdStyle}">${pNames || 'N/A'}</td><td style="${tdStyle}">${r.text}${sigHtml}</td><td style="${tdStyle}">₹${totExp}</td></tr>`;
+                        text += `[${printD || '          '}] ${r.company ? r.company : 'Visit'} | Met: ${pNames || 'N/A'} (Exp: Rs.${totExp})\nUpdate: ${r.text}\n\n`;
+                        lastDate = r.date;
                     });
                     html += `</table>`;
                 }
@@ -6289,13 +6291,17 @@ Update: ${r.text}
                     html += `<p style="margin-bottom:5px;"><b>Itemized Personal Expense Log:</b></p>
                     <table style="${tableStyle}">
                         <tr><th style="${thStyle}; width:80px;">Date</th><th style="${thStyle}">Description</th><th style="${thStyle}; width:80px;">Amount(₹)</th></tr>`;
-                    fPersonalExp.forEach(e => {
-                        html += `<tr><td style="${tdStyle}">${e.date}</td><td style="${tdStyle}">${e.desc}</td><td style="${tdStyle} text-align:right;">${e.amount}</td></tr>`;
-                    });
-                    fSheets.forEach(s => {
-                        s.items.forEach(i => {
-                            html += `<tr><td style="${tdStyle}">${s.date}</td><td style="${tdStyle}">${i.desc} (from Sheet)</td><td style="${tdStyle} text-align:right;">${i.amount}</td></tr>`;
-                        });
+                    
+                    let allExp = [];
+                    fPersonalExp.forEach(e => allExp.push({date: e.date, desc: e.desc, amount: e.amount}));
+                    fSheets.forEach(s => s.items.forEach(i => allExp.push({date: s.date, desc: i.desc + ' (from Sheet)', amount: i.amount})));
+                    allExp.sort((a,b) => a.date.localeCompare(b.date));
+                    
+                    let lastDate = "";
+                    allExp.forEach(e => {
+                        let printD = (e.date !== lastDate) ? e.date : "";
+                        html += `<tr><td style="${tdStyle}"><b>${printD}</b></td><td style="${tdStyle}">${e.desc}</td><td style="${tdStyle} text-align:right;">${e.amount}</td></tr>`;
+                        lastDate = e.date;
                     });
                     html += `</table>`;
                 }
@@ -6303,33 +6309,36 @@ Update: ${r.text}
             }
 
             if(incInquiries && data.inquiries.length > 0) {
+                data.inquiries.sort((a,b) => a.date.localeCompare(b.date));
+                let lastDate = "";
                 html += `<h4 style="color:#5bc0de; margin:10px 0 5px 0;">4. Sales Inquiries</h4>`;
                 html += `<table style="${tableStyle}"><tr><th style="${thStyle}; width:80px;">Date</th><th style="${thStyle}">Company</th><th style="${thStyle}">Project</th><th style="${thStyle}; width:80px;">Status</th></tr>`;
-                text += `=== 4. SALES INQUIRIES ===
-`;
+                text += `=== 4. SALES INQUIRIES ===\n`;
                 data.inquiries.forEach(i => {
-                    html += `<tr><td style="${tdStyle}">${i.date}</td><td style="${tdStyle}">${i.company}</td><td style="${tdStyle}">${i.project}</td><td style="${tdStyle}">${i.status}</td></tr>`;
-                    text += `[${i.date}] ${i.project} (${i.company}) - Status: ${i.status}
-`;
+                    let printD = (i.date !== lastDate) ? i.date : "";
+                    html += `<tr><td style="${tdStyle}"><b>${printD}</b></td><td style="${tdStyle}">${i.company}</td><td style="${tdStyle}">${i.project}</td><td style="${tdStyle}">${i.status}</td></tr>`;
+                    text += `[${printD || '          '}] ${i.project} (${i.company}) - Status: ${i.status}\n`;
+                    lastDate = i.date;
                 });
                 html += `</table>`;
-                text += `
-`;
+                text += `\n`;
             }
 
             if(incContacts && data.contacts.length > 0) {
+                data.contacts.sort((a,b) => (a.date||'').localeCompare(b.date||''));
+                let lastDate = "";
                 html += `<h4 style="color:#795548; margin:10px 0 5px 0;">5. New Contacts Added</h4>`;
-                html += `<table style="${tableStyle}"><tr><th style="${thStyle}">Company</th><th style="${thStyle}">Address</th><th style="${thStyle}; width:60px;">Persons</th></tr>`;
-                text += `=== 5. NEW CONTACTS ===
-`;
+                html += `<table style="${tableStyle}"><tr><th style="${thStyle}; width:80px;">Date</th><th style="${thStyle}">Company</th><th style="${thStyle}">Address</th><th style="${thStyle}; width:60px;">Persons</th></tr>`;
+                text += `=== 5. NEW CONTACTS ===\n`;
                 data.contacts.forEach(c => {
-                    html += `<tr><td style="${tdStyle}">${c.company}</td><td style="${tdStyle}">${c.address}</td><td style="${tdStyle}">${c.persons ? c.persons.length : 0}</td></tr>`;
-                    text += `${c.company} (${c.address}) - ${c.persons ? c.persons.length : 0} persons logged.
-`;
+                    let d = c.date || 'N/A';
+                    let printD = (d !== lastDate) ? d : "";
+                    html += `<tr><td style="${tdStyle}"><b>${printD}</b></td><td style="${tdStyle}">${c.company}</td><td style="${tdStyle}">${c.address}</td><td style="${tdStyle}">${c.persons ? c.persons.length : 0}</td></tr>`;
+                    text += `[${printD || '          '}] ${c.company} (${c.address}) - ${c.persons ? c.persons.length : 0} persons logged.\n`;
+                    lastDate = d;
                 });
                 html += `</table>`;
-                text += `
-`;
+                text += `\n`;
             }
 
             html += `</div>`;
