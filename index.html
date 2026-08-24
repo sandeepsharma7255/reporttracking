@@ -6290,18 +6290,60 @@ CRITICAL RULES:
             }
 
             if(incTasks && data.plans.length > 0) {
-                data.plans.sort((a,b) => a.date.localeCompare(b.date));
-                let lastDate = "";
-                html += `<h4 style="color:#f0ad4e; margin:10px 0 5px 0;">2. ${reportType.replace(' Report', '')} Action Plans</h4>`;
-                html += `<table style="${tableStyle}"><tr><th style="${thStyle}; width:80px;">Date</th><th style="${thStyle}">Task</th><th style="${thStyle}; width:100px;">Status</th></tr>`;
+                html += `<h4 style="color:#f59e0b; margin:15px 0 10px 0; font-size:16px; border-bottom:1px solid #e2e8f0; padding-bottom:5px;">2. ${reportType.replace(' Report', '')} Action Plans & Progress</h4>`;
                 text += `=== 2. ${reportType.replace(' Report', '').toUpperCase()} ACTION PLANS ===\n`;
+                
+                // Grouping by Date for advanced UI
+                let planStats = {};
                 data.plans.forEach(p => {
-                    let printD = (p.date !== lastDate) ? p.date : "";
-                    html += `<tr><td style="${tdStyle}"><b>${printD}</b></td><td style="${tdStyle}">${p.task}</td><td style="${tdStyle}; font-weight:bold; color:${p.status==='Completed'?'green':'red'};">${p.status}</td></tr>`;
-                    text += `[${printD || '          '}] ${p.task} - Status: ${p.status}\n`;
-                    lastDate = p.date;
+                    let d = p.date || 'N/A';
+                    if(!planStats[d]) planStats[d] = { total: 0, completed: 0, tasks: [] };
+                    planStats[d].total++;
+                    if(p.status === 'Completed') planStats[d].completed++;
+                    planStats[d].tasks.push(p);
                 });
-                html += `</table>`;
+
+                // Sort dates
+                let sortedDates = Object.keys(planStats).sort((a,b) => a.localeCompare(b));
+                
+                sortedDates.forEach(d => {
+                    let stats = planStats[d];
+                    let pct = stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0;
+                    let color = pct === 100 ? '#10b981' : (pct >= 50 ? '#3b82f6' : '#ef4444');
+                    let bgGrad = pct === 100 ? 'linear-gradient(90deg, #10b981, #34d399)' : 'linear-gradient(90deg, #3b82f6, #8b5cf6)';
+                    
+                    html += `<div style="background: #f8fafc; border-left: 4px solid ${color}; padding: 12px 15px; margin-bottom: 15px; border-radius: 0 8px 8px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); page-break-inside: avoid;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            <h5 style="margin:0; font-size:13px; color:#1e293b; font-weight:700;">📅 Date: ${d}</h5>
+                            <span style="background:${color}; color:#fff; padding:3px 10px; border-radius:12px; font-size:10px; font-weight:bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                ${stats.completed}/${stats.total} Tasks (${pct}%)
+                            </span>
+                        </div>
+                        <div style="width: 100%; background: #e2e8f0; height: 6px; border-radius: 3px; margin-bottom: 12px; overflow:hidden;">
+                            <div style="width: ${pct}%; background: ${bgGrad}; height: 100%; border-radius: 3px;"></div>
+                        </div>
+                        <table style="width:100%; border-collapse:collapse; font-size:12px; color:#334155;">`;
+                    
+                    text += `\n[ ${d} ] - ${stats.completed}/${stats.total} Tasks Completed (${pct}%)\n`;
+                    
+                    stats.tasks.forEach((p, idx) => {
+                        let isLast = idx === stats.tasks.length - 1;
+                        let btmBorder = isLast ? 'none' : '1px dashed #cbd5e1';
+                        let sColor = p.status === 'Completed' ? '#10b981' : '#ef4444';
+                        
+                        let taskHtml = p.task.replace(/\n/g, '<br>');
+                        
+                        html += `<tr>
+                            <td style="padding:6px 0; border-bottom:${btmBorder}; vertical-align:top; width:80%;">${taskHtml}</td>
+                            <td style="padding:6px 0; border-bottom:${btmBorder}; vertical-align:top; text-align:right;">
+                                <span style="color:${sColor}; font-weight:600; font-size:11px; text-transform:uppercase; border:1px solid ${sColor}; padding:2px 6px; border-radius:4px;">${p.status}</span>
+                            </td>
+                        </tr>`;
+                        text += `  - ${p.task.replace(/\n/g, ' ')} [${p.status}]\n`;
+                    });
+                    
+                    html += `</table></div>`;
+                });
                 text += `\n`;
             }
 
