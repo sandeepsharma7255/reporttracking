@@ -874,15 +874,17 @@
                     <h2 style="margin-bottom: 0;"><i class="fas fa-tasks"></i> Today's Action Plan</h2>
                     <button type="button" onclick="togglePlanHistory()" class="btn" style="width:auto; padding:5px 10px; font-size:0.8rem; background:transparent; border:1px solid var(--accent-primary); color:var(--accent-primary); margin:0;"><i class="fas fa-history"></i> <span id="planHistoryBtnText">Show History</span></button>
                 </div>
-                <form id="planForm" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 20px;">
+                <form id="planForm" style="display:flex; flex-direction:column; gap:12px; margin-bottom: 25px;">
                     <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                        <input type="date" id="planTaskDate" class="input-field" style="width:auto; margin-bottom:0;" required>
+                        <input type="date" id="planTaskDate" class="input-field" style="width:140px; margin-bottom:0;" required>
                         <input type="text" id="planTask" class="input-field" placeholder="What needs to be done?" style="flex:1; min-width:200px; margin-bottom:0;" required>
-                        <button type="button" class="btn" style="width:auto; padding:0 15px; background:var(--accent-primary); color:#000;" onclick="translateToEnglish('planTask')" title="Translate Hindi to Professional English"><i class="fas fa-language"></i> AI</button>
+                        <button type="button" class="btn" style="width:auto; padding:0 20px; background:var(--accent-primary); color:#000; border-radius:25px;" onclick="translateToEnglish('planTask')" title="Translate Hindi to Professional English"><i class="fas fa-language"></i> AI</button>
                     </div>
-                    <button type="submit" id="planSubmitBtn" class="btn" style="width:auto; margin-top:0;">Add Task</button>
-                    <button type="button" id="planAIBtn" class="btn" style="width:auto; margin-top:0; background: linear-gradient(45deg, #00E5FF, #00BFFF); color: black;" onclick="enhanceTextWithAI('planTask', 'planAIBtn')"><i class="fas fa-magic"></i> ✨ AI Enhance</button>
-                    <button type="button" id="btnMeetingRecorder" class="btn" style="width:auto; background: linear-gradient(45deg, #FF5252, #FF1744); margin-top:0;" onclick="toggleMeetingRecorder()"><i class="fas fa-microphone"></i> Record MOM</button>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <button type="submit" id="planSubmitBtn" class="btn" style="flex:1; margin-top:0; border-radius:25px; background: #10b981; color:#fff; font-weight:bold; min-width:120px;"><i class="fas fa-plus"></i> Add Task</button>
+                        <button type="button" id="planAIBtn" class="btn" style="flex:1; margin-top:0; background: linear-gradient(45deg, #00E5FF, #00BFFF); color: black; border-radius:25px; font-weight:bold; min-width:120px;" onclick="enhanceTextWithAI('planTask', 'planAIBtn')"><i class="fas fa-magic"></i> AI Enhance</button>
+                        <button type="button" id="btnMeetingRecorder" class="btn" style="flex:1; background: linear-gradient(45deg, #FF5252, #FF1744); margin-top:0; border-radius:25px; font-weight:bold; min-width:120px;" onclick="toggleMeetingRecorder()"><i class="fas fa-microphone"></i> Record MOM</button>
+                    </div>
                 </form>
                 <div id="recordingStatus" style="font-size:0.8rem; color:#ff5252; display:none; align-items:center; gap:5px; margin-bottom:15px;">
                     <i class="fas fa-circle" style="animation: pulse 1s infinite;"></i> Listening to Meeting... Tap again to stop & generate MOM.
@@ -6066,22 +6068,29 @@ CRITICAL RULES:
             
             if(todaysPlans.length === 0) return div.innerHTML = '<p style="color:grey;text-align:center;">No tasks found.</p>';
             todaysPlans.forEach(p => {
-                let badgeCol = p.status === 'Completed' ? 'var(--success)' : (p.status === 'Progress' ? 'var(--warning)' : 'var(--danger)'); let strike = p.status === 'Completed' ? 'line-through' : 'none'; let txtCol = p.status === 'Completed' ? 'var(--text-muted)' : 'var(--text-main)';
+                let badgeCol = p.status === 'Completed' ? 'var(--success)' : (p.status === 'Progress' ? 'var(--warning)' : 'var(--danger)'); 
+                let bgCol = p.status === 'Completed' ? 'rgba(40, 167, 69, 0.05)' : 'rgba(255, 255, 255, 0.02)';
+                let strike = p.status === 'Completed' ? 'line-through' : 'none'; 
+                let txtCol = p.status === 'Completed' ? 'var(--text-muted)' : '#ffffff';
+                let glow = `0 4px 15px ${badgeCol}15`;
+                
                 div.innerHTML += `
-                <div class="list-item" style="border-left-color:${badgeCol}; flex-wrap:wrap; gap:10px;">
-                    <div style="flex:1; min-width:200px;">
-                        <span style="font-size:0.65rem; font-weight:bold; padding:2px 8px; border-radius:10px; border:1px solid ${badgeCol}; color:${badgeCol};">${p.status.toUpperCase()}</span>
-                        <p style="font-size:0.95rem; margin-top:5px; text-decoration:${strike}; color:${txtCol}">${p.task}</p>
-                        <span class="task-date-badge"><i class="fas fa-calendar-alt"></i> ${p.date}</span>
+                <div style="background: ${bgCol}; border: 1px solid rgba(255,255,255,0.05); border-left: 4px solid ${badgeCol}; border-radius: 12px; padding: 15px; display: flex; flex-wrap: wrap; gap: 15px; align-items: center; box-shadow: ${glow}; transition: 0.3s;">
+                    <div style="flex:1; min-width:200px; display: flex; flex-direction: column; gap: 5px;">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span class="task-date-badge" style="background: rgba(255,255,255,0.1); color: #ccc; font-size: 0.7rem; padding: 3px 8px; border-radius: 6px;"><i class="fas fa-calendar-alt"></i> ${p.date}</span>
+                            <span style="font-size:0.65rem; font-weight:800; padding:3px 10px; border-radius:12px; background: ${badgeCol}20; color:${badgeCol}; letter-spacing: 0.5px;">${p.status.toUpperCase()}</span>
+                        </div>
+                        <p style="font-size:1rem; margin:5px 0 0 0; font-weight:500; text-decoration:${strike}; color:${txtCol}; line-height:1.4;">${p.task}</p>
                     </div>
-                    <div>
-                        <select onchange="updatePlanStatus(${p.id}, this.value)" style="width:auto; padding:5px; margin-bottom:0; font-size:0.8rem; background:rgba(0,0,0,0.5);">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <select onchange="updatePlanStatus(${p.id}, this.value)" style="padding:8px 12px; font-size:0.85rem; border-radius:8px; background:rgba(0,0,0,0.6); color:#fff; border:1px solid rgba(255,255,255,0.1); outline:none; cursor:pointer;">
                             <option value="Pending" ${p.status === 'Pending' ? 'selected' : ''}>Pending</option>
                             <option value="Progress" ${p.status === 'Progress' ? 'selected' : ''}>In Progress</option>
                             <option value="Completed" ${p.status === 'Completed' ? 'selected' : ''}>Completed</option>
                         </select>
-                        <button class="btn" style="width:auto; padding:5px 8px; font-size:0.8rem; background:#007BFF; margin-right:2px;" onclick="editPlan(${p.id})"><i class="fas fa-edit"></i></button>
-                        <button class="delete-btn" onclick="deletePlan(${p.id})"><i class="fas fa-trash"></i></button>
+                        <button class="icon-btn" style="background: rgba(0, 123, 255, 0.15); color: #00E5FF; border: 1px solid rgba(0, 229, 255, 0.3); width: 35px; height: 35px; border-radius: 8px;" onclick="editPlan(${p.id})" title="Edit Task"><i class="fas fa-edit"></i></button>
+                        <button class="icon-btn" style="background: rgba(255, 77, 77, 0.15); color: #ff4d4d; border: 1px solid rgba(255, 77, 77, 0.3); width: 35px; height: 35px; border-radius: 8px;" onclick="deletePlan(${p.id})" title="Delete Task"><i class="fas fa-trash"></i></button>
                     </div>
                 </div>`;
             });
