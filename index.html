@@ -6183,28 +6183,28 @@ CRITICAL RULES:
                     let totalExp = (parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0);
                     
                     div.innerHTML += `
-                    <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-left: 4px solid var(--accent-primary); border-radius: 12px; padding: 15px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 4px 15px rgba(0, 229, 255, 0.1); transition: 0.3s;">
+                    <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-left: 4px solid var(--accent-primary); border-radius: 12px; padding: 15px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); transition: 0.3s;">
                         <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
                             <div style="display:flex; gap: 10px; align-items:center;">
-                                <span style="background: rgba(255,255,255,0.1); color: #ccc; font-size: 0.75rem; padding: 4px 10px; border-radius: 6px;"><i class="fas fa-calendar-alt"></i> ${r.date||'No Date'}</span>
-                                <span style="color: #8b9bb4; font-size: 0.75rem; background:rgba(0,0,0,0.3); padding:4px 8px; border-radius:6px;"><i class="fas fa-clock"></i> ${format12Hour(r.time)} - ${r.returnTime ? format12Hour(r.returnTime) : '--:--'}</span>
+                                <span style="background: var(--bg-color); color: var(--text-muted); font-size: 0.75rem; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--card-border);"><i class="fas fa-calendar-alt"></i> ${r.date||'No Date'}</span>
+                                <span style="color: var(--text-muted); font-size: 0.75rem; background: var(--bg-color); border: 1px solid var(--card-border); padding:4px 8px; border-radius:6px;"><i class="fas fa-clock"></i> ${format12Hour(r.time)} - ${r.returnTime ? format12Hour(r.returnTime) : '--:--'}</span>
                             </div>
-                            <button class="icon-btn" style="background: rgba(255, 77, 77, 0.15); color: #ff4d4d; border: 1px solid rgba(255, 77, 77, 0.3); width: 32px; height: 32px; border-radius: 8px;" onclick="deleteReport(${r.id})" title="Delete Visit"><i class="fas fa-trash"></i></button>
+                            <button class="icon-btn" style="background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border: 1px solid rgba(255, 77, 77, 0.2); width: 32px; height: 32px; border-radius: 8px;" onclick="deleteReport(${r.id})" title="Delete Visit"><i class="fas fa-trash"></i></button>
                         </div>
                         
-                        ${r.company ? `<div style="font-size:1.15rem; color:#fff; font-weight:800; letter-spacing: 0.5px; display:flex; align-items:center; gap:8px; margin-top:5px;"><i class="fas fa-building" style="color:var(--accent-primary);"></i> ${String(r.company).replace(/</g,'&lt;')}</div>` : ''}
+                        ${r.company ? `<div style="font-size:1.15rem; color:var(--text-main); font-weight:800; letter-spacing: 0.5px; display:flex; align-items:center; gap:8px; margin-top:5px;"><i class="fas fa-building" style="color:var(--accent-primary);"></i> ${String(r.company).replace(/</g,'&lt;')}</div>` : ''}
                         
-                        <div style="display:flex; flex-direction:column; gap:5px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; border: 1px dashed rgba(255,255,255,0.1);">
+                        <div style="display:flex; flex-direction:column; gap:5px; background: var(--bg-color); padding: 10px; border-radius: 8px; border: 1px dashed var(--card-border);">
                             <span style="color:var(--accent-primary); font-size:0.7rem; text-transform:uppercase; font-weight:bold; letter-spacing:1px; margin-bottom:2px;"><i class="fas fa-users"></i> People Met</span>
-                            ${pListHtml || '<span style="color: #666; font-size: 0.8rem; font-style:italic;">No contacts added</span>'}
+                            ${pListHtml || '<span style="color: var(--text-muted); font-size: 0.8rem; font-style:italic;">No contacts added</span>'}
                         </div>
                         
-                        <p style="font-size:0.95rem; line-height:1.5; color:#e2e8f0; margin: 5px 0;">${String(r.text || '').replace(/</g, '&lt;').replace(/\n/g, '<br>')}</p>
+                        <p style="font-size:0.95rem; line-height:1.5; color:var(--text-main); margin: 5px 0;">${String(r.text || '').replace(/</g, '&lt;').replace(/\n/g, '<br>')}</p>
                         
                         ${totalExp > 0 ? `
                         <div style="display:flex; gap: 15px; align-items:center; background: rgba(255,193,7,0.1); padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(255,193,7,0.2); margin-top:5px;">
-                            <span style="color:#ffc107; font-size:0.85rem; font-weight:bold;"><i class="fas fa-wallet"></i> Total Expense: ₹${totalExp}</span>
-                            <span style="color:#aaa; font-size:0.75rem;">(Go: ₹${r.goingFare||0} | Ret: ₹${r.returnFare||0} | Food: ₹${r.food||0})</span>
+                            <span style="color:#e6a100; font-size:0.85rem; font-weight:bold;"><i class="fas fa-wallet"></i> Total Expense: ₹${totalExp}</span>
+                            <span style="color:var(--text-muted); font-size:0.75rem;">(Go: ₹${r.goingFare||0} | Ret: ₹${r.returnFare||0} | Food: ₹${r.food||0})</span>
                         </div>` : ''}
                     </div>`;
                 } catch(e) {
