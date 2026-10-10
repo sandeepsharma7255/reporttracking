@@ -5171,10 +5171,33 @@ CRITICAL RULES:
             }
             if(currentUser && navigator.onLine) {
                 db.collection('corporateOperationsData').doc(currentUser.uid).get().then((doc) => {
-                    if (doc.exists) appData = cleanData({ ...appData, ...doc.data() }); else { appData = cleanData(appData); autoSave(); }
+                    if (doc.exists) {
+                        let cloudData = doc.data();
+                        
+                        // Merge arrays by ID so offline data isn't wiped by older cloud data
+                        function mergeArrays(arr1, arr2) {
+                            let map = new Map();
+                            (arr1 || []).forEach(i => { if(i.id) map.set(i.id, i); });
+                            (arr2 || []).forEach(i => { if(i.id) map.set(i.id, i); });
+                            return Array.from(map.values());
+                        }
+
+                        let mergedData = { ...appData, ...cloudData };
+                        mergedData.reports = mergeArrays(appData.reports, cloudData.reports);
+                        mergedData.plans = mergeArrays(appData.plans, cloudData.plans);
+                        mergedData.attendance = mergeArrays(appData.attendance, cloudData.attendance);
+                        mergedData.inquiries = mergeArrays(appData.inquiries, cloudData.inquiries);
+                        mergedData.personalExpenses = mergeArrays(appData.personalExpenses, cloudData.personalExpenses);
+                        mergedData.expenseSheets = mergeArrays(appData.expenseSheets, cloudData.expenseSheets);
+
+                        appData = cleanData(mergedData);
+                    } else { 
+                        appData = cleanData(appData); autoSave(); 
+                    }
                     
                     if(appData.appPin && appData.appPin.toString().trim().length === 4) showPinScreen();
-                    document.getElementById('themeSelect').value = appData.theme; changeTheme(); document.getElementById('profileName').value = appData.userName; document.getElementById('pinInput').value = appData.appPin; document.getElementById('targetVisits').value = appData.targetVisits; document.getElementById('targetOrders').value = appData.targetOrders; 
+                    document.getElementById('themeSelect').value = appData.theme; changeTheme(); 
+                    document.getElementById('profileName').value = appData.userName; document.getElementById('pinInput').value = appData.appPin; document.getElementById('targetVisits').value = appData.targetVisits; document.getElementById('targetOrders').value = appData.targetOrders; 
                     isDataLoaded = true;
                     updateUI();
                 }).catch(err => { 
