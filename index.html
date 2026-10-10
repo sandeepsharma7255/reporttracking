@@ -6196,7 +6196,7 @@ CRITICAL RULES:
                         ${pListHtml || '<span style="color: #666; font-size: 0.8rem; font-style:italic;">No contacts added</span>'}
                     </div>
                     
-                    <p style="font-size:0.95rem; line-height:1.5; color:#e2e8f0; margin: 5px 0;">${r.text.replace(/\n/g, '<br>')}</p>
+                    <p style="font-size:0.95rem; line-height:1.5; color:#e2e8f0; margin: 5px 0;">${(r.text || '').replace(/\n/g, '<br>')}</p>
                     
                     ${totalExp > 0 ? `
                     <div style="display:flex; gap: 15px; align-items:center; background: rgba(255,193,7,0.1); padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(255,193,7,0.2); margin-top:5px;">
