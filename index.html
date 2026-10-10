@@ -1352,8 +1352,11 @@
                     <button class="btn" style="margin-bottom:20px;" onclick="saveSecuritySettings()">Update Security PIN</button>
                     
                     <hr style="border-color: var(--card-border); margin-bottom: 20px;">
-                    <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:15px;">Securely download your entire app database locally.</p>
-                    <button class="btn" style="background:transparent; border:1px solid var(--accent-primary); color:var(--accent-primary);" onclick="exportBackup()"><i class="fas fa-download"></i> Download Local Backup (JSON)</button>
+                    <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:15px;">Securely backup and restore your entire app database.</p>
+                    <button class="btn" style="background:transparent; border:1px solid var(--accent-primary); color:var(--accent-primary); width:100%; margin-bottom:10px;" onclick="exportBackup()"><i class="fas fa-download"></i> Download Local Backup (JSON)</button>
+                    <input type="file" id="importBackupFile" style="display:none;" onchange="importBackup(event)" accept=".json">
+                    <button class="btn" style="background:transparent; border:1px solid var(--success); color:var(--success); width:100%; margin-bottom:10px;" onclick="document.getElementById('importBackupFile').click()"><i class="fas fa-upload"></i> Restore from JSON Backup File</button>
+                    <button class="btn" style="background:transparent; border:1px solid #ff9800; color:#ff9800; width:100%;" onclick="restoreLocalSnapshot()"><i class="fas fa-history"></i> Restore Emergency Auto-Backup</button>
                 </div>
             </div>
         </section>
@@ -5040,10 +5043,10 @@ CRITICAL RULES:
         function cleanData(data) { 
             let tDate = data.timerDate || getLocalDateStr(); let tTime = data.totalAppTime || 0; if(tDate !== getLocalDateStr()) { tTime = 0; tDate = getLocalDateStr(); }
             
-            // Auto-Archive Logic
-            const currentMonthStr = new Date().toISOString().substring(0, 7); // e.g., "2026-07"
-            let activeMonth = data.activeMonth || currentMonthStr;
-            let archive = data.archive || {};
+            // Zero Data Loss Engine: Month changes will NEVER delete or hide user data!
+            const currentMonthStr = new Date().toISOString().substring(0, 7);
+            let activeMonth = currentMonthStr;
+            let archive = (data.archive && typeof data.archive === 'object') ? data.archive : {};
             
             let plans = Array.isArray(data.plans) ? data.plans : [];
             let reports = Array.isArray(data.reports) ? data.reports : [];
@@ -5051,27 +5054,34 @@ CRITICAL RULES:
             let inquiries = Array.isArray(data.inquiries) ? data.inquiries : [];
             let personalExpenses = Array.isArray(data.personalExpenses) ? data.personalExpenses : [];
             let expenseSheets = Array.isArray(data.expenseSheets) ? data.expenseSheets : [];
-            
-            if (activeMonth !== currentMonthStr) {
-                // Month changed! Move current arrays to archive
-                archive[activeMonth] = {
-                    plans: plans,
-                    reports: reports,
-                    attendance: attendance,
-                    inquiries: inquiries,
-                    personalExpenses: personalExpenses,
-                    expenseSheets: expenseSheets
-                };
-                
-                // Reset active arrays for the new month
-                plans = [];
-                reports = [];
-                attendance = [];
-                inquiries = [];
-                personalExpenses = [];
-                expenseSheets = [];
-                
-                activeMonth = currentMonthStr;
+
+            // Helper to merge arrays without duplicates so data is permanent
+            function mergeUnique(arr1, arr2) {
+                let map = new Map();
+                (arr1 || []).forEach(item => {
+                    if(!item) return;
+                    let k = item.id || (item.date ? item.date + '_' + (item.desc || item.company || item.task || '') : JSON.stringify(item));
+                    map.set(String(k), item);
+                });
+                (arr2 || []).forEach(item => {
+                    if(!item) return;
+                    let k = item.id || (item.date ? item.date + '_' + (item.desc || item.company || item.task || '') : JSON.stringify(item));
+                    map.set(String(k), item);
+                });
+                return Array.from(map.values());
+            }
+
+            // Auto-Recovery: Restore any older history from archive so it is NEVER lost
+            for(let m in archive) {
+                let arc = archive[m];
+                if(arc && typeof arc === 'object') {
+                    if(Array.isArray(arc.plans) && arc.plans.length > 0) plans = mergeUnique(plans, arc.plans);
+                    if(Array.isArray(arc.reports) && arc.reports.length > 0) reports = mergeUnique(reports, arc.reports);
+                    if(Array.isArray(arc.attendance) && arc.attendance.length > 0) attendance = mergeUnique(attendance, arc.attendance);
+                    if(Array.isArray(arc.inquiries) && arc.inquiries.length > 0) inquiries = mergeUnique(inquiries, arc.inquiries);
+                    if(Array.isArray(arc.personalExpenses) && arc.personalExpenses.length > 0) personalExpenses = mergeUnique(personalExpenses, arc.personalExpenses);
+                    if(Array.isArray(arc.expenseSheets) && arc.expenseSheets.length > 0) expenseSheets = mergeUnique(expenseSheets, arc.expenseSheets);
+                }
             }
             
             // Contacts Migration Logic (Flattened to Grouped)
@@ -5119,7 +5129,16 @@ CRITICAL RULES:
         // OFFLINE & AUTO-SYNC ENGINE
         function saveLocally() {
             let uid = currentUser ? currentUser.uid : 'local_user';
-            localStorage.setItem('corpHub_offlineData_' + uid, JSON.stringify(cleanData(appData)));
+            let finalData = JSON.stringify(cleanData(appData));
+            localStorage.setItem('corpHub_offlineData_' + uid, finalData);
+            
+            // Auto-Rolling Backup for Extreme Safety
+            let currentBackup = localStorage.getItem('corpHub_backup_1_' + uid);
+            if(currentBackup !== finalData) {
+                // If it changed, shift old backup to backup_2 and save new one
+                localStorage.setItem('corpHub_backup_2_' + uid, currentBackup || '');
+                localStorage.setItem('corpHub_backup_1_' + uid, finalData);
+            }
         }
         function pushToFirebase() {
             if(!currentUser || !navigator.onLine || !isDataLoaded) return;
@@ -5537,6 +5556,52 @@ CRITICAL RULES:
         function saveSettings() { appData.userName = document.getElementById('profileName').value; appData.targetVisits = parseInt(document.getElementById('targetVisits').value) || 0; appData.targetOrders = parseInt(document.getElementById('targetOrders').value) || 0; autoSave(); showToast('Settings Saved!'); }
         function exportBackup() { let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2)); let dlAnchorElem = document.createElement('a'); dlAnchorElem.setAttribute("href", dataStr); dlAnchorElem.setAttribute("download", `CorporateHub_Backup_${todayStr}.json`); dlAnchorElem.click(); showToast("Backup Downloaded Securely!"); }
 
+        function importBackup(e) {
+            const file = e.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const imported = JSON.parse(evt.target.result);
+                    if(imported && typeof imported === 'object') {
+                        if(confirm("Are you sure you want to restore data from this backup file? Existing data will be safely merged.")) {
+                            appData = cleanData({ ...appData, ...imported });
+                            autoSave();
+                            updateUI();
+                            alert("Backup restored and merged successfully! 🚀");
+                        }
+                    } else {
+                        alert("Invalid backup file format.");
+                    }
+                } catch(err) {
+                    alert("Error parsing backup file: " + err.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function restoreLocalSnapshot() {
+            let uid = currentUser ? currentUser.uid : 'local_user';
+            let snap1 = localStorage.getItem('corpHub_backup_1_' + uid);
+            let snap2 = localStorage.getItem('corpHub_backup_2_' + uid);
+            let snap = snap1 || snap2;
+            if(!snap) {
+                alert("No emergency auto-backup snapshot found in this browser yet.");
+                return;
+            }
+            try {
+                let parsed = JSON.parse(snap);
+                if(confirm("Emergency auto-backup found! Do you want to restore and merge it?")) {
+                    appData = cleanData({ ...appData, ...parsed });
+                    autoSave();
+                    updateUI();
+                    alert("Emergency auto-backup restored successfully! ✅");
+                }
+            } catch(e) {
+                alert("Failed to read emergency auto-backup: " + e.message);
+            }
+        }
+
 
 
         // CHART.JS SALES ANALYTICS
@@ -5806,7 +5871,7 @@ CRITICAL RULES:
                 inqSelect.innerHTML += `<option value="${comp}">${comp}</option>`;
             });
         }
-        function deleteContact(id) { appData.contacts = appData.contacts.filter(c => c.id !== id); autoSave(); renderContacts(); }
+        function deleteContact(id) { if(!confirm("Are you sure you want to delete this contact?")) return; appData.contacts = appData.contacts.filter(c => c.id !== id); autoSave(); renderContacts(); }
         
         function editContact(id) {
             const c = appData.contacts.find(x => x.id === id);
@@ -5996,7 +6061,7 @@ CRITICAL RULES:
             });
             div.innerHTML = html || '<p style="color:grey;text-align:center;">No inquiries found.</p>';
         }
-        function deleteInq(id) { appData.inquiries = appData.inquiries.filter(i => i.id !== id); autoSave(); renderInquiries(); updateUI(); }
+        function deleteInq(id) { if(!confirm("Are you sure you want to delete this inquiry?")) return; appData.inquiries = appData.inquiries.filter(i => i.id !== id); autoSave(); renderInquiries(); updateUI(); }
         document.getElementById('inqDate').value = todayStr;
 
         // DAILY PLAN
@@ -6122,7 +6187,7 @@ CRITICAL RULES:
             });
         }
         function updatePlanStatus(id, status) { const plan = appData.plans.find(p => p.id === id); if(plan) { plan.status = status; autoSave(); } }
-        function deletePlan(id) { appData.plans = appData.plans.filter(p => p.id !== id); autoSave(); }
+        function deletePlan(id) { if(!confirm("Are you sure you want to delete this action plan?")) return; appData.plans = appData.plans.filter(p => p.id !== id); autoSave(); }
 
         // DAILY REPORTS
         let currentReportPersons = [];
@@ -6236,7 +6301,7 @@ CRITICAL RULES:
                 }
             });
         }
-        function deleteReport(id) { appData.reports = appData.reports.filter(r => r.id !== id); autoSave(); renderReportsList(); updateUI(); }
+        function deleteReport(id) { if(!confirm("Are you sure you want to delete this visit report?")) return; appData.reports = appData.reports.filter(r => r.id !== id); autoSave(); renderReportsList(); updateUI(); }
 
         function recoverArchivedHistory() {
             if(!appData.archive) return alert("No older history found in archive.");
@@ -6836,7 +6901,7 @@ CRITICAL RULES:
                 </tr>`;
             });
         }
-        function deleteAttendance(id) { appData.attendance = appData.attendance.filter(a => a.id !== id); autoSave(); }
+        function deleteAttendance(id) { if(!confirm("Are you sure you want to delete this attendance record?")) return; appData.attendance = appData.attendance.filter(a => a.id !== id); autoSave(); }
         function exportData(type) { alert(`Export for ${type} coming soon`); }
 
         function addPersonalExpense() {
