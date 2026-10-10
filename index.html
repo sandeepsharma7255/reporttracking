@@ -967,7 +967,8 @@
             </div>
             <div class="card" style="margin-top:20px;">
                 <h2 style="margin-bottom: 20px;"><i class="fas fa-history"></i> Reports & Meeting History</h2>
-                <div id="reportListDiv" style="max-height: 350px; overflow-y: auto;"></div>
+                <div id="reportListDiv" style="max-height: 350px; overflow-y: auto; margin-bottom: 15px;"></div>
+                <button type="button" class="btn" style="background: rgba(255,255,255,0.1); color: var(--text-muted); font-size: 0.8rem; padding: 5px; width: 100%; border-radius: 8px;" onclick="recoverArchivedHistory()"><i class="fas fa-box-open"></i> Load Older / Missing History</button>
             </div>
         </section>
 
@@ -6213,6 +6214,27 @@ CRITICAL RULES:
             });
         }
         function deleteReport(id) { appData.reports = appData.reports.filter(r => r.id !== id); autoSave(); renderReportsList(); updateUI(); }
+
+        function recoverArchivedHistory() {
+            if(!appData.archive) return alert("No older history found in archive.");
+            let count = 0;
+            for (let month in appData.archive) {
+                let arc = appData.archive[month];
+                if(arc.reports && arc.reports.length > 0) { appData.reports = [...appData.reports, ...arc.reports]; arc.reports = []; count++; }
+                if(arc.plans && arc.plans.length > 0) { appData.plans = [...appData.plans, ...arc.plans]; arc.plans = []; count++; }
+                if(arc.attendance && arc.attendance.length > 0) { appData.attendance = [...appData.attendance, ...arc.attendance]; arc.attendance = []; }
+                if(arc.inquiries && arc.inquiries.length > 0) { appData.inquiries = [...appData.inquiries, ...arc.inquiries]; arc.inquiries = []; }
+            }
+            if(count > 0) {
+                // Ensure no immediate re-archiving
+                appData.activeMonth = new Date().toISOString().substring(0, 7);
+                autoSave();
+                updateUI();
+                alert("Successfully loaded older history from archive!");
+            } else {
+                alert("No missing history was found in the archive.");
+            }
+        }
 
         function getFilteredData(fromDateStr, toDateStr) {
             // String comparison works perfectly for YYYY-MM-DD
