@@ -544,6 +544,31 @@
             }
 
             #mobileHamburger { display: inline-block !important; }
+
+            #mainScrollArea, .main-scroll-area {
+                padding: 12px 10px !important;
+                overflow-x: hidden !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+            .main-content {
+                overflow-x: hidden !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+            .module-section {
+                width: 100% !important;
+                max-width: 100% !important;
+                overflow-x: hidden !important;
+                box-sizing: border-box !important;
+            }
+            .card {
+                padding: 14px 12px !important;
+                margin-bottom: 14px !important;
+                box-sizing: border-box !important;
+                width: 100% !important;
+                max-width: 100% !important;
+            }
         }
 
         @media (max-width: 480px) {
@@ -1091,34 +1116,40 @@
         <section id="reports" class="module-section">
             <div class="grid-2">
                 <div class="card">
-                    <h2 style="margin-bottom: 10px;"><i class="fas fa-edit"></i> Visit Page</h2>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+                        <h2 style="margin:0;"><i class="fas fa-edit"></i> Visit Page</h2>
+                        <div id="visitDraftStatus" style="display:none; align-items:center; gap:6px; background:rgba(0, 229, 255, 0.1); color:var(--accent-primary); border:1px solid rgba(0, 229, 255, 0.3); font-size:0.75rem; padding:3px 10px; border-radius:20px; font-weight:600;">
+                            <span class="pulse-sync-dot" style="background:var(--accent-primary); width:6px; height:6px;"></span> Draft Saved
+                            <button type="button" onclick="clearVisitDraft(true)" style="background:none; border:none; color:#ff5252; cursor:pointer; font-size:0.75rem; margin-left:4px; font-weight:bold;" title="Discard Draft">✕ Clear</button>
+                        </div>
+                    </div>
                     <form id="reportForm">
-                        <div style="display:flex; gap:15px; flex-wrap:wrap; margin-bottom: 15px;">
-                            <div style="flex:1; min-width:100px;"><label style="font-size:0.8rem; color:#aaa;">Date</label><input type="date" id="repDate" class="input-field" required></div>
-                            <div style="flex:1; min-width:100px;"><label style="font-size:0.8rem; color:#aaa;">Going Time</label><input type="time" id="repTime" class="input-field" required></div>
-                            <div style="flex:1; min-width:100px;"><label style="font-size:0.8rem; color:#aaa;">Return Time</label><input type="time" id="repReturnTime" class="input-field" required></div>
+                        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 15px;">
+                            <div style="flex:1 1 95px; min-width:0;"><label style="font-size:0.8rem; color:#aaa;">Date</label><input type="date" id="repDate" class="input-field" style="width:100%;" required></div>
+                            <div style="flex:1 1 95px; min-width:0;"><label style="font-size:0.8rem; color:#aaa;">Going Time</label><input type="time" id="repTime" class="input-field" style="width:100%;" required></div>
+                            <div style="flex:1 1 95px; min-width:0;"><label style="font-size:0.8rem; color:#aaa;">Return Time</label><input type="time" id="repReturnTime" class="input-field" style="width:100%;" required></div>
                         </div>
                         <div style="margin-bottom:20px;">
                             <label style="font-size:0.8rem; color:#aaa;">Company Name</label>
-                            <input type="text" id="repCompany" class="input-field" placeholder="e.g. Reliance Industries" style="font-size:1.1rem; font-weight:bold; color:var(--accent-primary);" required>
+                            <input type="text" id="repCompany" class="input-field" placeholder="e.g. Reliance Industries" style="font-size:1.1rem; font-weight:bold; color:var(--accent-primary); width:100%;" required>
                         </div>
                         
                         <h3 style="color:var(--accent-primary); margin:20px 0 10px 0; font-size: 0.95rem; text-transform:uppercase; letter-spacing:1px;"><i class="fas fa-users"></i> People Met With</h3>
                         <div id="repPersonsList" style="margin-bottom:15px;"></div>
-                        <div style="background:rgba(255,255,255,0.02); border:1px dashed rgba(255,255,255,0.1); padding:15px; border-radius:12px; margin-bottom:20px;">
+                        <div style="background:rgba(255,255,255,0.02); border:1px dashed rgba(255,255,255,0.1); padding:12px; border-radius:12px; margin-bottom:20px;">
                             <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
-                                <div style="flex:1; min-width:120px;"><label style="font-size:0.8rem; color:#888;">Name</label><input type="text" id="rpName" class="input-field" style="margin-bottom:0;"></div>
-                                <div style="flex:1; min-width:120px;"><label style="font-size:0.8rem; color:#888;">Designation</label><input type="text" id="rpDesig" class="input-field" placeholder="e.g. Manager" style="margin-bottom:0;"></div>
+                                <div style="flex:1 1 120px; min-width:0;"><label style="font-size:0.8rem; color:#888;">Name</label><input type="text" id="rpName" class="input-field" style="margin-bottom:0; width:100%;"></div>
+                                <div style="flex:1 1 120px; min-width:0;"><label style="font-size:0.8rem; color:#888;">Designation</label><input type="text" id="rpDesig" class="input-field" placeholder="e.g. Manager" style="margin-bottom:0; width:100%;"></div>
                             </div>
-                            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:15px;">
-                                <div style="flex:1; min-width:120px;"><label style="font-size:0.8rem; color:#888;">Mobile</label><input type="tel" id="rpMobile" class="input-field" style="margin-bottom:0;"></div>
-                                <div style="flex:1; min-width:120px;"><label style="font-size:0.8rem; color:#888;">Email</label><input type="email" id="rpEmail" class="input-field" style="margin-bottom:0;"></div>
+                            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px;">
+                                <div style="flex:1 1 120px; min-width:0;"><label style="font-size:0.8rem; color:#888;">Mobile</label><input type="tel" id="rpMobile" class="input-field" style="margin-bottom:0; width:100%;"></div>
+                                <div style="flex:1 1 120px; min-width:0;"><label style="font-size:0.8rem; color:#888;">Email</label><input type="email" id="rpEmail" class="input-field" style="margin-bottom:0; width:100%;"></div>
                             </div>
                             <button type="button" class="btn" style="background:rgba(255,255,255,0.1); color:#fff; border-radius:20px; padding: 8px 15px; font-size:0.85rem;" onclick="addPersonToReport()"><i class="fas fa-plus"></i> Add Person Met</button>
                         </div>
                         <!-- ADVANCED MULTIPLE PAYMENTS & EXPENSES -->
-                        <div style="background:rgba(0, 229, 255, 0.03); border:1px solid rgba(0, 229, 255, 0.15); padding:15px; border-radius:14px; margin-bottom:20px;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <div style="background:rgba(0, 229, 255, 0.03); border:1px solid rgba(0, 229, 255, 0.15); padding:14px; border-radius:14px; margin-bottom:20px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
                                 <h3 style="color:var(--accent-primary); font-size:0.95rem; text-transform:uppercase; letter-spacing:1px; margin:0; display:flex; align-items:center; gap:8px;">
                                     <i class="fas fa-wallet"></i> Multiple Payments & Expenses
                                 </h3>
@@ -1141,19 +1172,19 @@
                             <!-- Add Expense Row Inputs -->
                             <div style="background:rgba(0,0,0,0.25); border:1px dashed var(--card-border); padding:12px; border-radius:10px;">
                                 <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px;">
-                                    <div style="flex:2; min-width:130px;">
+                                    <div style="flex:2 1 130px; min-width:0;">
                                         <label style="font-size:0.75rem; color:#aaa;">Expense Item / Title</label>
-                                        <input type="text" id="vExpTitle" class="input-field" placeholder="e.g. Ola to Client / Lunch" style="margin-bottom:0; padding:10px;">
+                                        <input type="text" id="vExpTitle" class="input-field" placeholder="e.g. Ola to Client / Lunch" style="margin-bottom:0; padding:10px; width:100%;">
                                     </div>
-                                    <div style="flex:1; min-width:90px;">
+                                    <div style="flex:1 1 90px; min-width:0;">
                                         <label style="font-size:0.75rem; color:#aaa;">Amount (₹)</label>
-                                        <input type="number" id="vExpAmount" class="input-field" placeholder="0" style="margin-bottom:0; padding:10px;" min="0">
+                                        <input type="number" id="vExpAmount" class="input-field" placeholder="0" style="margin-bottom:0; padding:10px; width:100%;" min="0">
                                     </div>
                                 </div>
                                 <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
-                                    <div style="flex:1; min-width:110px;">
+                                    <div style="flex:1 1 110px; min-width:0;">
                                         <label style="font-size:0.75rem; color:#aaa;">Category</label>
-                                        <select id="vExpCat" class="input-field" style="margin-bottom:0; padding:10px;">
+                                        <select id="vExpCat" class="input-field" style="margin-bottom:0; padding:10px; width:100%;">
                                             <option value="Travel">🚕 Travel / Fare</option>
                                             <option value="Food">☕ Food / Snacks</option>
                                             <option value="Toll/Parking">🅿️ Toll / Parking</option>
@@ -1162,16 +1193,16 @@
                                             <option value="Other">📦 Other Misc</option>
                                         </select>
                                     </div>
-                                    <div style="flex:1; min-width:110px;">
+                                    <div style="flex:1 1 110px; min-width:0;">
                                         <label style="font-size:0.75rem; color:#aaa;">Payment Mode</label>
-                                        <select id="vExpMode" class="input-field" style="margin-bottom:0; padding:10px;">
+                                        <select id="vExpMode" class="input-field" style="margin-bottom:0; padding:10px; width:100%;">
                                             <option value="UPI">📱 UPI / GPay</option>
                                             <option value="Cash">💵 Cash</option>
                                             <option value="Company Card">💳 Company Card</option>
                                             <option value="Personal Paid (Reimbursable)">📝 Reimbursable</option>
                                         </select>
                                     </div>
-                                    <button type="button" class="btn" style="width:auto; padding:10px 18px; background:linear-gradient(45deg, var(--accent-primary), var(--accent-secondary)); color:#000; border-radius:8px; font-weight:bold; font-size:0.85rem;" onclick="addPaymentToVisit()">
+                                    <button type="button" class="btn" style="flex:1 1 120px; min-width:0; padding:10px 14px; background:linear-gradient(45deg, var(--accent-primary), var(--accent-secondary)); color:#000; border-radius:8px; font-weight:bold; font-size:0.85rem;" onclick="addPaymentToVisit()">
                                         <i class="fas fa-plus"></i> Add Payment
                                     </button>
                                 </div>
@@ -1184,10 +1215,10 @@
                         </div>
 
                         <!-- ADVANCED VISIT OUTCOME & STAGE -->
-                        <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:15px; background:rgba(255,255,255,0.02); padding:12px; border-radius:12px; border:1px solid var(--card-border);">
-                            <div style="flex:1; min-width:130px;">
+                        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:15px; background:rgba(255,255,255,0.02); padding:12px; border-radius:12px; border:1px solid var(--card-border);">
+                            <div style="flex:1 1 130px; min-width:0;">
                                 <label style="font-size:0.75rem; color:#aaa;"><i class="fas fa-flag"></i> Meeting Outcome / Stage</label>
-                                <select id="repStage" class="input-field" style="margin-bottom:0; padding:10px;">
+                                <select id="repStage" class="input-field" style="margin-bottom:0; padding:10px; width:100%;">
                                     <option value="Initial Discussion">🤝 Initial Discussion</option>
                                     <option value="Requirement Gathering">📋 Requirement Gathering</option>
                                     <option value="Quotation / Offer Pitched">📑 Offer / Quotation Pitched</option>
@@ -1196,9 +1227,9 @@
                                     <option value="Technical Site Survey">🔍 Technical Site Survey</option>
                                 </select>
                             </div>
-                            <div style="flex:1; min-width:130px;">
+                            <div style="flex:1 1 130px; min-width:0;">
                                 <label style="font-size:0.75rem; color:#aaa;"><i class="fas fa-calendar-check"></i> Next Follow-up Date (Optional)</label>
-                                <input type="date" id="repNextFollowUp" class="input-field" style="margin-bottom:0; padding:10px;">
+                                <input type="date" id="repNextFollowUp" class="input-field" style="margin-bottom:0; padding:10px; width:100%;">
                             </div>
                         </div>
                         <label style="font-size:0.8rem; color:#aaa;">Visit Summary / Notes</label>
@@ -5227,12 +5258,24 @@ CRITICAL RULES:
                 setTimeout(() => t.style.bottom = '-60px', 3000); 
             }
         }
-        function switchTab(id, navEl) { 
+        let currentActiveTab = 'dashboard';
+
+        function switchTab(id, navEl, isHistoryNav = false) { 
             const targetSection = document.getElementById(id);
             if (!targetSection) {
                 console.warn("Module section not found: " + id);
                 return;
             }
+            currentActiveTab = id;
+            try { localStorage.setItem('corpHub_activeTab', id); } catch(e){}
+
+            // Push history state so Android edge-swipe back stays inside the app
+            if (!isHistoryNav && window.history && window.history.pushState) {
+                if (window.location.hash !== '#' + id) {
+                    window.history.pushState({ tab: id }, '', '#' + id);
+                }
+            }
+
             document.querySelectorAll('.module-section').forEach(e => e.classList.remove('active')); 
             targetSection.classList.add('active'); 
             
@@ -5254,15 +5297,52 @@ CRITICAL RULES:
                 if (matchingBottom) matchingBottom.classList.add('active');
             }
 
-            // Close sidebar if open on mobile
+            // Close sidebar cleanly if open on mobile
             const sb = document.getElementById('sidebar');
+            const ov = document.getElementById('sidebarOverlay');
             if(sb && sb.classList.contains('active')) {
-                toggleSidebar();
+                sb.classList.remove('active');
+                if(ov) ov.classList.remove('active');
+                const ham = document.querySelector('.hamburger-container');
+                if(ham) ham.classList.remove('change');
+            }
+
+            // If entering visit tab, ensure draft is restored & visit history rendered
+            if(id === 'reports') {
+                if(typeof restoreVisitDraft === 'function') restoreVisitDraft();
+                if(typeof renderReportsList === 'function') renderReportsList();
             }
             
             const scrollArea = document.getElementById('mainScrollArea');
             if(scrollArea) scrollArea.scrollTo({ top: 0, behavior: 'smooth' });
         }
+
+        // Gesture Navigation & Browser Back Handling (Prevents Visit hide on Android edge-swipe back)
+        window.addEventListener('popstate', function(e) {
+            // 1. If sidebar is open, close sidebar and stay on current page
+            const sb = document.getElementById('sidebar');
+            if(sb && sb.classList.contains('active')) {
+                toggleSidebar();
+                if(currentActiveTab) window.history.pushState({ tab: currentActiveTab }, '', '#' + currentActiveTab);
+                return;
+            }
+
+            // 2. If a modal is open, close modal
+            const smartModal = document.getElementById('smartToolModal');
+            if(smartModal && smartModal.style.display === 'flex') {
+                closeSmartTool();
+                if(currentActiveTab) window.history.pushState({ tab: currentActiveTab }, '', '#' + currentActiveTab);
+                return;
+            }
+
+            // 3. Switch tab according to state or hash
+            let targetTab = (e.state && e.state.tab) || (window.location.hash ? window.location.hash.replace('#', '') : 'dashboard');
+            if(document.getElementById(targetTab)) {
+                switchTab(targetTab, null, true);
+            } else {
+                switchTab('dashboard', null, true);
+            }
+        });
         
         function copyTemplate(elemId, btn) {
             const el = document.getElementById(elemId);
@@ -6582,12 +6662,87 @@ CRITICAL RULES:
             document.getElementById('rpMobile').value = '';
             document.getElementById('rpEmail').value = '';
             renderReportPersonsList();
+            saveVisitDraft();
         }
 
-        function removeReportPerson(idx) { currentReportPersons.splice(idx, 1); renderReportPersonsList(); }
+        function removeReportPerson(idx) { 
+            currentReportPersons.splice(idx, 1); 
+            renderReportPersonsList(); 
+            saveVisitDraft();
+        }
 
         // DYNAMIC MULTIPLE PAYMENTS & EXPENSES FOR VISITS
         let currentReportExpenses = [];
+
+        // --- PERSISTENT AUTO-SAVING VISIT DRAFT ---
+        function saveVisitDraft() {
+            try {
+                const draft = {
+                    date: document.getElementById('repDate')?.value || '',
+                    time: document.getElementById('repTime')?.value || '',
+                    returnTime: document.getElementById('repReturnTime')?.value || '',
+                    company: document.getElementById('repCompany')?.value || '',
+                    stage: document.getElementById('repStage')?.value || 'Initial Discussion',
+                    nextFollowUp: document.getElementById('repNextFollowUp')?.value || '',
+                    text: document.getElementById('repText')?.value || '',
+                    persons: currentReportPersons,
+                    expenses: currentReportExpenses,
+                    updatedAt: Date.now()
+                };
+                if(draft.company || draft.text || (draft.persons && draft.persons.length > 0) || (draft.expenses && draft.expenses.length > 0)) {
+                    localStorage.setItem('corpHub_visitDraft', JSON.stringify(draft));
+                    const statusEl = document.getElementById('visitDraftStatus');
+                    if(statusEl) statusEl.style.display = 'inline-flex';
+                }
+            } catch(e) {}
+        }
+
+        function restoreVisitDraft() {
+            try {
+                const stored = localStorage.getItem('corpHub_visitDraft');
+                if(!stored) return;
+                const draft = JSON.parse(stored);
+                if(!draft) return;
+                
+                if(draft.date && document.getElementById('repDate')) document.getElementById('repDate').value = draft.date;
+                if(draft.time && document.getElementById('repTime')) document.getElementById('repTime').value = draft.time;
+                if(draft.returnTime && document.getElementById('repReturnTime')) document.getElementById('repReturnTime').value = draft.returnTime;
+                if(draft.company && document.getElementById('repCompany')) document.getElementById('repCompany').value = draft.company;
+                if(draft.stage && document.getElementById('repStage')) document.getElementById('repStage').value = draft.stage;
+                if(draft.nextFollowUp && document.getElementById('repNextFollowUp')) document.getElementById('repNextFollowUp').value = draft.nextFollowUp;
+                if(draft.text && document.getElementById('repText')) document.getElementById('repText').value = draft.text;
+                
+                if(Array.isArray(draft.persons) && draft.persons.length > 0) {
+                    currentReportPersons = [...draft.persons];
+                    renderReportPersonsList();
+                }
+                if(Array.isArray(draft.expenses) && draft.expenses.length > 0) {
+                    currentReportExpenses = [...draft.expenses];
+                    renderReportExpensesList();
+                }
+                const statusEl = document.getElementById('visitDraftStatus');
+                if(statusEl) statusEl.style.display = 'inline-flex';
+            } catch(e) {
+                console.warn("Could not restore visit draft", e);
+            }
+        }
+
+        function clearVisitDraft(confirmUser = true) {
+            if(confirmUser && !confirm("Clear this unsaved visit draft?")) return;
+            localStorage.removeItem('corpHub_visitDraft');
+            const form = document.getElementById('reportForm');
+            if(form) form.reset();
+            currentReportPersons = [];
+            currentReportExpenses = [];
+            renderReportPersonsList();
+            renderReportExpensesList();
+            const repD = document.getElementById('repDate'); if(repD) repD.value = todayStr;
+            const repT = document.getElementById('repTime'); if(repT) repT.value = new Date().toTimeString().slice(0,5);
+            const repRT = document.getElementById('repReturnTime'); if(repRT) repRT.value = new Date().toTimeString().slice(0,5);
+            const statusEl = document.getElementById('visitDraftStatus');
+            if(statusEl) statusEl.style.display = 'none';
+            showToast("Visit draft cleared.");
+        }
 
         function renderReportExpensesList() {
             const div = document.getElementById('visitExpensesList');
@@ -6672,6 +6827,7 @@ CRITICAL RULES:
             if(titleInput) titleInput.value = '';
             if(amtInput) amtInput.value = '';
             renderReportExpensesList();
+            saveVisitDraft();
         }
 
         function quickAddVisitExpense(defaultTitle, cat, mode) {
@@ -6688,11 +6844,13 @@ CRITICAL RULES:
                 mode: mode
             });
             renderReportExpensesList();
+            saveVisitDraft();
         }
 
         function removeReportExpense(idx) {
             currentReportExpenses.splice(idx, 1);
             renderReportExpensesList();
+            saveVisitDraft();
         }
 
         function getReportTotalExpense(r) {
@@ -6761,10 +6919,25 @@ CRITICAL RULES:
             document.getElementById('repDate').value = todayStr;
             document.getElementById('repTime').value = new Date().toTimeString().slice(0,5);
             document.getElementById('repReturnTime').value = new Date().toTimeString().slice(0,5);
+            
+            // Clear auto-saved draft
+            try {
+                localStorage.removeItem('corpHub_visitDraft');
+                const draftBadge = document.getElementById('visitDraftStatus');
+                if(draftBadge) draftBadge.style.display = 'none';
+            } catch(err){}
+
             autoSave();
             renderReportsList();
             showToast('Visit logged successfully with payments! ✅');
         });
+
+        // Auto-save visit draft on any typing or field change
+        const repFormEl = document.getElementById('reportForm');
+        if(repFormEl) {
+            repFormEl.addEventListener('input', () => { if(typeof saveVisitDraft === 'function') saveVisitDraft(); });
+            repFormEl.addEventListener('change', () => { if(typeof saveVisitDraft === 'function') saveVisitDraft(); });
+        }
 
         function renderReportsList() {
             const div = document.getElementById('reportListDiv');
@@ -8247,7 +8420,7 @@ CRITICAL RULES:
             { id: 'crm', name: 'Customer CRM', icon: 'fa-users', type: 'module', category: 'CORE WORKSPACE', defaultPin: true },
             { id: 'planner', name: 'Daily Plan & Tasks', icon: 'fa-tasks', type: 'tab', category: 'CORE WORKSPACE', defaultPin: true },
             { id: 'daily-report', name: 'Smart Daily Report', icon: 'fa-file-signature', type: 'tab', category: 'CORE WORKSPACE', defaultPin: true },
-            { id: 'reports', name: 'Visit Reports', icon: 'fa-map-marked-alt', type: 'tab', category: 'CORE WORKSPACE', defaultPin: true },
+            { id: 'reports', name: 'Field Visits (Visit Page)', icon: 'fa-briefcase', type: 'tab', category: 'CORE WORKSPACE', defaultPin: true },
             { id: 'quotation', name: 'Quotations', icon: 'fa-file-invoice-dollar', type: 'tab', category: 'CORE WORKSPACE', defaultPin: true },
             
             // OFFICE WORK & EXPENSES
@@ -8326,7 +8499,7 @@ CRITICAL RULES:
                 sb.innerHTML += `<div class="nav-category"><i class="fas ${catConfig.catIcon}"></i> ${cat}</div>`;
                 
                 appsInCat.forEach(app => {
-                    const clickFunc = app.type === 'tab' ? `switchTab('${app.id}'); closeMobileSidebar();` : `openErpModule('${app.id}'); closeMobileSidebar();`;
+                    const clickFunc = app.type === 'tab' ? `switchTab('${app.id}');` : `openErpModule('${app.id}'); closeMobileSidebar();`;
                     sb.innerHTML += `<li class="nav-item" id="nav-${app.id}" onclick="${clickFunc}"><i class="fas ${app.icon}"></i> ${app.name}</li>`;
                 });
             });
@@ -8337,7 +8510,12 @@ CRITICAL RULES:
         }
 
         function closeMobileSidebar() {
-            document.getElementById('sidebar').classList.remove('active');
+            const sb = document.getElementById('sidebar');
+            if(sb) sb.classList.remove('active');
+            const ov = document.getElementById('sidebarOverlay');
+            if(ov) ov.classList.remove('active');
+            const ham = document.querySelector('.hamburger-container');
+            if(ham) ham.classList.remove('change');
         }
 
         function renderAppLibrary() {
@@ -8362,12 +8540,24 @@ CRITICAL RULES:
             });
         }
         
-        // Render on init
+        // Render on init & restore saved active tab
         setTimeout(() => {
             renderSidebar();
             renderAppLibrary();
             fetchDashboardAPIs(); // Fetch API data on load
-        }, 500);
+
+            // Restore last active tab if user was on Visit or other page
+            try {
+                const hashTab = window.location.hash ? window.location.hash.replace('#', '') : null;
+                const savedTab = hashTab || localStorage.getItem('corpHub_activeTab');
+                if(savedTab && document.getElementById(savedTab) && savedTab !== 'dashboard') {
+                    switchTab(savedTab, null, true);
+                }
+                if(typeof restoreVisitDraft === 'function') {
+                    restoreVisitDraft();
+                }
+            } catch(e) {}
+        }, 300);
 
         // --- DASHBOARD API INTEGRATION ---
         async function fetchDashboardAPIs() {
