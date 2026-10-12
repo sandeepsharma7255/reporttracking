@@ -371,24 +371,192 @@
         
         h2, h3 { color: #ffffff !important; }
         
-        /* MOBILE RESPONSIVE MEDIA QUERIES */
-        @media (max-width: 900px) { #mobileHamburger { display: inline-block !important; } }
-        @media (max-width: 900px) {
-            .dashboard-layout { grid-template-columns: 1fr; }
-            .kpi-grid-4 { grid-template-columns: repeat(2, 1fr); }
-            .quick-actions-grid { grid-template-columns: repeat(3, 1fr); }
+        /* ========================================================
+           ANIMATED & STYLISH MICRO-INTERACTIONS
+           ======================================================== */
+        /* Smooth Entrance for Sections */
+        .module-section {
+            display: none;
+            opacity: 0;
+            transform: translateY(14px);
+            transition: opacity 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
-        
-        @media (max-width: 600px) {
-            .kpi-grid-4 { grid-template-columns: 1fr; }
-            .quick-actions-grid { grid-template-columns: repeat(2, 1fr); }
-            .search-bar { display: none; }
-            .header-greeting h1 { font-size: 1.1rem !important; }
-            .header-greeting p { display: none; }
-            .main-content { margin-left: 0 !important; padding: 0; }
-            #mobileHamburger { display: inline-block !important; margin-right: 15px; }
+        .module-section.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+            animation: sectionEnter 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+        @keyframes sectionEnter {
+            from { opacity: 0; transform: translateY(14px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
+        /* Card & KPI Animations */
+        .card, .kpi-card, .list-item, .glass-card {
+            transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease, border-color 0.25s ease !important;
+        }
+        .card:hover, .kpi-card:hover {
+            transform: translateY(-3px) !important;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), var(--glow) !important;
+        }
+
+        /* Sleek Button Micro-interactions */
+        .btn, button.btn {
+            transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+            cursor: pointer;
+        }
+        .btn:hover, button.btn:hover {
+            filter: brightness(1.1);
+            transform: translateY(-1px);
+        }
+        .btn:active, button.btn:active {
+            transform: scale(0.97) !important;
+        }
+
+        /* Pulsing Status Dot */
+        .pulse-sync-dot {
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background-color: var(--success);
+            box-shadow: 0 0 0 0 rgba(0, 230, 118, 0.7);
+            animation: pulseSync 2s infinite;
+            vertical-align: middle;
+            margin-right: 4px;
+        }
+        @keyframes pulseSync {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 230, 118, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(0, 230, 118, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 230, 118, 0); }
+        }
+
+        /* Modern Gradient Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, var(--accent-primary), rgba(255,255,255,0.2)); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent-primary); }
+
+        /* ========================================================
+           MOBILE BOTTOM NAVIGATION BAR
+           ======================================================== */
+        .mobile-bottom-nav {
+            display: none;
+        }
+        @media (max-width: 768px) {
+            .mobile-bottom-nav {
+                display: flex;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 64px;
+                background: rgba(10, 14, 23, 0.94);
+                backdrop-filter: blur(25px);
+                -webkit-backdrop-filter: blur(25px);
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+                z-index: 999;
+                justify-content: space-around;
+                align-items: center;
+                padding: 4px 8px;
+                box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.5);
+            }
+            .bottom-nav-item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 3px;
+                color: var(--text-muted);
+                cursor: pointer;
+                padding: 6px 10px;
+                border-radius: 12px;
+                transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+                flex: 1;
+                max-width: 70px;
+                user-select: none;
+            }
+            .bottom-nav-item i {
+                font-size: 1.2rem;
+                transition: transform 0.25s;
+            }
+            .bottom-nav-item span {
+                font-size: 0.65rem;
+                font-weight: 600;
+                letter-spacing: 0.2px;
+            }
+            .bottom-nav-item.active {
+                color: var(--accent-primary);
+                background: rgba(0, 229, 255, 0.12);
+                box-shadow: 0 0 12px rgba(0, 229, 255, 0.25);
+            }
+            .bottom-nav-item.active i {
+                transform: scale(1.15);
+                filter: drop-shadow(0 0 6px var(--accent-primary));
+            }
+
+            /* Scroll Area safe space for Bottom Nav */
+            .main-scroll-area {
+                padding: 12px 14px 85px 14px !important;
+            }
+
+            /* Header on Mobile */
+            .top-header-new {
+                padding: 10px 14px !important;
+            }
+            .header-greeting h1 {
+                font-size: 1.05rem !important;
+            }
+            .header-greeting p {
+                font-size: 0.72rem !important;
+            }
+            .search-bar {
+                display: none !important;
+            }
+
+            /* Mobile-friendly Inputs & Touch Targets */
+            .input-field, select, textarea {
+                font-size: 16px !important; /* Prevents auto-zoom on iOS Safari */
+                padding: 12px 14px !important;
+            }
+            .btn, button.btn {
+                min-height: 44px !important;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            /* Layout responsiveness */
+            .dashboard-layout { grid-template-columns: 1fr !important; }
+            .kpi-grid-4 { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+            .quick-actions-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 8px !important; }
+            .grid-2, .grid-3 { grid-template-columns: 1fr !important; gap: 12px !important; }
+            .card { padding: 14px !important; margin-bottom: 12px !important; border-radius: 14px !important; }
+            
+            /* Responsive Floating Mic Action */
+            .mic-fab {
+                bottom: 75px !important;
+                right: 18px !important;
+                width: 50px !important;
+                height: 50px !important;
+                font-size: 1.25rem !important;
+            }
+
+            #mobileHamburger { display: inline-block !important; }
+        }
+
+        @media (max-width: 480px) {
+            .kpi-grid-4 { grid-template-columns: 1fr !important; }
+            .quick-actions-grid { grid-template-columns: repeat(2, 1fr) !important; }
+            .header-greeting h1 {
+                font-size: 0.95rem !important;
+                max-width: 170px !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+            }
+        }
 </style>
 </head>
 <body>
@@ -653,7 +821,7 @@
             </div>
         </header>
         
-        <div style="flex:1; overflow-y:auto; padding:20px 30px;">
+        <div id="mainScrollArea" class="main-scroll-area" style="flex:1; overflow-y:auto; padding:20px 30px;">
 
 
         
@@ -957,7 +1125,7 @@
                         <div class="ai-textarea-wrapper" style="margin-bottom: 25px;">
                             <textarea id="repText" placeholder="Start typing or tap mic for dictation..." style="min-height:120px; font-size:0.95rem; line-height:1.5;" required></textarea>
                             <button type="button" class="btn" style="position:absolute; right:50px; bottom:20px; width:auto; padding:5px 15px; background:linear-gradient(45deg, #00E5FF, #00BFFF); color:#000; border-radius:20px; font-size:0.8rem; font-weight:bold;" onclick="translateToEnglish('repText')" title="Translate Hindi to Professional English"><i class="fas fa-magic"></i> AI Magic</button>
-                            <div class="mic-btn" onclick="startVoiceRecognition('repText')"><i class="fas fa-microphone"></i></div>
+                            <div class="mic-btn" id="micReportBtn" onclick="startVoiceRecognition('repText')" title="Voice Dictation"><i class="fas fa-microphone"></i></div>
                         </div>
                         <button type="submit" class="btn" style="border-radius:25px; background:#10b981; font-weight:bold; font-size:1.1rem; padding:12px;"><i class="fas fa-check-circle"></i> Log Daily Visit</button>
                     </form>
@@ -1680,6 +1848,30 @@
         </div> <!-- End of flex:1 scroll container -->
         <div class="mic-fab" onclick="toggleJarvis()"><i class="fas fa-microphone"></i></div>
 
+        <!-- MOBILE BOTTOM NAVIGATION BAR -->
+        <nav class="mobile-bottom-nav" id="mobileBottomNav">
+            <div class="bottom-nav-item active" onclick="switchTab('dashboard', this)">
+                <i class="fas fa-th-large"></i>
+                <span>Home</span>
+            </div>
+            <div class="bottom-nav-item" onclick="switchTab('planner', this)">
+                <i class="fas fa-tasks"></i>
+                <span>Plans</span>
+            </div>
+            <div class="bottom-nav-item" onclick="switchTab('reports', this)">
+                <i class="fas fa-briefcase"></i>
+                <span>Visits</span>
+            </div>
+            <div class="bottom-nav-item" onclick="switchTab('contacts', this)">
+                <i class="fas fa-address-book"></i>
+                <span>Contacts</span>
+            </div>
+            <div class="bottom-nav-item" onclick="switchTab('master-reports', this)">
+                <i class="fas fa-file-invoice"></i>
+                <span>Reports</span>
+            </div>
+        </nav>
+
     </main>
 
     <!-- FIREBASE & JAVASCRIPT ENGINE -->
@@ -1836,7 +2028,8 @@ function runRecovery() {
     appData.expenseSheets = recExpenseSheet;
     autoSave();
     updateUI();
-    document.getElementById('recoveryBtn').style.display = 'none';
+    const rBtn = document.getElementById('recoveryBtn');
+    if(rBtn) rBtn.style.display = 'none';
     alert("Data successfully restored! 🚀");
 }
 // RECOVERY SCRIPT INJECT
@@ -1976,10 +2169,10 @@ function runRecovery() {
             document.body.classList.toggle('premium-black');
             const icon = document.getElementById('themeIcon');
             if(document.body.classList.contains('premium-black')) {
-                icon.className = 'fas fa-gem';
+                if(icon) icon.className = 'fas fa-gem';
                 localStorage.setItem('theme', 'premium');
             } else {
-                icon.className = 'fas fa-moon';
+                if(icon) icon.className = 'fas fa-moon';
                 localStorage.setItem('theme', 'default');
             }
         }
@@ -4933,21 +5126,77 @@ CRITICAL RULES:
             // Try to open WhatsApp Web/App directly
             window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank");
         }
-        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); document.getElementById('sidebarOverlay').classList.toggle('active'); const ham = document.querySelector('.hamburger-container'); if(ham) ham.classList.toggle('change'); }
-        function toggleSubMenu(id) { const el = document.getElementById(id); el.style.display = el.style.display === 'none' ? 'block' : 'none'; }
-        function showToast(msg) { const t = document.getElementById('toast'); document.getElementById('toastMsg').innerText = msg; t.style.bottom = '30px'; setTimeout(() => t.style.bottom = '-60px', 3000); }
-        function switchTab(id) { document.querySelectorAll('.module-section, .nav-item').forEach(e => e.classList.remove('active')); document.getElementById(id).classList.add('active'); event.currentTarget.classList.add('active'); toggleSidebar(); }
+        function toggleSidebar() { 
+            const sb = document.getElementById('sidebar');
+            const ov = document.getElementById('sidebarOverlay');
+            const ham = document.querySelector('.hamburger-container');
+            if(sb) sb.classList.toggle('active'); 
+            if(ov) ov.classList.toggle('active'); 
+            if(ham) ham.classList.toggle('change'); 
+        }
+        function toggleSubMenu(id) { 
+            const el = document.getElementById(id); 
+            if(el) el.style.display = el.style.display === 'none' ? 'block' : 'none'; 
+        }
+        function showToast(msg) { 
+            const t = document.getElementById('toast'); 
+            const msgEl = document.getElementById('toastMsg');
+            if(msgEl) msgEl.innerText = msg; 
+            if(t) {
+                t.style.bottom = '30px'; 
+                setTimeout(() => t.style.bottom = '-60px', 3000); 
+            }
+        }
+        function switchTab(id, navEl) { 
+            const targetSection = document.getElementById(id);
+            if (!targetSection) {
+                console.warn("Module section not found: " + id);
+                return;
+            }
+            document.querySelectorAll('.module-section').forEach(e => e.classList.remove('active')); 
+            targetSection.classList.add('active'); 
+            
+            // Highlight sidebar item
+            document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
+            if (navEl && navEl.classList && navEl.classList.contains('nav-item')) {
+                navEl.classList.add('active');
+            } else {
+                const matchingNav = document.getElementById('nav-' + id) || document.querySelector(`.nav-item[onclick*="'${id}'"]`);
+                if (matchingNav) matchingNav.classList.add('active');
+            }
+            
+            // Highlight mobile bottom nav item
+            document.querySelectorAll('.bottom-nav-item').forEach(e => e.classList.remove('active'));
+            if (navEl && navEl.classList && navEl.classList.contains('bottom-nav-item')) {
+                navEl.classList.add('active');
+            } else {
+                const matchingBottom = document.querySelector(`.bottom-nav-item[onclick*="'${id}'"]`);
+                if (matchingBottom) matchingBottom.classList.add('active');
+            }
+
+            // Close sidebar if open on mobile
+            const sb = document.getElementById('sidebar');
+            if(sb && sb.classList.contains('active')) {
+                toggleSidebar();
+            }
+            
+            const scrollArea = document.getElementById('mainScrollArea');
+            if(scrollArea) scrollArea.scrollTo({ top: 0, behavior: 'smooth' });
+        }
         
         function copyTemplate(elemId, btn) {
-            navigator.clipboard.writeText(document.getElementById(elemId).innerText);
+            const el = document.getElementById(elemId);
+            if(!el) return;
+            navigator.clipboard.writeText(el.innerText);
             const oldHtml = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
             setTimeout(() => btn.innerHTML = oldHtml, 2000);
         }
         
-        document.getElementById('repDate').value = todayStr; document.getElementById('repTime').value = new Date().toTimeString().slice(0,5);
-        document.getElementById('masterDateFrom').value = todayStr;
-        document.getElementById('masterDateTo').value = todayStr;
+        const repD = document.getElementById('repDate'); if(repD) repD.value = todayStr;
+        const repT = document.getElementById('repTime'); if(repT) repT.value = new Date().toTimeString().slice(0,5);
+        const mdF = document.getElementById('masterDateFrom'); if(mdF) mdF.value = todayStr;
+        const mdT = document.getElementById('masterDateTo'); if(mdT) mdT.value = todayStr;
 
         function formatDateForInput(d) {
             return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
@@ -5142,14 +5391,15 @@ CRITICAL RULES:
         }
         function pushToFirebase() {
             if(!currentUser || !navigator.onLine || !isDataLoaded) return;
-            document.getElementById('syncStatus').innerHTML = `🔄 Syncing...`;
+            const syncEl = document.getElementById('syncStatus');
+            if(syncEl) syncEl.innerHTML = `<span class="pulse-sync-dot" style="background:#00E5FF;"></span> Syncing...`;
             db.collection('corporateOperationsData').doc(currentUser.uid).set(cleanData(appData), {merge:true})
                 .then(() => { 
-                    document.getElementById('syncStatus').innerHTML = `🟢 Cloud Secured`; 
+                    if(syncEl) syncEl.innerHTML = `<span class="pulse-sync-dot"></span> Cloud Secured`; 
                 })
                 .catch(err => {
                     console.error("Firebase Sync Error:", err);
-                    document.getElementById('syncStatus').innerHTML = `🔴 Sync Failed: ` + err.message; 
+                    if(syncEl) syncEl.innerHTML = `<span class="pulse-sync-dot" style="background:#ff4d4d;"></span> Sync Failed`; 
                 });
         }
         // ONE-TIME INJECTION FOR AUG 21 TASKS
@@ -5181,6 +5431,16 @@ CRITICAL RULES:
             }
         }
 
+        function applyLoadedSettings() {
+            if(appData.appPin && appData.appPin.toString().trim().length === 4) showPinScreen();
+            const ts = document.getElementById('themeSelect'); if(ts) ts.value = appData.theme;
+            changeTheme();
+            const pn = document.getElementById('profileName'); if(pn) pn.value = appData.userName || '';
+            const pi = document.getElementById('pinInput'); if(pi) pi.value = appData.appPin || '';
+            const tv = document.getElementById('targetVisits'); if(tv) tv.value = appData.targetVisits || 50;
+            const to = document.getElementById('targetOrders'); if(to) to.value = appData.targetOrders || 10;
+        }
+
         function loadDataForUser() {
             injectAug21Tasks();
             let uid = currentUser ? currentUser.uid : 'local_user';
@@ -5196,8 +5456,8 @@ CRITICAL RULES:
                         // Merge arrays by ID so offline data isn't wiped by older cloud data
                         function mergeArrays(arr1, arr2) {
                             let map = new Map();
-                            (arr1 || []).forEach(i => { if(i.id) map.set(i.id, i); });
-                            (arr2 || []).forEach(i => { if(i.id) map.set(i.id, i); });
+                            (arr1 || []).forEach(i => { if(i && i.id) map.set(String(i.id), i); });
+                            (arr2 || []).forEach(i => { if(i && i.id) map.set(String(i.id), i); });
                             return Array.from(map.values());
                         }
 
@@ -5214,19 +5474,21 @@ CRITICAL RULES:
                         appData = cleanData(appData); autoSave(); 
                     }
                     
-                    if(appData.appPin && appData.appPin.toString().trim().length === 4) showPinScreen();
-                    document.getElementById('themeSelect').value = appData.theme; changeTheme(); 
-                    document.getElementById('profileName').value = appData.userName; document.getElementById('pinInput').value = appData.appPin; document.getElementById('targetVisits').value = appData.targetVisits; document.getElementById('targetOrders').value = appData.targetOrders; 
+                    applyLoadedSettings();
                     isDataLoaded = true;
                     updateUI();
                 }).catch(err => { 
                     console.error("Firebase Load Error:", err);
-                    document.getElementById('syncStatus').innerHTML = `🔴 Cloud Load Error`;
+                    const syncEl = document.getElementById('syncStatus');
+                    if(syncEl) syncEl.innerHTML = `<span class="pulse-sync-dot" style="background:#ff4d4d;"></span> Cloud Load Error`;
+                    applyLoadedSettings();
+                    isDataLoaded = true;
+                    updateUI();
                 });
             } else {
-                document.getElementById('syncStatus').innerHTML = `🔴 Offline Mode Active`;
-                if(appData.appPin && appData.appPin.toString().trim().length === 4) showPinScreen();
-                document.getElementById('themeSelect').value = appData.theme; changeTheme(); document.getElementById('profileName').value = appData.userName; document.getElementById('pinInput').value = appData.appPin; document.getElementById('targetVisits').value = appData.targetVisits; document.getElementById('targetOrders').value = appData.targetOrders; 
+                const syncEl = document.getElementById('syncStatus');
+                if(syncEl) syncEl.innerHTML = `<span class="pulse-sync-dot" style="background:#ff9800;"></span> Offline Mode Active`;
+                applyLoadedSettings();
                 isDataLoaded = true;
                 updateUI();
             }
@@ -5234,10 +5496,21 @@ CRITICAL RULES:
         function autoSave() { 
             appData = cleanData(appData);
             saveLocally();
-            if(currentUser && navigator.onLine) { pushToFirebase(); showToast('Data Synced! ☁️'); }
-            else { document.getElementById('syncStatus').innerHTML = `🔴 Saved Offline`; showToast('Saved Locally.'); }
+            const syncEl = document.getElementById('syncStatus');
+            if(currentUser && navigator.onLine) { 
+                pushToFirebase(); 
+                showToast('Data Synced! ☁️'); 
+            } else { 
+                if(syncEl) syncEl.innerHTML = `<span class="pulse-sync-dot" style="background:#ff9800;"></span> Saved Offline`; 
+                showToast('Saved Locally.'); 
+            }
             updateUI(); 
         }
+
+        // Periodic Background Safety Auto-Save (Continuous Storage - Zero Data Loss)
+        setInterval(() => {
+            if(isDataLoaded) silentSave();
+        }, 45000);
 
         let currentCalMonth = new Date().getMonth();
         let currentCalYear = new Date().getFullYear();
@@ -6764,19 +7037,29 @@ CRITICAL RULES:
         }
 
         async function aiSummarizeReports() {
-            const filtered = appData.reports;
+            const filtered = appData.reports || [];
             if(filtered.length === 0) return alert("No reports to summarize.");
-            document.getElementById('compiledReportBox').style.display = 'block';
-            const outputEl = document.getElementById('compiledOutput');
-            outputEl.value = "AI is analyzing your reports... Please wait.";
-            let allText = filtered.map(r => `[${r.date}] Met: ${r.metName || 'N/A'} - ${r.text}`).join("\n");
+            const box = document.getElementById('compiledReportBox');
+            if(box) box.style.display = 'block';
+            const outputEl = document.getElementById('compiledOutput') || document.getElementById('pdfExportArea');
+            if(outputEl) {
+                if('value' in outputEl) outputEl.value = "AI is analyzing your reports... Please wait.";
+                else outputEl.innerHTML = "<p>AI is analyzing your reports... Please wait.</p>";
+            }
+            let allText = filtered.map(r => `[${r.date}] Met: ${r.metName || (r.persons && r.persons[0] ? r.persons[0].name : 'N/A')} - ${r.text || ''}`).join("\n");
             
             let summary = await callSandeepAI("You are a corporate executive assistant. Summarize these daily reports into a concise, professional executive summary with bullet points.", allText);
             if(summary) {
-                outputEl.value = summary;
+                if(outputEl) {
+                    if('value' in outputEl) outputEl.value = summary;
+                    else outputEl.innerHTML = `<div style="padding:10px; line-height:1.6;">${summary.replace(/\n/g, '<br>')}</div>`;
+                }
                 showToast("AI Summary generated successfully.");
             } else {
-                outputEl.value = "Failed to generate AI summary.";
+                if(outputEl) {
+                    if('value' in outputEl) outputEl.value = "Failed to generate AI summary.";
+                    else outputEl.innerHTML = "<p style='color:red;'>Failed to generate AI summary.</p>";
+                }
             }
         }
 
@@ -6803,6 +7086,7 @@ CRITICAL RULES:
         function startReportVoice() {
             const btn = document.getElementById('micReportBtn');
             const el = document.getElementById('repText');
+            if(!el) return;
             
             if (isRecording) {
                 if (recognition) recognition.stop();
@@ -6822,7 +7106,7 @@ CRITICAL RULES:
                 
                 recognition.onstart = function() {
                     isRecording = true;
-                    btn.classList.add('listening');
+                    if(btn) btn.classList.add('listening');
                     showToast("Listening... (Speak now)");
                 };
                 
@@ -6842,12 +7126,12 @@ CRITICAL RULES:
                     console.error("Speech Recognition Error: ", event.error);
                     showToast("Microphone error. Check permissions.");
                     isRecording = false;
-                    btn.classList.remove('listening');
+                    if(btn) btn.classList.remove('listening');
                 };
                 
                 recognition.onend = function() {
                     isRecording = false;
-                    btn.classList.remove('listening');
+                    if(btn) btn.classList.remove('listening');
                     showToast("Dictation ended.");
                 };
             }
@@ -6857,7 +7141,7 @@ CRITICAL RULES:
             } catch(e) {
                 console.error("Start error:", e);
                 isRecording = false;
-                btn.classList.remove('listening');
+                if(btn) btn.classList.remove('listening');
             }
         }
 
@@ -6905,9 +7189,13 @@ CRITICAL RULES:
         function exportData(type) { alert(`Export for ${type} coming soon`); }
 
         function addPersonalExpense() {
-            const dt = document.getElementById('expDate').value || todayStr;
-            const desc = document.getElementById('expDesc').value;
-            const amt = parseFloat(document.getElementById('expAmount').value) || 0;
+            const dtEl = document.getElementById('expDate');
+            const descEl = document.getElementById('expDesc');
+            const amtEl = document.getElementById('expAmount');
+            if(!descEl || !amtEl) return;
+            const dt = (dtEl && dtEl.value) || todayStr;
+            const desc = descEl.value;
+            const amt = parseFloat(amtEl.value) || 0;
             if(!desc || amt <= 0) return alert("Enter valid description and amount.");
             if(!appData.personalExpenses) appData.personalExpenses = [];
             appData.personalExpenses.push({
@@ -6916,8 +7204,8 @@ CRITICAL RULES:
                 desc: desc,
                 amount: amt
             });
-            document.getElementById('expDesc').value = '';
-            document.getElementById('expAmount').value = '';
+            descEl.value = '';
+            amtEl.value = '';
             autoSave();
             updateUI();
         }
