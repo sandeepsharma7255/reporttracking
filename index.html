@@ -1116,10 +1116,90 @@
                             </div>
                             <button type="button" class="btn" style="background:rgba(255,255,255,0.1); color:#fff; border-radius:20px; padding: 8px 15px; font-size:0.85rem;" onclick="addPersonToReport()"><i class="fas fa-plus"></i> Add Person Met</button>
                         </div>
-                        <div style="display:flex; gap:15px; margin-bottom:20px; flex-wrap:wrap; background:rgba(255,193,7,0.05); padding:15px; border-radius:12px; border: 1px solid rgba(255,193,7,0.1);">
-                            <div style="flex:1; min-width:80px;"><label style="font-size:0.8rem; color:#ffc107;">Going Fare (₹)</label><input type="number" id="repGoing" class="input-field" style="margin-bottom:0;" value="0"></div>
-                            <div style="flex:1; min-width:80px;"><label style="font-size:0.8rem; color:#ffc107;">Return Fare (₹)</label><input type="number" id="repReturn" class="input-field" style="margin-bottom:0;" value="0"></div>
-                            <div style="flex:1; min-width:80px;"><label style="font-size:0.8rem; color:#ffc107;">Food (₹)</label><input type="number" id="repFood" class="input-field" style="margin-bottom:0;" value="0"></div>
+                        <!-- ADVANCED MULTIPLE PAYMENTS & EXPENSES -->
+                        <div style="background:rgba(0, 229, 255, 0.03); border:1px solid rgba(0, 229, 255, 0.15); padding:15px; border-radius:14px; margin-bottom:20px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                                <h3 style="color:var(--accent-primary); font-size:0.95rem; text-transform:uppercase; letter-spacing:1px; margin:0; display:flex; align-items:center; gap:8px;">
+                                    <i class="fas fa-wallet"></i> Multiple Payments & Expenses
+                                </h3>
+                                <div id="visitTotalExpBadge" style="background:rgba(16, 185, 129, 0.15); color:#10b981; border:1px solid rgba(16, 185, 129, 0.3); padding:4px 12px; border-radius:20px; font-weight:800; font-size:0.85rem;">
+                                    Total: ₹<span id="visitLiveTotalExp">0.00</span>
+                                </div>
+                            </div>
+
+                            <!-- Quick Presets -->
+                            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
+                                <button type="button" class="btn" style="width:auto; padding:5px 12px; font-size:0.75rem; background:rgba(255,255,255,0.06); border:1px solid var(--card-border); color:var(--text-main); border-radius:8px;" onclick="quickAddVisitExpense('🚕 Cab / Auto', 'Travel', 'UPI')">+ 🚕 Cab/Auto</button>
+                                <button type="button" class="btn" style="width:auto; padding:5px 12px; font-size:0.75rem; background:rgba(255,255,255,0.06); border:1px solid var(--card-border); color:var(--text-main); border-radius:8px;" onclick="quickAddVisitExpense('☕ Tea / Food', 'Food', 'Cash')">+ ☕ Tea/Food</button>
+                                <button type="button" class="btn" style="width:auto; padding:5px 12px; font-size:0.75rem; background:rgba(255,255,255,0.06); border:1px solid var(--card-border); color:var(--text-main); border-radius:8px;" onclick="quickAddVisitExpense('🅿️ Toll / Parking', 'Toll/Parking', 'Fastag/UPI')">+ 🅿️ Parking/Toll</button>
+                                <button type="button" class="btn" style="width:auto; padding:5px 12px; font-size:0.75rem; background:rgba(255,255,255,0.06); border:1px solid var(--card-border); color:var(--text-main); border-radius:8px;" onclick="quickAddVisitExpense('🚆 Metro / Train', 'Travel', 'UPI')">+ 🚆 Metro/Train</button>
+                            </div>
+
+                            <!-- Dynamic Expense List Container -->
+                            <div id="visitExpensesList" style="margin-bottom:12px; display:flex; flex-direction:column; gap:8px;"></div>
+
+                            <!-- Add Expense Row Inputs -->
+                            <div style="background:rgba(0,0,0,0.25); border:1px dashed var(--card-border); padding:12px; border-radius:10px;">
+                                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px;">
+                                    <div style="flex:2; min-width:130px;">
+                                        <label style="font-size:0.75rem; color:#aaa;">Expense Item / Title</label>
+                                        <input type="text" id="vExpTitle" class="input-field" placeholder="e.g. Ola to Client / Lunch" style="margin-bottom:0; padding:10px;">
+                                    </div>
+                                    <div style="flex:1; min-width:90px;">
+                                        <label style="font-size:0.75rem; color:#aaa;">Amount (₹)</label>
+                                        <input type="number" id="vExpAmount" class="input-field" placeholder="0" style="margin-bottom:0; padding:10px;" min="0">
+                                    </div>
+                                </div>
+                                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
+                                    <div style="flex:1; min-width:110px;">
+                                        <label style="font-size:0.75rem; color:#aaa;">Category</label>
+                                        <select id="vExpCat" class="input-field" style="margin-bottom:0; padding:10px;">
+                                            <option value="Travel">🚕 Travel / Fare</option>
+                                            <option value="Food">☕ Food / Snacks</option>
+                                            <option value="Toll/Parking">🅿️ Toll / Parking</option>
+                                            <option value="Client Meeting">🤝 Client Meeting</option>
+                                            <option value="Hotel/Stay">🏨 Hotel / Stay</option>
+                                            <option value="Other">📦 Other Misc</option>
+                                        </select>
+                                    </div>
+                                    <div style="flex:1; min-width:110px;">
+                                        <label style="font-size:0.75rem; color:#aaa;">Payment Mode</label>
+                                        <select id="vExpMode" class="input-field" style="margin-bottom:0; padding:10px;">
+                                            <option value="UPI">📱 UPI / GPay</option>
+                                            <option value="Cash">💵 Cash</option>
+                                            <option value="Company Card">💳 Company Card</option>
+                                            <option value="Personal Paid (Reimbursable)">📝 Reimbursable</option>
+                                        </select>
+                                    </div>
+                                    <button type="button" class="btn" style="width:auto; padding:10px 18px; background:linear-gradient(45deg, var(--accent-primary), var(--accent-secondary)); color:#000; border-radius:8px; font-weight:bold; font-size:0.85rem;" onclick="addPaymentToVisit()">
+                                        <i class="fas fa-plus"></i> Add Payment
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Hidden legacy inputs for backwards compatibility -->
+                            <input type="hidden" id="repGoing" value="0">
+                            <input type="hidden" id="repReturn" value="0">
+                            <input type="hidden" id="repFood" value="0">
+                        </div>
+
+                        <!-- ADVANCED VISIT OUTCOME & STAGE -->
+                        <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:15px; background:rgba(255,255,255,0.02); padding:12px; border-radius:12px; border:1px solid var(--card-border);">
+                            <div style="flex:1; min-width:130px;">
+                                <label style="font-size:0.75rem; color:#aaa;"><i class="fas fa-flag"></i> Meeting Outcome / Stage</label>
+                                <select id="repStage" class="input-field" style="margin-bottom:0; padding:10px;">
+                                    <option value="Initial Discussion">🤝 Initial Discussion</option>
+                                    <option value="Requirement Gathering">📋 Requirement Gathering</option>
+                                    <option value="Quotation / Offer Pitched">📑 Offer / Quotation Pitched</option>
+                                    <option value="Follow-up / Negotiations">⏳ Follow-up / Negotiations</option>
+                                    <option value="Deal Won / PO Expected">🎉 Deal Won / PO Expected</option>
+                                    <option value="Technical Site Survey">🔍 Technical Site Survey</option>
+                                </select>
+                            </div>
+                            <div style="flex:1; min-width:130px;">
+                                <label style="font-size:0.75rem; color:#aaa;"><i class="fas fa-calendar-check"></i> Next Follow-up Date (Optional)</label>
+                                <input type="date" id="repNextFollowUp" class="input-field" style="margin-bottom:0; padding:10px;">
+                            </div>
                         </div>
                         <label style="font-size:0.8rem; color:#aaa;">Visit Summary / Notes</label>
                         <div class="ai-textarea-wrapper" style="margin-bottom: 25px;">
@@ -5730,7 +5810,7 @@ CRITICAL RULES:
             let expTotal = 0;
             if(data.personalExpenses) data.personalExpenses.forEach(e => expTotal += parseFloat(e.amount)||0);
             if(data.expenseSheets) data.expenseSheets.forEach(s => s.items.forEach(i => expTotal += parseFloat(i.amount)||0));
-            if(data.reports) data.reports.forEach(r => expTotal += (parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0));
+            if(data.reports) data.reports.forEach(r => expTotal += (typeof getReportTotalExpense === 'function' ? getReportTotalExpense(r) : ((parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0))));
 
             document.getElementById('arcDuty').innerText = data.attendance ? data.attendance.length : 0;
             document.getElementById('arcVisits').innerText = data.reports ? data.reports.length : 0;
@@ -5744,7 +5824,7 @@ CRITICAL RULES:
             if(!sel || !appData.archive || !appData.archive[sel]) return alert("Please select a valid archive month.");
             
             const data = appData.archive[sel];
-            let reportsWithExp = (data.reports||[]).filter(r => (parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0) > 0);
+            let reportsWithExp = (data.reports||[]).filter(r => (typeof getReportTotalExpense === 'function' ? getReportTotalExpense(r) : ((parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0))) > 0);
             
             let htmlContent = `
             <html xmlns:x="urn:schemas-microsoft-com:office:excel">
@@ -5757,9 +5837,13 @@ CRITICAL RULES:
 
             let grandTotal = 0;
             [...reportsWithExp].sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(r => {
-                let tot = (parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0);
+                let tot = typeof getReportTotalExpense === 'function' ? getReportTotalExpense(r) : ((parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0));
                 grandTotal += tot;
-                htmlContent += `<tr><td>${r.date}</td><td>Field Visit</td><td>${r.company || 'Visit'}</td><td>${tot}</td></tr>`;
+                let desc = r.company || 'Visit';
+                if(r.expenses && r.expenses.length > 0) {
+                    desc += ' (' + r.expenses.map(x => (x.desc || x.cat || 'Exp') + ': ₹' + x.amount).join(', ') + ')';
+                }
+                htmlContent += `<tr><td>${r.date}</td><td>Field Visit</td><td>${desc}</td><td>${tot}</td></tr>`;
             });
             if(data.personalExpenses) {
                 [...data.personalExpenses].sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(e => {
@@ -5968,7 +6052,7 @@ CRITICAL RULES:
 
             let visitExp = 0;
             appData.reports.forEach(r => {
-                visitExp += (parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0);
+                visitExp += getReportTotalExpense(r);
             });
             let personalExp = 0;
             if(appData.personalExpenses) {
@@ -6502,6 +6586,155 @@ CRITICAL RULES:
 
         function removeReportPerson(idx) { currentReportPersons.splice(idx, 1); renderReportPersonsList(); }
 
+        // DYNAMIC MULTIPLE PAYMENTS & EXPENSES FOR VISITS
+        let currentReportExpenses = [];
+
+        function renderReportExpensesList() {
+            const div = document.getElementById('visitExpensesList');
+            if(!div) return;
+            if(currentReportExpenses.length === 0) {
+                div.innerHTML = '<div style="font-size:0.8rem; color:var(--text-muted); font-style:italic; padding:6px 0;">No payments/expenses added yet.</div>';
+                updateVisitLiveTotal();
+                return;
+            }
+            let html = '';
+            currentReportExpenses.forEach((exp, idx) => {
+                let catIcon = 'fa-tag';
+                if(exp.category === 'Travel') catIcon = 'fa-taxi';
+                else if(exp.category === 'Food') catIcon = 'fa-utensils';
+                else if(exp.category === 'Toll/Parking') catIcon = 'fa-parking';
+                else if(exp.category === 'Client Meeting') catIcon = 'fa-handshake';
+                else if(exp.category === 'Hotel/Stay') catIcon = 'fa-hotel';
+                
+                let modeColor = '#10b981';
+                if(exp.mode === 'Cash') modeColor = '#ffc107';
+                else if(exp.mode === 'Company Card') modeColor = '#00E5FF';
+                else if(exp.mode && exp.mode.includes('Reimbursable')) modeColor = '#ff9800';
+
+                html += `
+                <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); padding:8px 12px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span style="background:rgba(0, 229, 255, 0.1); color:var(--accent-primary); width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.75rem;">
+                            <i class="fas ${catIcon}"></i>
+                        </span>
+                        <div>
+                            <div style="font-size:0.85rem; font-weight:600; color:var(--text-main);">${exp.title}</div>
+                            <div style="font-size:0.7rem; color:var(--text-muted);">
+                                <span>${exp.category}</span> • <span style="color:${modeColor}; font-weight:600;">${exp.mode}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span style="font-size:0.95rem; font-weight:800; color:var(--accent-primary);">₹${parseFloat(exp.amount).toFixed(2)}</span>
+                        <button type="button" class="delete-btn" style="padding:4px 6px; font-size:0.85rem;" onclick="removeReportExpense(${idx})" title="Remove Item"><i class="fas fa-times"></i></button>
+                    </div>
+                </div>`;
+            });
+            div.innerHTML = html;
+            updateVisitLiveTotal();
+        }
+
+        function updateVisitLiveTotal() {
+            let tot = 0;
+            currentReportExpenses.forEach(e => tot += (parseFloat(e.amount)||0));
+            const badge = document.getElementById('visitLiveTotalExp');
+            if(badge) badge.innerText = tot.toFixed(2);
+            
+            // Sync with legacy fields so existing formulas & summaries never break
+            let travelTot = 0, foodTot = 0;
+            currentReportExpenses.forEach(e => {
+                if(e.category === 'Food') foodTot += (parseFloat(e.amount)||0);
+                else travelTot += (parseFloat(e.amount)||0);
+            });
+            const repG = document.getElementById('repGoing'); if(repG) repG.value = travelTot;
+            const repF = document.getElementById('repFood'); if(repF) repF.value = foodTot;
+        }
+
+        function addPaymentToVisit() {
+            const titleInput = document.getElementById('vExpTitle');
+            const amtInput = document.getElementById('vExpAmount');
+            const title = (titleInput && titleInput.value.trim()) || '';
+            const amt = parseFloat(amtInput && amtInput.value) || 0;
+            const cat = (document.getElementById('vExpCat') && document.getElementById('vExpCat').value) || 'Travel';
+            const mode = (document.getElementById('vExpMode') && document.getElementById('vExpMode').value) || 'UPI';
+            
+            if(!title) return alert("Please enter payment/expense title (e.g., Cab, Metro, Lunch).");
+            if(amt <= 0) return alert("Please enter a valid amount greater than 0.");
+            
+            currentReportExpenses.push({
+                id: Date.now() + Math.random(),
+                title: title,
+                amount: amt,
+                category: cat,
+                mode: mode
+            });
+            
+            if(titleInput) titleInput.value = '';
+            if(amtInput) amtInput.value = '';
+            renderReportExpensesList();
+        }
+
+        function quickAddVisitExpense(defaultTitle, cat, mode) {
+            let amountStr = prompt(`Enter amount for "${defaultTitle}":`, "100");
+            if(!amountStr) return;
+            let amt = parseFloat(amountStr) || 0;
+            if(amt <= 0) return alert("Invalid amount.");
+            
+            currentReportExpenses.push({
+                id: Date.now() + Math.random(),
+                title: defaultTitle,
+                amount: amt,
+                category: cat,
+                mode: mode
+            });
+            renderReportExpensesList();
+        }
+
+        function removeReportExpense(idx) {
+            currentReportExpenses.splice(idx, 1);
+            renderReportExpensesList();
+        }
+
+        function getReportTotalExpense(r) {
+            if(!r) return 0;
+            let total = 0;
+            if(Array.isArray(r.expenses) && r.expenses.length > 0) {
+                r.expenses.forEach(e => total += (parseFloat(e.amount)||0));
+            } else {
+                total = (parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0);
+            }
+            return total;
+        }
+
+        function shareSingleReportWA(reportId) {
+            const r = appData.reports.find(x => x.id === reportId);
+            if(!r) return;
+            let pNames = '';
+            if(r.persons && Array.isArray(r.persons) && r.persons.length > 0) {
+                pNames = r.persons.map(p => `${p.name}${p.desig ? ' (' + p.desig + ')' : ''}`).join(', ');
+            } else if(r.metName) {
+                pNames = r.metName;
+            }
+            let totalExp = getReportTotalExpense(r);
+            let expDetails = '';
+            if(Array.isArray(r.expenses) && r.expenses.length > 0) {
+                expDetails = r.expenses.map(e => `- ${e.title}: Rs.${e.amount} [${e.mode}]`).join('\n');
+            } else if(totalExp > 0) {
+                expDetails = `Go: Rs.${r.goingFare||0}, Ret: Rs.${r.returnFare||0}, Food: Rs.${r.food||0}`;
+            }
+
+            let msg = `*Field Visit Report*\n` +
+                      `*Date:* ${r.date} (${format12Hour(r.time)} - ${r.returnTime ? format12Hour(r.returnTime) : '--'})\n` +
+                      `*Company:* ${r.company || 'Visit'}\n` +
+                      (r.stage ? `*Outcome / Stage:* ${r.stage}\n` : '') +
+                      (pNames ? `*People Met:* ${pNames}\n` : '') +
+                      (totalExp > 0 ? `*Total Expenses:* Rs.${totalExp.toFixed(2)}\n${expDetails ? expDetails + '\n' : ''}` : '') +
+                      (r.nextFollowUp ? `*Next Follow-up:* ${r.nextFollowUp}\n` : '') +
+                      `*Summary / Discussion:*\n${r.text || 'N/A'}`;
+
+            window.open("https://wa.me/?text=" + encodeURIComponent(msg), "_blank");
+        }
+
         document.getElementById('reportForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const rep = {
@@ -6510,7 +6743,10 @@ CRITICAL RULES:
                 time: document.getElementById('repTime').value,
                 returnTime: document.getElementById('repReturnTime').value,
                 company: document.getElementById('repCompany').value,
+                stage: document.getElementById('repStage') ? document.getElementById('repStage').value : 'Initial Discussion',
+                nextFollowUp: document.getElementById('repNextFollowUp') ? document.getElementById('repNextFollowUp').value : '',
                 persons: [...currentReportPersons],
+                expenses: [...currentReportExpenses],
                 goingFare: parseFloat(document.getElementById('repGoing').value) || 0,
                 returnFare: parseFloat(document.getElementById('repReturn').value) || 0,
                 food: parseFloat(document.getElementById('repFood').value) || 0,
@@ -6519,18 +6755,22 @@ CRITICAL RULES:
             appData.reports.push(rep);
             this.reset();
             currentReportPersons = [];
+            currentReportExpenses = [];
             renderReportPersonsList();
+            renderReportExpensesList();
             document.getElementById('repDate').value = todayStr;
             document.getElementById('repTime').value = new Date().toTimeString().slice(0,5);
             document.getElementById('repReturnTime').value = new Date().toTimeString().slice(0,5);
             autoSave();
             renderReportsList();
+            showToast('Visit logged successfully with payments! ✅');
         });
 
         function renderReportsList() {
             const div = document.getElementById('reportListDiv');
+            if(!div) return;
             div.innerHTML = '';
-            if(appData.reports.length === 0) return div.innerHTML = '<p style="color:grey;text-align:center;">No reports found.</p>';
+            if(!appData.reports || appData.reports.length === 0) return div.innerHTML = '<p style="color:grey;text-align:center;">No reports found.</p>';
             [...appData.reports].sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(r => {
                 try {
                     let pListHtml = '';
@@ -6542,16 +6782,37 @@ CRITICAL RULES:
                         pListHtml = `<div style="font-size:0.75rem; color:var(--text-muted);">Legacy Entry: ${r.metName} ${r.metPhone ? `(${r.metPhone})` : ''}</div>`;
                     }
 
-                    let totalExp = (parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0);
+                    let totalExp = getReportTotalExpense(r);
+                    let expBreakdownHtml = '';
+                    if(Array.isArray(r.expenses) && r.expenses.length > 0) {
+                        expBreakdownHtml = `<div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;">`;
+                        r.expenses.forEach(e => {
+                            let catIcon = 'fa-tag';
+                            if(e.category === 'Travel') catIcon = 'fa-taxi';
+                            else if(e.category === 'Food') catIcon = 'fa-utensils';
+                            else if(e.category === 'Toll/Parking') catIcon = 'fa-parking';
+                            else if(e.category === 'Client Meeting') catIcon = 'fa-handshake';
+                            else if(e.category === 'Hotel/Stay') catIcon = 'fa-hotel';
+                            expBreakdownHtml += `<span style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); padding:3px 8px; border-radius:6px; font-size:0.72rem; color:var(--text-main); display:inline-flex; align-items:center; gap:5px;"><i class="fas ${catIcon}" style="color:var(--accent-primary);"></i> ${e.title}: <strong>₹${parseFloat(e.amount).toFixed(2)}</strong> <small style="color:var(--text-muted);">[${e.mode}]</small></span>`;
+                        });
+                        expBreakdownHtml += `</div>`;
+                    } else if(totalExp > 0) {
+                        expBreakdownHtml = `<div style="color:var(--text-muted); font-size:0.75rem; margin-top:4px;">(Go: ₹${r.goingFare||0} | Ret: ₹${r.returnFare||0} | Food: ₹${r.food||0})</div>`;
+                    }
                     
                     div.innerHTML += `
                     <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-left: 4px solid var(--accent-primary); border-radius: 12px; padding: 15px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); transition: 0.3s;">
-                        <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
-                            <div style="display:flex; gap: 10px; align-items:center;">
+                        <div style="display:flex; justify-content:space-between; width:100%; align-items:center; flex-wrap:wrap; gap:8px;">
+                            <div style="display:flex; gap: 8px; align-items:center; flex-wrap:wrap;">
                                 <span style="background: var(--bg-color); color: var(--text-muted); font-size: 0.75rem; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--card-border);"><i class="fas fa-calendar-alt"></i> ${r.date||'No Date'}</span>
                                 <span style="color: var(--text-muted); font-size: 0.75rem; background: var(--bg-color); border: 1px solid var(--card-border); padding:4px 8px; border-radius:6px;"><i class="fas fa-clock"></i> ${format12Hour(r.time)} - ${r.returnTime ? format12Hour(r.returnTime) : '--:--'}</span>
+                                ${r.stage ? `<span style="background:rgba(0, 229, 255, 0.1); color:var(--accent-primary); border:1px solid rgba(0, 229, 255, 0.25); font-size:0.7rem; padding:3px 8px; border-radius:6px; font-weight:600;"><i class="fas fa-flag"></i> ${r.stage}</span>` : ''}
+                                ${r.nextFollowUp ? `<span style="background:rgba(255, 193, 7, 0.1); color:#ffc107; border:1px solid rgba(255, 193, 7, 0.25); font-size:0.7rem; padding:3px 8px; border-radius:6px; font-weight:600;"><i class="fas fa-calendar-check"></i> Next: ${r.nextFollowUp}</span>` : ''}
                             </div>
-                            <button class="icon-btn" style="background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border: 1px solid rgba(255, 77, 77, 0.2); width: 32px; height: 32px; border-radius: 8px;" onclick="deleteReport(${r.id})" title="Delete Visit"><i class="fas fa-trash"></i></button>
+                            <div style="display:flex; gap:6px;">
+                                <button class="icon-btn" style="background: rgba(37, 211, 102, 0.15); color: #25D366; border: 1px solid rgba(37, 211, 102, 0.3); width: 32px; height: 32px; border-radius: 8px;" onclick="shareSingleReportWA(${r.id})" title="Share to WhatsApp"><i class="fab fa-whatsapp"></i></button>
+                                <button class="icon-btn" style="background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border: 1px solid rgba(255, 77, 77, 0.2); width: 32px; height: 32px; border-radius: 8px;" onclick="deleteReport(${r.id})" title="Delete Visit"><i class="fas fa-trash"></i></button>
+                            </div>
                         </div>
                         
                         ${r.company ? `<div style="font-size:1.15rem; color:var(--text-main); font-weight:800; letter-spacing: 0.5px; display:flex; align-items:center; gap:8px; margin-top:5px;"><i class="fas fa-building" style="color:var(--accent-primary);"></i> ${String(r.company).replace(/</g,'&lt;')}</div>` : ''}
@@ -6564,9 +6825,11 @@ CRITICAL RULES:
                         <p style="font-size:0.95rem; line-height:1.5; color:var(--text-main); margin: 5px 0;">${String(r.text || '').replace(/</g, '&lt;').replace(/\n/g, '<br>')}</p>
                         
                         ${totalExp > 0 ? `
-                        <div style="display:flex; gap: 15px; align-items:center; background: rgba(255,193,7,0.1); padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(255,193,7,0.2); margin-top:5px;">
-                            <span style="color:#e6a100; font-size:0.85rem; font-weight:bold;"><i class="fas fa-wallet"></i> Total Expense: ₹${totalExp}</span>
-                            <span style="color:var(--text-muted); font-size:0.75rem;">(Go: ₹${r.goingFare||0} | Ret: ₹${r.returnFare||0} | Food: ₹${r.food||0})</span>
+                        <div style="background: rgba(255,193,7,0.08); padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(255,193,7,0.2); margin-top:5px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <span style="color:#e6a100; font-size:0.85rem; font-weight:bold;"><i class="fas fa-wallet"></i> Total Payments/Expenses: ₹${totalExp.toFixed(2)}</span>
+                            </div>
+                            ${expBreakdownHtml}
                         </div>` : ''}
                     </div>`;
                 } catch(e) {
@@ -6651,7 +6914,7 @@ CRITICAL RULES:
             let fSheetsSum = (appData.expenseSheets || []).filter(s => s.date >= fromDateStr && s.date <= toDateStr);
             fPersonalExpSum.forEach(e => sumExpenses += parseFloat(e.amount)||0);
             fSheetsSum.forEach(s => sumExpenses += parseFloat(s.total)||0);
-            data.reports.forEach(r => sumExpenses += (parseFloat(r.goingFare)||0)+(parseFloat(r.returnFare)||0)+(parseFloat(r.food)||0));
+            data.reports.forEach(r => sumExpenses += getReportTotalExpense(r));
 
             let html = `
                 <div style="font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; font-size: 12px; line-height: 1.5; max-width: 100%; background: #fff; padding: 10px;">
@@ -6780,7 +7043,7 @@ CRITICAL RULES:
                         let pNames = '';
                         if(r.persons && r.persons.length > 0) pNames = r.persons.map(p => p.name).join(', ');
                         else if(r.metName) pNames = r.metName;
-                        const totExp = (parseFloat(r.goingFare)||0)+(parseFloat(r.returnFare)||0)+(parseFloat(r.food)||0);
+                        const totExp = getReportTotalExpense(r);
                         totalVisitsExpMaster += totExp;
                         let sigHtml = r.signature ? `<br><img src="${r.signature}" style="width:100px; height:auto; margin-top:5px; border:1px solid #ddd;">` : '';
                         html += `<tr><td style="${tdStyle}"><b>${printD}</b></td><td style="${tdStyle}">${r.company || 'Visit'}</td><td style="${tdStyle}">${pNames || 'N/A'}</td><td style="${tdStyle}">${r.text}${sigHtml}</td><td style="${tdStyle}">₹${totExp}</td></tr>`;
@@ -7326,7 +7589,7 @@ CRITICAL RULES:
                 let legacyExpenses = Array.isArray(appData.personalExpenses) ? appData.personalExpenses : Object.values(appData.personalExpenses || {});
                 let reports = Array.isArray(appData.reports) ? appData.reports : Object.values(appData.reports || {});
 
-                let reportsWithExp = reports.filter(r => (parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0) > 0);
+                let reportsWithExp = reports.filter(r => (typeof getReportTotalExpense === 'function' ? getReportTotalExpense(r) : ((parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0))) > 0);
 
                 if(allSheets.length === 0 && legacyExpenses.length === 0 && reportsWithExp.length === 0) {
                     div.innerHTML = '<p style="color:var(--text-muted); font-size:0.85rem;">No expenses found.</p>';
@@ -7342,9 +7605,10 @@ CRITICAL RULES:
                             <strong style="color:var(--success);">Field Visit Expenses (Auto-extracted)</strong>
                          </div>`;
                      [...reportsWithExp].sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(r => {
-                         let tot = (parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0);
+                         let tot = typeof getReportTotalExpense === 'function' ? getReportTotalExpense(r) : ((parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0));
+                         let detailTag = (r.expenses && r.expenses.length > 0) ? `(${r.expenses.length} payments)` : `(Fare & Food)`;
                          html += `<div style="display:flex; justify-content:space-between; font-size:0.8rem; padding:4px 0; border-bottom:1px dashed rgba(255,255,255,0.1);">
-                            <span>${r.date} - ${r.company || 'Visit'} (Fare & Food)</span><span style="color:var(--success)">₹${tot}</span>
+                            <span>${r.date} - ${r.company || 'Visit'} ${detailTag}</span><span style="color:var(--success)">₹${tot}</span>
                          </div>`;
                      });
                      html += `</div>`;
@@ -7447,7 +7711,7 @@ CRITICAL RULES:
             let legacyExpenses = Array.isArray(appData.personalExpenses) ? appData.personalExpenses : Object.values(appData.personalExpenses || {});
             let reports = Array.isArray(appData.reports) ? appData.reports : Object.values(appData.reports || {});
 
-            let reportsWithExp = reports.filter(r => (parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0) > 0);
+            let reportsWithExp = reports.filter(r => (typeof getReportTotalExpense === 'function' ? getReportTotalExpense(r) : ((parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0))) > 0);
             
             if(allSheets.length === 0 && legacyExpenses.length === 0 && reportsWithExp.length === 0) {
                 return alert("No expenses to generate.");
@@ -7476,12 +7740,18 @@ CRITICAL RULES:
 
             // 1. Visit Expenses
             [...reportsWithExp].sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(r => {
-                let tot = (parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0);
+                let tot = typeof getReportTotalExpense === 'function' ? getReportTotalExpense(r) : ((parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0));
                 grandTotal += tot;
+                let desc = r.company || 'Visit';
+                if(r.expenses && r.expenses.length > 0) {
+                    desc += ' (' + r.expenses.map(x => (x.desc || x.cat || 'Exp') + ': ₹' + x.amount).join(', ') + ')';
+                } else {
+                    desc += ' (Fare & Food)';
+                }
                 html += `<tr>
                     <td style="${tdStyle}">${r.date}</td>
                     <td style="${tdStyle}; color:green; font-weight:bold;">Field Visit</td>
-                    <td style="${tdStyle}">${r.company || 'Visit'} (Fare & Food)</td>
+                    <td style="${tdStyle}">${desc}</td>
                     <td style="${tdStyle}; text-align:right;">${tot.toFixed(2)}</td>
                 </tr>`;
             });
@@ -7556,7 +7826,7 @@ CRITICAL RULES:
             let allSheets = Array.isArray(appData.expenseSheets) ? appData.expenseSheets : Object.values(appData.expenseSheets || {});
             let legacyExpenses = Array.isArray(appData.personalExpenses) ? appData.personalExpenses : Object.values(appData.personalExpenses || {});
             let reports = Array.isArray(appData.reports) ? appData.reports : Object.values(appData.reports || {});
-            let reportsWithExp = reports.filter(r => (parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0) > 0);
+            let reportsWithExp = reports.filter(r => (typeof getReportTotalExpense === 'function' ? getReportTotalExpense(r) : ((parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0))) > 0);
             
             let htmlContent = `
             <html xmlns:x="urn:schemas-microsoft-com:office:excel">
@@ -7567,8 +7837,12 @@ CRITICAL RULES:
             `;
 
             [...reportsWithExp].sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(r => {
-                let tot = (parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0);
-                htmlContent += `<tr><td>${r.date}</td><td>Field Visit</td><td>${r.company || 'Visit'}</td><td>${tot}</td></tr>`;
+                let tot = typeof getReportTotalExpense === 'function' ? getReportTotalExpense(r) : ((parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0));
+                let desc = r.company || 'Visit';
+                if(r.expenses && r.expenses.length > 0) {
+                    desc += ' (' + r.expenses.map(x => (x.desc || x.cat || 'Exp') + ': ₹' + x.amount).join(', ') + ')';
+                }
+                htmlContent += `<tr><td>${r.date}</td><td>Field Visit</td><td>${desc}</td><td>${tot}</td></tr>`;
             });
             [...legacyExpenses].sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(e => {
                 htmlContent += `<tr><td>${e.date}</td><td>Legacy</td><td>${e.desc}</td><td>${e.amount}</td></tr>`;
@@ -7602,7 +7876,7 @@ CRITICAL RULES:
             let allSheets = Array.isArray(appData.expenseSheets) ? appData.expenseSheets : Object.values(appData.expenseSheets || {});
             let legacyExpenses = Array.isArray(appData.personalExpenses) ? appData.personalExpenses : Object.values(appData.personalExpenses || {});
             let reports = Array.isArray(appData.reports) ? appData.reports : Object.values(appData.reports || {});
-            let reportsWithExp = reports.filter(r => (parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0) > 0);
+            let reportsWithExp = reports.filter(r => (typeof getReportTotalExpense === 'function' ? getReportTotalExpense(r) : ((parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0))) > 0);
             
             if(allSheets.length === 0 && legacyExpenses.length === 0 && reportsWithExp.length === 0) {
                 return alert("No expenses to generate.");
@@ -7763,9 +8037,15 @@ CRITICAL RULES:
 
             let grandTotal = 0;
             [...reportsWithExp].sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(r => {
-                let tot = (parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0);
+                let tot = typeof getReportTotalExpense === 'function' ? getReportTotalExpense(r) : ((parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0));
                 grandTotal += tot;
-                html += `<tr><td>${r.date}</td><td class="visit">Field Visit</td><td>${r.company || 'Visit'} (Fare & Food)</td><td>${tot.toFixed(2)}</td></tr>`;
+                let desc = r.company || 'Visit';
+                if(r.expenses && r.expenses.length > 0) {
+                    desc += ' (' + r.expenses.map(x => (x.desc || x.cat || 'Exp') + ': Rs.' + x.amount).join(', ') + ')';
+                } else {
+                    desc += ' (Fare & Food)';
+                }
+                html += `<tr><td>${r.date}</td><td class="visit">Field Visit</td><td>${desc}</td><td>${tot.toFixed(2)}</td></tr>`;
             });
             [...legacyExpenses].sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(e => {
                 let amt = parseFloat(e.amount)||0;
@@ -7847,7 +8127,7 @@ CRITICAL RULES:
             let otherExp = 0;
 
             reports.forEach(r => {
-                travelFood += (parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0);
+                travelFood += getReportTotalExpense(r);
             });
             legacyExp.forEach(e => {
                 otherExp += parseFloat(e.amount)||0;
@@ -7882,7 +8162,7 @@ CRITICAL RULES:
                 labels.push(d.toLocaleDateString('en-GB', {day:'numeric', month:'short'}));
                 
                 let dayTot = 0;
-                reports.filter(r => r.date === dStr).forEach(r => dayTot += (parseFloat(r.goingFare)||0) + (parseFloat(r.returnFare)||0) + (parseFloat(r.food)||0));
+                reports.filter(r => r.date === dStr).forEach(r => dayTot += getReportTotalExpense(r));
                 legacyExp.filter(e => e.date === dStr).forEach(e => dayTot += parseFloat(e.amount)||0);
                 sheetsExp.filter(s => s.date === dStr).forEach(s => s.items.forEach(it => dayTot += parseFloat(it.amount)||0));
                 
