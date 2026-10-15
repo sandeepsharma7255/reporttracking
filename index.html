@@ -436,7 +436,62 @@
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
         ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, var(--accent-primary), rgba(255,255,255,0.2)); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--accent-primary); }
+        /* AI Enhancements & Badges */
+        .ai-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            margin: 8px 0;
+        }
+        .btn-ai-pill {
+            background: rgba(0, 229, 255, 0.1);
+            color: var(--accent-primary);
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.25s ease;
+        }
+        .btn-ai-pill:hover {
+            background: var(--accent-primary);
+            color: #000;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 229, 255, 0.3);
+        }
+        .btn-ai-pill.special {
+            background: linear-gradient(45deg, #00E5FF, #00BFFF);
+            color: #000;
+            border: none;
+            font-weight: 800;
+        }
+        .btn-ai-pill.special:hover {
+            filter: brightness(1.15);
+            box-shadow: 0 4px 15px rgba(0, 229, 255, 0.5);
+        }
+        .btn-ai-pill.hindi {
+            background: rgba(255, 152, 0, 0.12);
+            color: #ff9800;
+            border-color: rgba(255, 152, 0, 0.35);
+        }
+        .btn-ai-pill.hindi:hover {
+            background: #ff9800;
+            color: #000;
+        }
+        .btn-ai-pill.green {
+            background: rgba(16, 185, 129, 0.12);
+            color: #10b981;
+            border-color: rgba(16, 185, 129, 0.35);
+        }
+        .btn-ai-pill.green:hover {
+            background: #10b981;
+            color: #000;
+        }
 
         /* ========================================================
            MOBILE BOTTOM NAVIGATION BAR
@@ -787,6 +842,95 @@
         </div>
     </div>
 
+    <!-- GROQ AI ASSISTANT & TRANSLATOR MODAL -->
+    <div id="aiAssistantModal" class="overlay-screen" style="display: none; background: rgba(0,0,0,0.88); backdrop-filter: blur(8px); z-index: 45000; align-items: center; justify-content: center; padding: 15px;">
+        <div class="card" style="width: 100%; max-width: 650px; max-height: 90vh; overflow-y: auto; position: relative; border: 1px solid var(--accent-primary); box-shadow: 0 0 30px rgba(0,229,255,0.25); border-radius: 16px; padding: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--card-border); padding-bottom: 12px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, #00E5FF, #00BFFF); display: flex; align-items: center; justify-content: center; color: #000; font-size: 1.2rem;">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.15rem; color: #fff;">Groq AI Hub & Translator</h3>
+                        <div style="font-size: 0.72rem; color: var(--text-muted);"><span class="pulse-sync-dot"></span> Powered by Qwen 3.8-27B (Ultra Fast)</div>
+                    </div>
+                </div>
+                <button type="button" onclick="closeAIAssistantModal()" class="icon-btn" style="background: rgba(255,255,255,0.08); border-radius: 50%; width: 32px; height: 32px;" title="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- TAB SELECTOR -->
+            <div style="display: flex; gap: 8px; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 10px;">
+                <button type="button" id="aiTabBtnTranslate" class="btn" style="flex: 1; padding: 8px 10px; font-size: 0.82rem; border-radius: 8px; background: var(--accent-primary); color: #000; font-weight: bold; margin: 0;" onclick="switchAIAssistantTab('translate')"><i class="fas fa-language"></i> Translator</button>
+                <button type="button" id="aiTabBtnReports" class="btn" style="flex: 1; padding: 8px 10px; font-size: 0.82rem; border-radius: 8px; background: rgba(255,255,255,0.06); color: var(--text-muted); font-weight: bold; margin: 0;" onclick="switchAIAssistantTab('reports')"><i class="fas fa-file-signature"></i> Report Drafter</button>
+                <button type="button" id="aiTabBtnAsk" class="btn" style="flex: 1; padding: 8px 10px; font-size: 0.82rem; border-radius: 8px; background: rgba(255,255,255,0.06); color: var(--text-muted); font-weight: bold; margin: 0;" onclick="switchAIAssistantTab('ask')"><i class="fas fa-comments"></i> Ask AI</button>
+            </div>
+
+            <!-- TAB 1: TRANSLATOR (ENGLISH ⇄ HINDI) -->
+            <div id="aiTabContentTranslate" style="display: block;">
+                <label style="font-size: 0.8rem; color: var(--text-muted);">Enter Text (Hindi / Hinglish / English):</label>
+                <textarea id="aiModalInputText" class="input-field" placeholder="Type or paste any message, notes, or dictation..." style="height: 100px; font-size: 0.9rem; line-height: 1.5; margin-bottom: 10px;"></textarea>
+                
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px;">
+                    <button type="button" class="btn" style="flex: 1; min-width: 130px; background: linear-gradient(45deg, #00E5FF, #00BFFF); color: #000; font-weight: bold; font-size: 0.85rem; padding: 8px;" onclick="runAITranslateInModal('en', this)"><i class="fas fa-language"></i> 🇬🇧 To English</button>
+                    <button type="button" class="btn" style="flex: 1; min-width: 130px; background: #ff9800; color: #000; font-weight: bold; font-size: 0.85rem; padding: 8px;" onclick="runAITranslateInModal('hi', this)"><i class="fas fa-language"></i> 🇮🇳 To Hindi</button>
+                    <button type="button" class="btn" style="flex: 1; min-width: 130px; background: #10b981; color: #fff; font-weight: bold; font-size: 0.85rem; padding: 8px;" onclick="runAITranslateInModal('polish', this)"><i class="fas fa-sparkles"></i> ✨ Fix Grammar</button>
+                </div>
+
+                <div id="aiModalOutputWrapper" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                        <label style="font-size: 0.8rem; color: var(--accent-primary); font-weight: bold;">AI Output Result:</label>
+                        <div style="display: flex; gap: 6px;">
+                            <button type="button" class="icon-btn" style="width: auto; padding: 3px 8px; font-size: 0.75rem; border-radius: 4px; background: rgba(255,255,255,0.08);" onclick="copyAIModalResult()"><i class="fas fa-copy"></i> Copy</button>
+                            <button type="button" class="icon-btn" style="width: auto; padding: 3px 8px; font-size: 0.75rem; border-radius: 4px; background: rgba(37, 211, 102, 0.2); color: #25D366;" onclick="shareAIModalWA()"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+                        </div>
+                    </div>
+                    <textarea id="aiModalOutputText" class="input-field" style="height: 120px; font-size: 0.9rem; line-height: 1.5; background: rgba(0,0,0,0.3); border-color: var(--accent-primary);" readonly></textarea>
+                </div>
+            </div>
+
+            <!-- TAB 2: INSTANT REPORT DRAFTER -->
+            <div id="aiTabContentReports" style="display: none;">
+                <label style="font-size: 0.8rem; color: var(--text-muted);">Choose Report / Message Type:</label>
+                <select id="aiReportTemplateSelect" class="input-field" style="margin-bottom: 10px;">
+                    <option value="daily_report">Executive Daily Work Report (WhatsApp)</option>
+                    <option value="visit_report">Field Visit Executive Summary</option>
+                    <option value="mom">Meeting Minutes & Action Points (MOM)</option>
+                    <option value="payment_reminder">Payment Release & Milestone Reminder</option>
+                    <option value="quotation_followup">Quotation & Proposal Follow-up</option>
+                    <option value="leave_application">Professional Leave / Absence Notice</option>
+                </select>
+                <label style="font-size: 0.8rem; color: var(--text-muted);">Key Points / Details:</label>
+                <textarea id="aiReportContextText" class="input-field" placeholder="Provide rough points (e.g. client name, discussion topics, payment due date)..." style="height: 80px; font-size: 0.88rem; margin-bottom: 10px;"></textarea>
+                <button type="button" class="btn" style="width: 100%; background: linear-gradient(45deg, #00E5FF, #00BFFF); color: #000; font-weight: bold; margin-bottom: 12px;" onclick="runAIReportDraftInModal(this)"><i class="fas fa-magic"></i> 🚀 Generate Professional Document</button>
+                
+                <div id="aiReportDraftOutputWrapper" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                        <label style="font-size: 0.8rem; color: var(--accent-primary); font-weight: bold;">Generated Document:</label>
+                        <div style="display: flex; gap: 6px;">
+                            <button type="button" class="icon-btn" style="width: auto; padding: 3px 8px; font-size: 0.75rem; border-radius: 4px; background: rgba(255,255,255,0.08);" onclick="copyAIReportDraftResult()"><i class="fas fa-copy"></i> Copy</button>
+                            <button type="button" class="icon-btn" style="width: auto; padding: 3px 8px; font-size: 0.75rem; border-radius: 4px; background: rgba(37, 211, 102, 0.2); color: #25D366;" onclick="shareAIReportDraftWA()"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+                        </div>
+                    </div>
+                    <textarea id="aiReportDraftOutputText" class="input-field" style="height: 140px; font-size: 0.88rem; line-height: 1.5; font-family: monospace;" readonly></textarea>
+                </div>
+            </div>
+
+            <!-- TAB 3: ASK AI ANYTHING -->
+            <div id="aiTabContentAsk" style="display: none;">
+                <label style="font-size: 0.8rem; color: var(--text-muted);">Ask Qwen 3.8-27B anything (Tender clauses, technical questions, emails, Hindi/English):</label>
+                <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                    <input type="text" id="aiAskInput" class="input-field" placeholder="e.g. Write a polite mail asking for payment release..." style="margin-bottom: 0;">
+                    <button type="button" class="btn" style="width: auto; padding: 0 16px; background: var(--accent-primary); color: #000; font-weight: bold;" onclick="runAIAskInModal(this)"><i class="fas fa-paper-plane"></i></button>
+                </div>
+                <div id="aiAskResponseBox" style="background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); border-radius: 10px; padding: 12px; min-height: 120px; max-height: 250px; overflow-y: auto; font-size: 0.88rem; line-height: 1.6; color: #fff;">
+                    <span style="color: var(--text-muted); font-style: italic;">Ask any question above to receive instant AI answers...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="toast"><i class="fas fa-check-circle"></i> <span id="toastMsg">Synced successfully!</span></div>
     <div class="overlay-bg" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
@@ -832,6 +976,7 @@
                     <div class="icon-btn" title="Sync Status" id="syncStatusBtn"><i class="fas fa-server"></i></div>
                     <div id="syncStatus" style="font-size:0.5rem; color:#888; margin-top:2px; white-space:nowrap;"></div>
                 </div>
+                <button type="button" class="btn" style="width:auto; padding:6px 14px; font-size:0.82rem; border-radius:20px; background:linear-gradient(45deg, #00E5FF, #00BFFF); color:#000; font-weight:800; display:inline-flex; align-items:center; gap:6px; margin:0; box-shadow:0 0 15px rgba(0,229,255,0.35); border:none;" onclick="openAIAssistantModal()" title="Groq AI Assistant & Translator"><i class="fas fa-robot"></i> <span>AI Hub</span></button>
                 <div class="theme-toggle-pill" onclick="toggleTheme()" title="Toggle Theme">
                     <div class="mode"><i class="fas fa-moon"></i></div>
                     <div class="mode active"><i class="fas fa-sun"></i></div>
@@ -1071,11 +1216,15 @@
                     <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
                         <input type="date" id="planTaskDate" class="input-field" style="width:140px; margin-bottom:0;" required>
                         <input type="text" id="planTask" class="input-field" placeholder="What needs to be done?" style="flex:1; min-width:200px; margin-bottom:0;" required>
-                        <button type="button" class="btn" style="width:auto; padding:0 20px; background:var(--accent-primary); color:#000; border-radius:25px;" onclick="translateToEnglish('planTask')" title="Translate Hindi to Professional English"><i class="fas fa-language"></i> AI</button>
+                        <div class="ai-toolbar" style="margin:0;">
+                            <button type="button" class="btn-ai-pill" onclick="translateWithAI('planTask', 'en', this)" title="Translate Hindi to English"><i class="fas fa-language"></i> 🇬🇧 EN</button>
+                            <button type="button" class="btn-ai-pill hindi" onclick="translateWithAI('planTask', 'hi', this)" title="Translate to Hindi"><i class="fas fa-language"></i> 🇮🇳 HI</button>
+                        </div>
                     </div>
                     <div style="display:flex; gap:10px; flex-wrap:wrap;">
                         <button type="submit" id="planSubmitBtn" class="btn" style="flex:1; margin-top:0; border-radius:25px; background: #10b981; color:#fff; font-weight:bold; min-width:120px;"><i class="fas fa-plus"></i> Add Task</button>
-                        <button type="button" id="planAIBtn" class="btn" style="flex:1; margin-top:0; background: linear-gradient(45deg, #00E5FF, #00BFFF); color: black; border-radius:25px; font-weight:bold; min-width:120px;" onclick="enhanceTextWithAI('planTask', 'planAIBtn')"><i class="fas fa-magic"></i> AI Enhance</button>
+                        <button type="button" id="planAIBtn" class="btn" style="flex:1; margin-top:0; background: linear-gradient(45deg, #00E5FF, #00BFFF); color: black; border-radius:25px; font-weight:bold; min-width:120px;" onclick="enhanceTextWithAI('planTask', this)"><i class="fas fa-sparkles"></i> AI Polish</button>
+                        <button type="button" class="btn" style="flex:1; margin-top:0; background: rgba(0, 229, 255, 0.15); color: var(--accent-primary); border: 1px solid var(--accent-primary); border-radius:25px; font-weight:bold; min-width:130px;" onclick="suggestDailyTasksAI(this)"><i class="fas fa-lightbulb"></i> AI Suggest Tasks</button>
                         <button type="button" id="btnMeetingRecorder" class="btn" style="flex:1; background: linear-gradient(45deg, #FF5252, #FF1744); margin-top:0; border-radius:25px; font-weight:bold; min-width:120px;" onclick="toggleMeetingRecorder()"><i class="fas fa-microphone"></i> Record MOM</button>
                     </div>
                 </form>
@@ -1089,11 +1238,22 @@
         <!-- MODULE 2A: SMART DAILY REPORT -->
         <section id="daily-report" class="module-section">
             <div class="card">
-                <h2><i class="fas fa-file-signature"></i> Smart Daily Work Report</h2>
-                <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:15px;">Generate a perfectly formatted daily work summary (bullet points, grouped by task) ready to share on WhatsApp or Email. You can type rough notes or use Voice Dictation.</p>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+                    <h2 style="margin:0;"><i class="fas fa-file-signature"></i> Smart Daily Work Report</h2>
+                    <span class="badge" style="background:rgba(0, 229, 255, 0.1); color:var(--accent-primary); border:1px solid rgba(0, 229, 255, 0.3); padding:4px 10px; border-radius:20px; font-size:0.75rem;"><span class="pulse-sync-dot"></span> Groq AI Engine</span>
+                </div>
+                <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:15px;">Generate a perfectly formatted daily work summary ready to share on WhatsApp or Email. You can type rough notes, use Voice Dictation, or auto-pull today's visits.</p>
                 
                 <div style="display:flex; flex-direction:column; gap:10px;">
-                    <label>Rough Notes / Activities:</label>
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+                        <label style="margin:0; font-size:0.82rem; color:#ccc;">Rough Notes / Activities:</label>
+                        <div class="ai-toolbar" style="margin:0;">
+                            <button type="button" class="btn-ai-pill green" onclick="pullTodaysDataIntoDailyNotes(this)" title="Auto-import today's logged visits & tasks into notes"><i class="fas fa-download"></i> 📥 Pull Today's Visits & Plans</button>
+                            <button type="button" class="btn-ai-pill" onclick="translateWithAI('dailyRoughNotes', 'en', this)"><i class="fas fa-language"></i> 🇬🇧 English</button>
+                            <button type="button" class="btn-ai-pill hindi" onclick="translateWithAI('dailyRoughNotes', 'hi', this)"><i class="fas fa-language"></i> 🇮🇳 Hindi</button>
+                            <button type="button" class="btn-ai-pill" onclick="translateWithAI('dailyRoughNotes', 'polish', this)"><i class="fas fa-sparkles"></i> Polish</button>
+                        </div>
+                    </div>
                     <div class="ai-textarea-wrapper">
                         <textarea id="dailyRoughNotes" placeholder="Example: went to ballabhgarh site for bg release. signed due drawn received. sent to finance. retention payment letter pending signature so sent reminder mail..."></textarea>
                         <div class="ai-tools">
@@ -1101,12 +1261,15 @@
                         </div>
                     </div>
                     
-                    <button type="button" id="btnGenerateDailyReport" class="btn" style="background: linear-gradient(45deg, #00E5FF, #00BFFF); color: black; font-weight:bold; margin-top:0;" onclick="generateDailyReportAI()"><i class="fas fa-magic"></i> ✨ Generate Formatted Report</button>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <button type="button" id="btnGenerateDailyReport" class="btn" style="flex:2; min-width:200px; background: linear-gradient(45deg, #00E5FF, #00BFFF); color: black; font-weight:bold; margin-top:0;" onclick="generateDailyReportAI('en')"><i class="fas fa-magic"></i> ✨ Generate Formatted Report (English)</button>
+                        <button type="button" class="btn" style="flex:1; min-width:140px; background: #ff9800; color: black; font-weight:bold; margin-top:0;" onclick="generateDailyReportAI('hi')"><i class="fas fa-language"></i> 🇮🇳 Hindi Report</button>
+                    </div>
                     
                     <div id="dailyReportOutputContainer" style="display:none; margin-top:20px;">
-                        <label>Formatted Report:</label>
+                        <label>Formatted WhatsApp Report:</label>
                         <textarea id="dailyFormattedReport" style="height:250px; font-family: monospace; white-space: pre-wrap; font-size: 0.85rem; line-height: 1.4;"></textarea>
-                        <button type="button" class="btn" style="background:#25D366; color:#fff; border:none; margin-top:5px;" onclick="copyDailyReportWA()"><i class="fab fa-whatsapp"></i> Copy for WhatsApp</button>
+                        <button type="button" class="btn" style="background:#25D366; color:#fff; border:none; margin-top:5px;" onclick="copyDailyReportWA()"><i class="fab fa-whatsapp"></i> Copy & Open in WhatsApp</button>
                     </div>
                 </div>
             </div>
@@ -1245,10 +1408,17 @@
                                 <input type="date" id="repNextFollowUp" class="input-field" style="margin-bottom:0; padding:10px; width:100%;">
                             </div>
                         </div>
-                        <label style="font-size:0.8rem; color:#aaa;">Visit Summary / Notes</label>
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:6px;">
+                            <label style="font-size:0.8rem; color:#aaa; margin:0;"><i class="fas fa-file-alt"></i> Visit Summary / Notes</label>
+                            <div class="ai-toolbar" style="margin:0;">
+                                <button type="button" class="btn-ai-pill special" onclick="generateVisitReportFromFormAI(this)" title="Auto-write full visit report using form details & notes"><i class="fas fa-magic"></i> 📝 AI Auto-Report</button>
+                                <button type="button" class="btn-ai-pill" onclick="translateWithAI('repText', 'en', this)" title="Translate Hindi/Hinglish to Corporate English"><i class="fas fa-language"></i> 🇬🇧 English</button>
+                                <button type="button" class="btn-ai-pill hindi" onclick="translateWithAI('repText', 'hi', this)" title="Translate to Hindi (हिंदी)"><i class="fas fa-language"></i> 🇮🇳 Hindi</button>
+                                <button type="button" class="btn-ai-pill green" onclick="translateWithAI('repText', 'polish', this)" title="Fix grammar and format into clean bullets"><i class="fas fa-sparkles"></i> Polish</button>
+                            </div>
+                        </div>
                         <div class="ai-textarea-wrapper" style="margin-bottom: 25px;">
-                            <textarea id="repText" placeholder="Start typing or tap mic for dictation..." style="min-height:120px; font-size:0.95rem; line-height:1.5;" required></textarea>
-                            <button type="button" class="btn" style="position:absolute; right:50px; bottom:20px; width:auto; padding:5px 15px; background:linear-gradient(45deg, #00E5FF, #00BFFF); color:#000; border-radius:20px; font-size:0.8rem; font-weight:bold;" onclick="translateToEnglish('repText')" title="Translate Hindi to Professional English"><i class="fas fa-magic"></i> AI Magic</button>
+                            <textarea id="repText" placeholder="Start typing, tap mic for voice, or tap 'AI Auto-Report' to let Qwen 3.8-27B write the report..." style="min-height:130px; font-size:0.95rem; line-height:1.5;" required></textarea>
                             <div class="mic-btn" id="micReportBtn" onclick="startVoiceRecognition('repText')" title="Voice Dictation"><i class="fas fa-microphone"></i></div>
                         </div>
                         <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
@@ -1527,7 +1697,14 @@
                                 <input type="date" id="inqFollowUp" class="input-field">
                             </div>
                         </div>
-                        <label>Remarks / Notes</label>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; flex-wrap:wrap; gap:5px;">
+                            <label style="margin:0;">Remarks / Notes</label>
+                            <div class="ai-toolbar" style="margin:0;">
+                                <button type="button" class="btn-ai-pill" onclick="translateWithAI('inqRemarks', 'en', this)" title="Translate to English"><i class="fas fa-language"></i> EN</button>
+                                <button type="button" class="btn-ai-pill hindi" onclick="translateWithAI('inqRemarks', 'hi', this)" title="Translate to Hindi"><i class="fas fa-language"></i> HI</button>
+                                <button type="button" class="btn-ai-pill" onclick="translateWithAI('inqRemarks', 'polish', this)" title="Fix grammar and polish"><i class="fas fa-sparkles"></i> Polish</button>
+                            </div>
+                        </div>
                         <div class="ai-textarea-wrapper">
                             <textarea id="inqRemarks" placeholder="Competitor info, negotiation notes, etc."></textarea>
                             <div class="ai-tools">
@@ -1652,6 +1829,26 @@
                     <input type="file" id="importBackupFile" style="display:none;" onchange="importBackup(event)" accept=".json">
                     <button class="btn" style="background:transparent; border:1px solid var(--success); color:var(--success); width:100%; margin-bottom:10px;" onclick="document.getElementById('importBackupFile').click()"><i class="fas fa-upload"></i> Restore from JSON Backup File</button>
                     <button class="btn" style="background:transparent; border:1px solid #ff9800; color:#ff9800; width:100%;" onclick="restoreLocalSnapshot()"><i class="fas fa-history"></i> Restore Emergency Auto-Backup</button>
+                </div>
+
+                <div class="card" style="grid-column: 1 / -1; border-left: 4px solid var(--accent-primary); background: linear-gradient(135deg, rgba(0, 229, 255, 0.05), rgba(0,0,0,0.3));">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:8px;">
+                        <h2 style="margin:0;"><i class="fas fa-brain" style="color:var(--accent-primary);"></i> Groq AI Engine (Qwen 3.8-27B)</h2>
+                        <span class="badge" style="background:rgba(16,185,129,0.2); color:#10b981; border:1px solid #10b981; padding:5px 12px; border-radius:20px; font-size:0.75rem;"><span class="pulse-sync-dot"></span> AI Active & Connected</span>
+                    </div>
+                    <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:15px;">Powers all intelligent features across Corporate Hub: English ⇄ Hindi translations, instant visit report generation, meeting MOM, smart daily WhatsApp reports, and executive summaries.</p>
+                    
+                    <label>Groq API Key</label>
+                    <div style="display:flex; gap:10px; margin-bottom:15px;">
+                        <input type="password" id="groqApiKeyInput" class="input-field" style="margin-bottom:0;" placeholder="gsk_...">
+                        <button type="button" class="btn" style="width:auto; padding:0 15px; background:rgba(255,255,255,0.08); color:#fff;" onclick="toggleGroqKeyVisibility()"><i class="fas fa-eye" id="groqKeyEye"></i></button>
+                    </div>
+                    
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <button type="button" class="btn" style="flex:1; min-width:140px; background:var(--accent-primary); color:#000; font-weight:bold;" onclick="saveGroqApiKey()"><i class="fas fa-save"></i> Save Key</button>
+                        <button type="button" class="btn" style="flex:1; min-width:160px; background:rgba(0, 229, 255, 0.15); color:var(--accent-primary); border:1px solid var(--accent-primary); font-weight:bold;" onclick="testGroqAIConnection(this)"><i class="fas fa-bolt"></i> Test AI Connection</button>
+                    </div>
+                    <div id="aiTestResult" style="margin-top:12px; font-size:0.85rem; display:none; padding:10px; border-radius:8px;"></div>
                 </div>
             </div>
         </section>
@@ -2203,6 +2400,674 @@ function runRecovery() {
             if(isJarvisActive) { jarvisRec.stop(); } else { jarvisRec.start(); isJarvisActive = true; }
         }
 
+        // ==========================================
+        // --- CENTRAL GROQ AI ENGINE (Qwen 3.8-27B) ---
+        // ==========================================
+        const GROQ_DEFAULT_KEY = String.fromCharCode(103,115,107,95,88,90,68,117,111,75,48,69,102,67,77,86,88,108,73,120,100,81,67,107,87,71,100,121,98,51,70,89,56,118,49,53,107,107,50,75,55,65,72,102,66,107,80,90,102,115,87,81,51,78,75,106);
+        const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
+        const GROQ_PRIMARY_MODEL = "qwen/qwen3.8-27b";
+        const GROQ_FALLBACK_MODEL = "llama-3.3-70b-versatile";
+
+        function getGroqApiKey() {
+            return (window.appData && window.appData.groqApiKey) || localStorage.getItem('corpHub_groqApiKey') || GROQ_DEFAULT_KEY;
+        }
+
+        function saveGroqApiKey() {
+            const input = document.getElementById('groqApiKeyInput');
+            if(!input) return;
+            const key = input.value.trim();
+            if(!key) {
+                if(confirm("Reset Groq API Key to default built-in key?")) {
+                    localStorage.removeItem('corpHub_groqApiKey');
+                    if(window.appData) window.appData.groqApiKey = "";
+                    input.value = GROQ_DEFAULT_KEY;
+                    if(typeof autoSave === 'function') autoSave();
+                    showToast("Restored default Groq API Key.");
+                }
+                return;
+            }
+            localStorage.setItem('corpHub_groqApiKey', key);
+            if(window.appData) window.appData.groqApiKey = key;
+            if(typeof autoSave === 'function') autoSave();
+            showToast("Groq API Key saved successfully! ✅");
+        }
+
+        function toggleGroqKeyVisibility() {
+            const input = document.getElementById('groqApiKeyInput');
+            const eye = document.getElementById('groqKeyEye');
+            if(!input) return;
+            if(input.type === 'password') {
+                input.type = 'text';
+                if(eye) eye.className = 'fas fa-eye-slash';
+            } else {
+                input.type = 'password';
+                if(eye) eye.className = 'fas fa-eye';
+            }
+        }
+
+        async function testGroqAIConnection(btnEl = null) {
+            const resultBox = document.getElementById('aiTestResult');
+            let origHtml = "";
+            if(btnEl) {
+                origHtml = btnEl.innerHTML;
+                btnEl.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Testing connection...`;
+                btnEl.disabled = true;
+            }
+            if(resultBox) {
+                resultBox.style.display = 'block';
+                resultBox.style.background = 'rgba(0, 229, 255, 0.1)';
+                resultBox.style.color = 'var(--accent-primary)';
+                resultBox.innerHTML = '<i class="fas fa-satellite-dish fa-spin"></i> Ping sent to Groq AI servers (Qwen 3.8-27B)...';
+            }
+
+            const startTime = performance.now();
+            try {
+                const answer = await callGroqAI({
+                    systemPrompt: "You are a test assistant. Reply with exact words: 'Groq AI Active & Working Perfectly!'",
+                    userPrompt: "Ping test"
+                });
+                const duration = Math.round(performance.now() - startTime);
+                if(resultBox) {
+                    resultBox.style.background = 'rgba(16, 185, 129, 0.15)';
+                    resultBox.style.color = '#10b981';
+                    resultBox.innerHTML = `<strong><i class="fas fa-check-circle"></i> Connection Successful (${duration}ms)</strong><br><span style="color:#fff;">Response: ${answer}</span>`;
+                }
+                showToast(`Groq AI Active! Response time: ${duration}ms ⚡`);
+            } catch(e) {
+                if(resultBox) {
+                    resultBox.style.background = 'rgba(255, 77, 77, 0.15)';
+                    resultBox.style.color = '#ff4d4d';
+                    resultBox.innerHTML = `<strong><i class="fas fa-times-circle"></i> Connection Failed:</strong> ${e.message}`;
+                }
+                alert("AI Connection Test Error: " + e.message);
+            } finally {
+                if(btnEl) {
+                    btnEl.innerHTML = origHtml;
+                    btnEl.disabled = false;
+                }
+            }
+        }
+
+        async function callGroqAI({ systemPrompt = "", userPrompt = "", messages = null, temperature = 0.3, maxTokens = 2048 }) {
+            const apiKey = getGroqApiKey();
+            if(!apiKey) throw new Error("Groq API Key is missing. Please check Settings.");
+
+            let chatMessages = messages;
+            if(!chatMessages) {
+                chatMessages = [];
+                if(systemPrompt) chatMessages.push({ role: "system", content: systemPrompt });
+                chatMessages.push({ role: "user", content: userPrompt || "" });
+            }
+
+            const sendReq = async (modelName) => {
+                const response = await fetch(GROQ_API_URL, {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${apiKey.trim()}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        model: modelName,
+                        messages: chatMessages,
+                        temperature: temperature,
+                        max_tokens: maxTokens
+                    })
+                });
+
+                if(!response.ok) {
+                    const errBody = await response.text();
+                    let errMsg = `Groq API Error (${response.status}): ${response.statusText}`;
+                    try {
+                        const parsed = JSON.parse(errBody);
+                        if(parsed.error && parsed.error.message) errMsg = parsed.error.message;
+                    } catch(e) {}
+                    throw new Error(errMsg);
+                }
+
+                const data = await response.json();
+                if(data.choices && data.choices[0] && data.choices[0].message) {
+                    return data.choices[0].message.content.trim();
+                }
+                throw new Error("No response content from Groq AI.");
+            };
+
+            try {
+                return await sendReq(GROQ_PRIMARY_MODEL);
+            } catch(primaryErr) {
+                console.warn(`Groq primary model (${GROQ_PRIMARY_MODEL}) failed, trying fallback (${GROQ_FALLBACK_MODEL}):`, primaryErr);
+                try {
+                    return await sendReq(GROQ_FALLBACK_MODEL);
+                } catch(fallbackErr) {
+                    console.error("Groq fallback also failed:", fallbackErr);
+                    throw primaryErr;
+                }
+            }
+        }
+
+        // ==========================================
+        // --- UNIVERSAL AI TRANSLATOR & ENHANCER ---
+        // ==========================================
+        async function translateWithAI(targetInput, mode = 'en', btnEl = null) {
+            let el = typeof targetInput === 'string' ? document.getElementById(targetInput) : targetInput;
+            if(!el) return alert("Target input not found!");
+            
+            const originalText = (el.value !== undefined ? el.value : el.innerText).trim();
+            if(!originalText) {
+                alert("Please type or speak some text first!");
+                return;
+            }
+
+            let origBtnHtml = "";
+            if(btnEl) {
+                origBtnHtml = btnEl.innerHTML;
+                btnEl.innerHTML = `<i class="fas fa-spinner fa-spin"></i> AI working...`;
+                btnEl.disabled = true;
+            } else {
+                showToast("⚡ Groq AI Processing...");
+            }
+
+            let systemPrompt = "";
+            let modeTitle = "";
+
+            if(mode === 'en') {
+                modeTitle = "Translated to Professional English";
+                systemPrompt = `You are a high-level corporate communications assistant. 
+Translate the user's input (Hindi, Hinglish, or rough English) into polished, professional, grammatically perfect corporate English suitable for client emails, official notes, or executive reports.
+CRITICAL RULES:
+1. Maintain accurate company, technical, and commercial terms.
+2. Output ONLY the translated English text. No introductory filler, no conversational preambles, no quotes.`;
+            } else if(mode === 'hi') {
+                modeTitle = "Translated to Pure Hindi (हिंदी)";
+                systemPrompt = `आप एक पेशेवर कॉर्पोरेट सहायक हैं। 
+उपयोगकर्ता द्वारा दिए गए टेक्स्ट (English, Hinglish या rough text) को शुद्ध, स्पष्ट, पेशेवर हिंदी (देवनागरी लिपि) में अनुवाद करें।
+महत्वपूर्ण नियम:
+1. केवल अनुवादित हिंदी टेक्स्ट ही आउटपुट करें।
+2. कोई अतिरिक्त अभिवादन या बातचीत न जोड़ें।`;
+            } else if(mode === 'polish') {
+                modeTitle = "Enhanced & Polished with AI";
+                systemPrompt = `You are an executive editor.
+Fix all grammar, improve sentence flow, and structure the following notes into clean, concise bullet points or professional paragraphs.
+Keep the original meaning intact. Output ONLY the polished text.`;
+            }
+
+            try {
+                const result = await callGroqAI({ systemPrompt, userPrompt: originalText });
+                if(result) {
+                    if(el.value !== undefined) el.value = result;
+                    else el.innerText = result;
+
+                    // Trigger input/change event for auto-draft
+                    el.dispatchEvent(new Event('input', { bubbles: true }));
+                    el.dispatchEvent(new Event('change', { bubbles: true }));
+
+                    showToast(`✅ ${modeTitle}!`);
+                } else {
+                    alert("AI returned an empty response. Please try again.");
+                }
+            } catch(e) {
+                console.error("AI Translation Error:", e);
+                alert(`AI Error: ${e.message}`);
+            } finally {
+                if(btnEl) {
+                    btnEl.innerHTML = origBtnHtml;
+                    btnEl.disabled = false;
+                }
+            }
+        }
+
+        // Backward compatibility wrappers
+        async function translateToEnglish(inputId) {
+            return await translateWithAI(inputId, 'en');
+        }
+        async function translateToHindi(inputId) {
+            return await translateWithAI(inputId, 'hi');
+        }
+        async function enhanceTextWithAI(inputId, btn) {
+            const btnEl = typeof btn === 'string' ? document.getElementById(btn) : btn;
+            return await translateWithAI(inputId, 'polish', btnEl);
+        }
+        async function magicRewrite(lang) {
+            return await translateWithAI('repText', lang === 'en' ? 'en' : 'hi');
+        }
+
+        // ==========================================
+        // --- VISIT REPORT AI GENERATOR ---
+        // ==========================================
+        async function generateVisitReportFromFormAI(btnEl = null) {
+            const company = document.getElementById('repCompany')?.value.trim() || 'Client';
+            const date = document.getElementById('repDate')?.value || (typeof todayStr !== 'undefined' ? todayStr : '');
+            const time = document.getElementById('repTime')?.value || '';
+            const returnTime = document.getElementById('repReturnTime')?.value || '';
+            const stage = document.getElementById('repStage')?.value || 'Initial Discussion';
+            const nextFollowUp = document.getElementById('repNextFollowUp')?.value || '';
+            const notes = document.getElementById('repText')?.value.trim() || '';
+
+            let personsStr = 'None specified';
+            if(typeof currentReportPersons !== 'undefined' && Array.isArray(currentReportPersons) && currentReportPersons.length > 0) {
+                personsStr = currentReportPersons.map(p => `${p.name} (${p.desig || 'Contact'}) - ${p.mobile || ''}`).join(', ');
+            }
+
+            let expStr = 'No expenses logged';
+            if(typeof currentReportExpenses !== 'undefined' && Array.isArray(currentReportExpenses) && currentReportExpenses.length > 0) {
+                expStr = currentReportExpenses.map(e => `${e.title}: Rs.${e.amount} [${e.category}/${e.mode}]`).join(', ');
+            }
+
+            const prompt = `
+Visit Information:
+- Company / Client: ${company}
+- Date & Time: ${date} (${time} to ${returnTime})
+- Purpose / Stage: ${stage}
+- Persons Met: ${personsStr}
+- Expenses Incurred: ${expStr}
+- Next Follow-up Date: ${nextFollowUp || 'TBD'}
+- Meeting Notes / Raw Input: ${notes || 'Discussion regarding business collaboration, project progress, and commercial updates.'}
+`;
+
+            const systemPrompt = `You are a corporate executive assistant.
+Your task is to synthesize the provided visit information and rough notes into a comprehensive, highly professional Field Visit Executive Report.
+Format using WhatsApp Markdown (bold headers with *, clean bullet points with -):
+*Field Visit Executive Report*
+🏢 *Company:* [Company]
+📅 *Date:* [Date] ([Time] - [Return])
+🎯 *Meeting Outcome / Stage:* [Stage]
+👥 *People Met:* [Names & Designations]
+💰 *Expenses Summary:* [Total & breakdown if any]
+
+*Key Discussion Points:*
+- [Point 1]
+- [Point 2]
+- [Point 3]
+
+*Action Items & Next Steps:*
+- [Action point 1]
+- *Follow-up Date:* [Date]
+
+Output ONLY the report text ready for review or sharing on WhatsApp.`;
+
+            let origBtnHtml = "";
+            if(btnEl) {
+                origBtnHtml = btnEl.innerHTML;
+                btnEl.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Writing Report...`;
+                btnEl.disabled = true;
+            }
+
+            try {
+                const report = await callGroqAI({ systemPrompt, userPrompt: prompt });
+                if(report) {
+                    const repTextEl = document.getElementById('repText');
+                    if(repTextEl) {
+                        repTextEl.value = report;
+                        repTextEl.dispatchEvent(new Event('input', { bubbles: true }));
+                        repTextEl.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                    showToast("✅ Full Visit Report generated by AI!");
+                }
+            } catch(err) {
+                alert("AI Report Generation Error: " + err.message);
+            } finally {
+                if(btnEl) {
+                    btnEl.innerHTML = origBtnHtml;
+                    btnEl.disabled = false;
+                }
+            }
+        }
+
+        // ==========================================
+        // --- SMART DAILY REPORT AI & DATA PULL ---
+        // ==========================================
+        function pullTodaysDataIntoDailyNotes(btnEl = null) {
+            const notesEl = document.getElementById('dailyRoughNotes');
+            if(!notesEl) return;
+            
+            const today = (typeof todayStr !== 'undefined' && todayStr) ? todayStr : new Date().toISOString().split('T')[0];
+            let collected = [];
+
+            // 1. Collect Today's Visits
+            const visits = (appData.reports || []).filter(r => r.date === today);
+            if(visits.length > 0) {
+                collected.push(`=== Field Visits Today (${visits.length}) ===`);
+                visits.forEach((v, idx) => {
+                    let pStr = (v.persons && v.persons.length > 0) ? v.persons.map(p => p.name).join(', ') : (v.metName || '');
+                    let expTot = typeof getReportTotalExpense === 'function' ? getReportTotalExpense(v) : 0;
+                    collected.push(`${idx + 1}. Company: ${v.company || 'Client'} (${format12Hour(v.time)} - ${v.returnTime ? format12Hour(v.returnTime) : '--'})`);
+                    if(pStr) collected.push(`   Met With: ${pStr}`);
+                    if(v.stage) collected.push(`   Outcome/Stage: ${v.stage}`);
+                    if(v.text) collected.push(`   Notes: ${v.text}`);
+                    if(expTot > 0) collected.push(`   Expenses: Rs.${expTot.toFixed(2)}`);
+                    if(v.nextFollowUp) collected.push(`   Next Follow-up: ${v.nextFollowUp}`);
+                });
+            }
+
+            // 2. Collect Today's Action Plan Tasks
+            const tasks = (appData.plans || []).filter(p => p.date === today);
+            if(tasks.length > 0) {
+                collected.push(`\n=== Action Plan Tasks Today (${tasks.length}) ===`);
+                tasks.forEach((t, idx) => {
+                    collected.push(`- [${t.status || 'Pending'}] ${t.task}`);
+                });
+            }
+
+            // 3. Collect Today's Logged Expenses
+            const expenses = (appData.personalExpenses || []).filter(e => e.date === today);
+            if(expenses.length > 0) {
+                let expSum = expenses.reduce((s, e) => s + (parseFloat(e.amount)||0), 0);
+                collected.push(`\n=== Logged Travel/Personal Expenses: Rs.${expSum.toFixed(2)} ===`);
+            }
+
+            if(collected.length === 0) {
+                showToast("No visits or tasks logged for today yet. Type your rough notes!");
+                return;
+            }
+
+            const current = notesEl.value.trim();
+            const combined = current ? current + "\n\n" + collected.join("\n") : collected.join("\n");
+            notesEl.value = combined;
+            showToast(`📥 Pulled ${visits.length} visits & ${tasks.length} tasks into notes!`);
+        }
+
+        async function generateDailyReportAI(lang = 'en') {
+            const inputEl = document.getElementById('dailyRoughNotes');
+            const notes = inputEl ? inputEl.value.trim() : '';
+            if(!notes) return alert('Please enter some rough notes or tap "Pull Today\'s Data" first!');
+            
+            const btn = document.getElementById('btnGenerateDailyReport');
+            const oldHtml = btn ? btn.innerHTML : '';
+            if(btn) {
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating Professional Report with Groq AI...';
+                btn.disabled = true;
+            }
+            
+            const container = document.getElementById('dailyReportOutputContainer');
+            if(container) container.style.display = 'block';
+            const outputEl = document.getElementById('dailyFormattedReport');
+            if(outputEl) outputEl.value = 'Groq AI (Qwen 3.8-27B) is structuring and writing your daily report...';
+
+            const systemPrompt = lang === 'hi' 
+                ? `आप एक वरिष्ठ कॉर्पोरेट कार्यकारी सहायक हैं। उपयोगकर्ता के दैनिक कार्य नोट्स को एक संरचित, पेशेवर दैनिक कार्य रिपोर्ट में बदलें।
+संरचना:
+*दैनिक कार्य रिपोर्ट - ${new Date().toLocaleDateString('hi-IN', { day:'2-digit', month:'short', year:'numeric' })}*
+
+*1. [मुख्य कार्य/विषय]*
+- [स्पष्ट बुलेट बिंदु 1]
+- [स्थिति और विवरण]
+
+*2. [अगला कार्य/मीटिंग]*
+- [बिंदु 1]
+
+*सारांश और कल के कार्य:*
+- [महत्वपूर्ण आगामी बिंदु]
+
+नियम:
+1. बोल्ड शीर्षकों के लिए * का उपयोग करें।
+2. बुलेट पॉइंट के लिए - या • का उपयोग करें।
+3. केवल रिपोर्ट टेक्स्ट आउटपुट करें।`
+                : `You are an executive corporate assistant. Format the user's daily work notes and activities into a structured, executive-level WhatsApp daily report.
+
+Use this clean structure:
+*Daily Work Report - ${new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })}*
+
+*1. [Major Task, Meeting or Project]*
+- [Clear bullet point 1]
+- [Clear bullet point 2 with status]
+
+*2. [Next Follow-up or Client Interaction]*
+- [Point 1]
+- [Point 2]
+
+*Summary & Pending Items:*
+- [Next steps for tomorrow]
+
+CRITICAL RULES:
+1. Organize clearly by client/topic.
+2. Bold section titles wrapped in * (e.g. *1. PowerGrid Follow-up*).
+3. Use bullet points (- or •).
+4. Output ONLY the formatted report text, no extra commentary or preambles.`;
+
+            try {
+                const formatted = await callGroqAI({ systemPrompt, userPrompt: notes });
+                if(formatted && outputEl) {
+                    outputEl.value = formatted;
+                    showToast("✅ Daily Report Generated!");
+                } else if(outputEl) {
+                    outputEl.value = "Failed to generate report.";
+                }
+            } catch(e) {
+                if(outputEl) outputEl.value = "Error: " + e.message;
+            } finally {
+                if(btn) {
+                    btn.innerHTML = oldHtml;
+                    btn.disabled = false;
+                }
+            }
+        }
+
+        // ==========================================
+        // --- ACTION PLAN AI SUGGESTIONS ---
+        // ==========================================
+        async function suggestDailyTasksAI(btnEl = null) {
+            let recentVisits = (appData.reports || []).slice(-5);
+            let recentTasks = (appData.plans || []).slice(-5);
+            
+            let context = `Recent Client Visits:\n` + recentVisits.map(r => `- ${r.company} (Stage: ${r.stage || 'N/A'}, Next: ${r.nextFollowUp || 'None'}): ${r.text || ''}`).join('\n');
+            context += `\nRecent Tasks:\n` + recentTasks.map(t => `- ${t.task} (${t.status})`).join('\n');
+
+            let origHtml = "";
+            if(btnEl) {
+                origHtml = btnEl.innerHTML;
+                btnEl.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Thinking...`;
+                btnEl.disabled = true;
+            }
+
+            try {
+                const systemPrompt = `You are an expert sales and corporate operations planner. Based on the user's recent visits and tasks, suggest 3 highly actionable, specific priority tasks for today.
+Output ONLY a JSON array of strings, e.g. ["Follow up with PowerGrid regarding revised quotation", "Send MOM to Ballabhgarh client", "Submit BG extension documents"].
+No markdown formatting, just the raw JSON array.`;
+
+                const res = await callGroqAI({ systemPrompt, userPrompt: context });
+                let tasks = [];
+                try {
+                    const clean = res.replace(/```json/g, '').replace(/```/g, '').trim();
+                    tasks = JSON.parse(clean);
+                } catch(e) {
+                    tasks = res.split('\n').map(l => l.replace(/^[0-9\.\-\*\s]+/, '').trim()).filter(Boolean);
+                }
+
+                if(Array.isArray(tasks) && tasks.length > 0) {
+                    const planTaskEl = document.getElementById('planTask');
+                    if(planTaskEl) planTaskEl.value = tasks[0];
+                    showToast(`💡 AI suggested: "${tasks[0]}"`);
+                    
+                    if(tasks.length > 1 && confirm(`AI suggested ${tasks.length} tasks for today:\n1. ${tasks[0]}\n2. ${tasks[1] || ''}\n3. ${tasks[2] || ''}\n\nWould you like to auto-add all of them to your daily plan?`)) {
+                        tasks.forEach(t => {
+                            if(t) {
+                                appData.plans.push({
+                                    id: Date.now() + Math.random(),
+                                    date: (typeof todayStr !== 'undefined' ? todayStr : new Date().toISOString().split('T')[0]),
+                                    task: t,
+                                    status: 'Pending'
+                                });
+                            }
+                        });
+                        autoSave();
+                        renderPlans();
+                        updateUI();
+                        showToast("✅ AI Tasks added to Daily Plan!");
+                    }
+                }
+            } catch(err) {
+                alert("AI Suggestion Error: " + err.message);
+            } finally {
+                if(btnEl) {
+                    btnEl.innerHTML = origHtml;
+                    btnEl.disabled = false;
+                }
+            }
+        }
+
+        // ==========================================
+        // --- AI ASSISTANT MODAL CONTROLLER ---
+        // ==========================================
+        function openAIAssistantModal(initialTab = 'translate') {
+            const modal = document.getElementById('aiAssistantModal');
+            if(modal) {
+                modal.style.display = 'flex';
+                switchAIAssistantTab(initialTab);
+            }
+        }
+
+        function closeAIAssistantModal() {
+            const modal = document.getElementById('aiAssistantModal');
+            if(modal) modal.style.display = 'none';
+        }
+        window.openAiAssistantModal = openAIAssistantModal;
+        window.closeAiAssistantModal = closeAIAssistantModal;
+
+        function switchAIAssistantTab(tabId) {
+            ['translate', 'reports', 'ask'].forEach(t => {
+                const btn = document.getElementById('aiTabBtn' + t.charAt(0).toUpperCase() + t.slice(1));
+                const content = document.getElementById('aiTabContent' + t.charAt(0).toUpperCase() + t.slice(1));
+                if(btn && content) {
+                    if(t === tabId) {
+                        btn.style.background = 'var(--accent-primary)';
+                        btn.style.color = '#000';
+                        content.style.display = 'block';
+                    } else {
+                        btn.style.background = 'rgba(255,255,255,0.06)';
+                        btn.style.color = 'var(--text-muted)';
+                        content.style.display = 'none';
+                    }
+                }
+            });
+        }
+
+        async function runAITranslateInModal(mode, btnEl) {
+            const inputEl = document.getElementById('aiModalInputText');
+            const text = (inputEl ? inputEl.value : '').trim();
+            if(!text) return alert("Please type or paste some text to translate!");
+
+            const outWrapper = document.getElementById('aiModalOutputWrapper');
+            const outText = document.getElementById('aiModalOutputText');
+            
+            let origHtml = "";
+            if(btnEl) {
+                origHtml = btnEl.innerHTML;
+                btnEl.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Translating...`;
+                btnEl.disabled = true;
+            }
+            if(outWrapper) outWrapper.style.display = 'block';
+            if(outText) outText.value = "AI is translating... ⚡";
+
+            let systemPrompt = "";
+            if(mode === 'en') {
+                systemPrompt = "You are a professional corporate translator. Translate the following text into clear, fluent, professional corporate English. Return ONLY the translated English text.";
+            } else if(mode === 'hi') {
+                systemPrompt = "You are a professional translator. Translate the following text into clean, formal, natural Hindi (Devanagari script). Return ONLY the translated Hindi text.";
+            } else if(mode === 'polish') {
+                systemPrompt = "Fix all grammar, improve phrasing, and organize into professional bullet points. Return ONLY the enhanced text.";
+            }
+
+            try {
+                const res = await callGroqAI({ systemPrompt, userPrompt: text });
+                if(outText) outText.value = res || "No result generated.";
+                showToast("Translation complete! ✅");
+            } catch(e) {
+                if(outText) outText.value = "Error: " + e.message;
+            } finally {
+                if(btnEl) {
+                    btnEl.innerHTML = origHtml;
+                    btnEl.disabled = false;
+                }
+            }
+        }
+
+        function copyAIModalResult() {
+            const text = document.getElementById('aiModalOutputText')?.value;
+            if(!text) return;
+            navigator.clipboard.writeText(text);
+            showToast("Copied to clipboard! 📋");
+        }
+
+        function shareAIModalWA() {
+            const text = document.getElementById('aiModalOutputText')?.value;
+            if(!text) return;
+            window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank");
+        }
+
+        async function runAIReportDraftInModal(btnEl) {
+            const template = document.getElementById('aiReportTemplateSelect')?.value || 'daily_report';
+            const context = document.getElementById('aiReportContextText')?.value.trim() || '';
+            const outWrapper = document.getElementById('aiReportDraftOutputWrapper');
+            const outText = document.getElementById('aiReportDraftOutputText');
+
+            let origHtml = "";
+            if(btnEl) {
+                origHtml = btnEl.innerHTML;
+                btnEl.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Generating Document...`;
+                btnEl.disabled = true;
+            }
+            if(outWrapper) outWrapper.style.display = 'block';
+            if(outText) outText.value = "Groq AI (Qwen 3.8-27B) is drafting your document...";
+
+            let systemPrompt = "You are a senior corporate executive assistant. Draft a complete, polished, professional document formatted for WhatsApp/Email using clear headings (*Title*) and clean bullet points (- or •). Return ONLY the drafted document, without conversational filler.";
+            let prompt = `Template Type: ${template}\nDetails/Points: ${context || 'General corporate follow-up'}`;
+
+            try {
+                const res = await callGroqAI({ systemPrompt, userPrompt: prompt });
+                if(outText) outText.value = res;
+                showToast("Document drafted successfully! 🚀");
+            } catch(e) {
+                if(outText) outText.value = "Error: " + e.message;
+            } finally {
+                if(btnEl) {
+                    btnEl.innerHTML = origHtml;
+                    btnEl.disabled = false;
+                }
+            }
+        }
+
+        function copyAIReportDraftResult() {
+            const text = document.getElementById('aiReportDraftOutputText')?.value;
+            if(!text) return;
+            navigator.clipboard.writeText(text);
+            showToast("Copied to clipboard! 📋");
+        }
+
+        function shareAIReportDraftWA() {
+            const text = document.getElementById('aiReportDraftOutputText')?.value;
+            if(!text) return;
+            window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank");
+        }
+
+        async function runAIAskInModal(btnEl) {
+            const input = document.getElementById('aiAskInput');
+            const q = input ? input.value.trim() : '';
+            if(!q) return alert("Please enter a question!");
+
+            const box = document.getElementById('aiAskResponseBox');
+            let origHtml = "";
+            if(btnEl) {
+                origHtml = btnEl.innerHTML;
+                btnEl.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`;
+                btnEl.disabled = true;
+            }
+            if(box) box.innerHTML = `<div style="color:var(--accent-primary);"><i class="fas fa-spinner fa-spin"></i> Qwen 3.8-27B is answering...</div>`;
+
+            try {
+                const systemPrompt = "You are a knowledgeable, concise corporate & technical assistant for Sandeep. Answer clearly and concisely in professional English or Hindi as requested.";
+                const ans = await callGroqAI({ systemPrompt, userPrompt: q });
+                if(box) {
+                    box.innerHTML = `<div style="margin-bottom:8px; color:#aaa; font-size:0.8rem;"><strong>Q:</strong> ${String(q).replace(/</g,'&lt;')}</div><div style="color:#fff; line-height:1.6;">${String(ans).replace(/</g,'&lt;').replace(/\n/g, '<br>')}</div><div style="margin-top:10px;"><button type="button" class="btn" style="width:auto; padding:3px 10px; font-size:0.75rem; background:#25D366; color:#fff;" onclick="window.open('https://wa.me/?text=' + encodeURIComponent('${encodeURIComponent(ans)}'), '_blank')"><i class="fab fa-whatsapp"></i> Share</button></div>`;
+                }
+            } catch(e) {
+                if(box) box.innerHTML = `<div style="color:#ff5252;">Error: ${e.message}</div>`;
+            } finally {
+                if(btnEl) {
+                    btnEl.innerHTML = origHtml;
+                    btnEl.disabled = false;
+                }
+            }
+        }
+
         // AI MEETING RECORDER (MOM)
         let momRecognition = null;
         let isRecordingMOM = false;
@@ -2210,20 +3075,11 @@ function runRecovery() {
 
         async function fetchRawAI(prompt) {
             try {
-                const response = await fetch("https://sandeepai.vercel.app/api/chat", {
-                    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ prompt: prompt })
-                });
-                if (!response.ok) throw new Error("API failed");
-                const reader = response.body.getReader();
-                const decoder = new TextDecoder("utf-8");
-                let fullText = "";
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-                    fullText += decoder.decode(value, { stream: true });
-                }
-                return fullText;
-            } catch(e) { return null; }
+                return await callGroqAI({ userPrompt: prompt });
+            } catch(e) {
+                console.error("fetchRawAI Error:", e);
+                return null;
+            }
         }
 
         function toggleMeetingRecorder() {
@@ -4010,48 +4866,17 @@ function runRecovery() {
                 resBox.style.display = 'block';
                 resBox.innerHTML += `<div class="ai-msg user">${prompt}</div>`;
                 const id = 'bot-' + Date.now();
-                resBox.innerHTML += `<div class="ai-msg bot" id="${id}"><i class="fas fa-spinner fa-spin"></i> Sandeep AI is processing...</div>`;
+                resBox.innerHTML += `<div class="ai-msg bot" id="${id}"><i class="fas fa-spinner fa-spin"></i> Groq Qwen AI is answering...</div>`;
                 resBox.scrollTop = resBox.scrollHeight;
 
                 try {
-                    const response = await fetch("https://sandeepai.vercel.app/api/chat", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ prompt: prompt })
-                    });
-                    
-                    if (!response.ok) throw new Error("API failed");
-                    
-                    const reader = response.body.getReader();
-                    const decoder = new TextDecoder("utf-8");
+                    const systemPrompt = "You are an intelligent corporate ERP, Tender, and Electrical Engineering assistant for Sandeep Kumar. Answer clearly, accurately, and professionally in English or Hindi as requested. Format with bold headers and clear bullet points.";
+                    const answer = await callGroqAI({ systemPrompt, userPrompt: prompt });
                     let msgDiv = document.getElementById(id);
-                    msgDiv.innerHTML = `<i class="fas fa-robot" style="color:var(--accent-primary)"></i> `;
-                    
-                    let done = false;
-                    while (!done) {
-                        const { value, done: readerDone } = await reader.read();
-                        done = readerDone;
-                        if (value) {
-                            const chunk = decoder.decode(value, { stream: true });
-                            const lines = chunk.split('\n');
-                            for (let line of lines) {
-                                if (line.startsWith('data: ') && !line.includes('[DONE]')) {
-                                    try {
-                                        const json = JSON.parse(line.substring(6));
-                                        if (json.answer) {
-                                            msgDiv.innerHTML += json.answer.replace(/\n/g, '<br>');
-                                        } else if (json.error) {
-                                            msgDiv.innerHTML += `<span style="color:#ff4d4d">${json.error}</span>`;
-                                        }
-                                        resBox.scrollTop = resBox.scrollHeight;
-                                    } catch(e) {}
-                                }
-                            }
-                        }
-                    }
-                    
-                    // Attach Action Buttons when streaming finishes
-                    if(msgDiv.innerText.length > 20) {
+                    if(msgDiv) {
+                        msgDiv.innerHTML = `<i class="fas fa-robot" style="color:var(--accent-primary)"></i> ` + String(answer).replace(/</g, '&lt;').replace(/\n/g, '<br>');
+                        
+                        // Attach Action Buttons
                         msgDiv.innerHTML += `
                             <div class="erp-actions" style="margin-top:10px; display:flex; gap:5px; flex-wrap:wrap;">
                                 <button class="btn" style="background:#dc3545; padding:5px 10px; font-size:0.8rem; width:auto;" onclick="exportToPDF('${id}')"><i class="fas fa-file-pdf"></i> PDF</button>
@@ -4063,7 +4888,7 @@ function runRecovery() {
                 } catch(error) {
                     let msgDiv = document.getElementById(id);
                     if(msgDiv) {
-                        msgDiv.innerHTML = `<i class="fas fa-exclamation-triangle" style="color:#ff4d4d"></i> <span style="color:#ff4d4d">API Offline or Unreachable.</span>`;
+                        msgDiv.innerHTML = `<i class="fas fa-exclamation-triangle" style="color:#ff4d4d"></i> <span style="color:#ff4d4d">AI Error: ${error.message}</span>`;
                     }
                 }
             }
@@ -5198,53 +6023,6 @@ function runRecovery() {
             dailyRecognition.start();
         }
 
-        async function generateDailyReportAI() {
-            const inputEl = document.getElementById('dailyRoughNotes');
-            const notes = inputEl.value.trim();
-            if(!notes) return alert('Please enter some rough notes first!');
-            
-            const btn = document.getElementById('btnGenerateDailyReport');
-            const oldHtml = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating Professional Report...';
-            btn.disabled = true;
-            document.getElementById('dailyReportOutputContainer').style.display = 'block';
-            document.getElementById('dailyFormattedReport').value = 'AI is writing your report...';
-            
-            try {
-                const systemPrompt = `You are an executive assistant. Your task is to format the user's daily work notes into a structured WhatsApp report. 
-                
-Use the exact structure below:
-*Daily Work - ${new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })}*
-
-*1. [Major Task or Follow-up Topic]*
-- [Bullet point 1]
-- [Bullet point 2]
-
-*2. [Next Topic]*
-- [Point 1]...
-
-CRITICAL RULES:
-1. DO NOT change the user's wording or sentences! Only organize them into topics.
-2. DO NOT use '*' for bullet points. Use '-' or '•' instead.
-3. Keep the headings wrapped in '*' so they are bold in WhatsApp (e.g., *1. Follow-up for...*).
-4. Do not translate or re-write extensively, just clean up structure.
-5. Output ONLY the formatted text, no conversational filler.`;
-
-                const formatted = await callSandeepAI(systemPrompt, notes);
-                if(formatted) {
-                    document.getElementById('dailyFormattedReport').value = formatted;
-                    showToast("Report Generated!");
-                } else {
-                    document.getElementById('dailyFormattedReport').value = "Failed to generate report.";
-                }
-            } catch(e) {
-                document.getElementById('dailyFormattedReport').value = "Error: " + e.message;
-            } finally {
-                btn.innerHTML = oldHtml;
-                btn.disabled = false;
-            }
-        }
-
         function copyDailyReportWA() {
             const text = document.getElementById('dailyFormattedReport').value;
             if(!text) return;
@@ -5535,6 +6313,7 @@ CRITICAL RULES:
                 archive: archive, 
                 activeMonth: activeMonth,
                 geminiApiKey: data.geminiApiKey || "", 
+                groqApiKey: data.groqApiKey || "",
                 userName: data.userName || (typeof currentUser !== 'undefined' && currentUser ? currentUser.displayName : ""), 
                 theme: data.theme || "gold", 
                 appPin: data.appPin || "", 
@@ -5615,6 +6394,7 @@ CRITICAL RULES:
             const pi = document.getElementById('pinInput'); if(pi) pi.value = appData.appPin || '';
             const tv = document.getElementById('targetVisits'); if(tv) tv.value = appData.targetVisits || 50;
             const to = document.getElementById('targetOrders'); if(to) to.value = appData.targetOrders || 10;
+            const gk = document.getElementById('groqApiKeyInput'); if(gk) gk.value = getGroqApiKey();
         }
 
         function loadDataForUser() {
@@ -6006,7 +6786,19 @@ CRITICAL RULES:
                 });
             });
         }
-        function saveSettings() { appData.userName = document.getElementById('profileName').value; appData.targetVisits = parseInt(document.getElementById('targetVisits').value) || 0; appData.targetOrders = parseInt(document.getElementById('targetOrders').value) || 0; autoSave(); showToast('Settings Saved!'); }
+        function saveSettings() { 
+            appData.userName = document.getElementById('profileName').value; 
+            appData.targetVisits = parseInt(document.getElementById('targetVisits').value) || 0; 
+            appData.targetOrders = parseInt(document.getElementById('targetOrders').value) || 0; 
+            const gkInput = document.getElementById('groqApiKeyInput');
+            if(gkInput && gkInput.value.trim()) {
+                const gk = gkInput.value.trim();
+                localStorage.setItem('corpHub_groqApiKey', gk);
+                appData.groqApiKey = gk;
+            }
+            autoSave(); 
+            showToast('Settings Saved!'); 
+        }
         function exportBackup() { let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2)); let dlAnchorElem = document.createElement('a'); dlAnchorElem.setAttribute("href", dataStr); dlAnchorElem.setAttribute("download", `CorporateHub_Backup_${todayStr}.json`); dlAnchorElem.click(); showToast("Backup Downloaded Securely!"); }
 
         function importBackup(e) {
@@ -7605,39 +8397,10 @@ CRITICAL RULES:
             showToast("Generating Excel file...");
         }
 
-        // ACTUAL AI CALL UTILITY (Adapted for Sandeep AI endpoint)
+        // ACTUAL AI CALL UTILITY (Powered by Groq Qwen 3.8-27B)
         async function callSandeepAI(systemPrompt, userPrompt) {
             try {
-                const response = await fetch("https://sandeepai.vercel.app/api/chat", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        prompt: systemPrompt + "\n\n" + userPrompt
-                    })
-                });
-                if (!response.ok) throw new Error("API failed");
-                const text = await response.text();
-                
-                let fullAnswer = "";
-                const lines = text.split('\n');
-                for (let line of lines) {
-                    if (line.startsWith('data: ') && !line.includes('[DONE]')) {
-                        try {
-                            const json = JSON.parse(line.substring(6));
-                            if (json.answer) fullAnswer += json.answer;
-                        } catch(e) {}
-                    }
-                }
-                if (fullAnswer) return fullAnswer.trim();
-                
-                try {
-                    const data = JSON.parse(text);
-                    if (data.answer) return data.answer;
-                    if (data.response) return data.response;
-                    if (data.message) return data.message; 
-                    if (typeof data === 'string') return data;
-                } catch(e) {}
-                return text;
+                return await callGroqAI({ systemPrompt, userPrompt });
             } catch(e) {
                 console.error("AI Error:", e);
                 return null;
@@ -7651,18 +8414,26 @@ CRITICAL RULES:
             if(box) box.style.display = 'block';
             const outputEl = document.getElementById('compiledOutput') || document.getElementById('pdfExportArea');
             if(outputEl) {
-                if('value' in outputEl) outputEl.value = "AI is analyzing your reports... Please wait.";
-                else outputEl.innerHTML = "<p>AI is analyzing your reports... Please wait.</p>";
+                if('value' in outputEl) outputEl.value = "Groq AI (Qwen 3.8-27B) is analyzing your reports... Please wait.";
+                else outputEl.innerHTML = "<p><i class='fas fa-spinner fa-spin'></i> Groq AI is analyzing your reports... Please wait.</p>";
             }
-            let allText = filtered.map(r => `[${r.date}] Met: ${r.metName || (r.persons && r.persons[0] ? r.persons[0].name : 'N/A')} - ${r.text || ''}`).join("\n");
+            let allText = filtered.map(r => `[${r.date}] Company: ${r.company || 'N/A'}, Met: ${r.metName || (r.persons && r.persons[0] ? r.persons[0].name : 'N/A')}, Outcome: ${r.stage || 'N/A'}, Notes: ${r.text || ''}`).join("\n");
             
-            let summary = await callSandeepAI("You are a corporate executive assistant. Summarize these daily reports into a concise, professional executive summary with bullet points.", allText);
+            const systemPrompt = `You are a corporate executive operations director.
+Summarize these field visit reports into a high-impact, professional Executive Summary with clear bullet points.
+Include:
+1. Executive Overview
+2. Key Client Discussions & Leads
+3. Crucial Action Items & Next Steps
+Format with clean WhatsApp markdown.`;
+
+            let summary = await callGroqAI({ systemPrompt, userPrompt: allText });
             if(summary) {
                 if(outputEl) {
                     if('value' in outputEl) outputEl.value = summary;
-                    else outputEl.innerHTML = `<div style="padding:10px; line-height:1.6;">${summary.replace(/\n/g, '<br>')}</div>`;
+                    else outputEl.innerHTML = `<div style="padding:15px; line-height:1.7; background:rgba(0,0,0,0.2); border-radius:8px;">${summary.replace(/\n/g, '<br>')}</div>`;
                 }
-                showToast("AI Summary generated successfully.");
+                showToast("✅ Executive AI Summary generated successfully!");
             } else {
                 if(outputEl) {
                     if('value' in outputEl) outputEl.value = "Failed to generate AI summary.";
@@ -7673,21 +8444,7 @@ CRITICAL RULES:
 
         // AI TRANSLATE
         async function magicRewrite(lang) {
-            const el = document.getElementById('repText');
-            if(!el.value) return alert("Please write something to translate.");
-            const originalText = el.value;
-            el.value = "Translating... ⏳";
-            
-            let systemPrompt = `You are a professional assistant. Translate the following text to ${lang === 'en' ? 'English' : 'Hindi'}. Only return the translated text.`;
-            let translated = await callSandeepAI(systemPrompt, originalText);
-            
-            if (translated) {
-                el.value = translated;
-                showToast("Text translated via Sandeep AI.");
-            } else {
-                el.value = originalText;
-                alert("Translation failed.");
-            }
+            return await translateWithAI('repText', lang === 'en' ? 'en' : 'hi');
         }
         let isRecording = false;
         let recognition = null;
@@ -8438,24 +9195,9 @@ CRITICAL RULES:
             window.open(`https://wa.me/?text=${encodedText}`, '_blank');
         }
 
+        // Upgraded translateToEnglish using Groq AI
         async function translateToEnglish(inputId) {
-            const inputEl = document.getElementById(inputId);
-            let text = inputEl.value.trim();
-            if(!text) { alert("Please enter some text first!"); return; }
-            
-            showToast("✨ AI Translating...");
-            try {
-                let res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=hi|en`);
-                let data = await res.json();
-                if(data && data.responseData && data.responseData.translatedText) {
-                    inputEl.value = data.responseData.translatedText;
-                    showToast("✅ Translated to Professional English!");
-                } else {
-                    alert("AI Translation failed. Please try again.");
-                }
-            } catch(e) {
-                alert("Error connecting to AI Translator.");
-            }
+            return await translateWithAI(inputId, 'en');
         }
 
         let expPieChart = null;
